@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "RENOVA Redevelopment Platform"
+description = "A guided redevelopment operating platform for Mumbai housing societies. RENOVA helps societies assess their property, understand next steps, identify potential regulatory pathways, and move toward PMC and developer selection."
+version = "1.0.0"
+id = "artifacts/renova"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24307
+
+[services.development]
+run = "pnpm --filter @workspace/renova run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/renova", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/renova/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24307"
+BASE_PATH = "/"

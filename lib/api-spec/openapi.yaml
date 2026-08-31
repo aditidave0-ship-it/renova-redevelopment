@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: RENOVA redevelopment operating platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: dashboard
+  - name: projects
+  - name: professionals
+  - name: regulations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get society dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List redevelopment projects
+      responses:
+        "200":
+          description: Project list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Start a redevelopment assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+  /professionals:
+    get:
+      operationId: listProfessionals
+      tags: [professionals]
+      summary: List matched professionals
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Professionals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Professional"
+  /regulations:
+    get:
+      operationId: listRegulations
+      tags: [regulations]
+      summary: List relevant redevelopment regulations
+      responses:
+        "200":
+          description: Regulations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Regulation"
+components:
+  parameters:
+    ProjectId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    Project:
+      type: object
+      required: [id, name, location, societyType, stage, readiness, updatedAt, redFlags, nextStep]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        location: { type: string }
+        societyType: { type: string }
+        landType: { type: string }
+        stage: { type: string }
+        readiness: { type: number }
+        memberCount: { type: number }
+        updatedAt: { type: string }
+        redFlags:
+          type: array
+          items: { type: string }
+        nextStep: { type: string }
+        pathway:
+          type: array
+          items: { type: string }
+    ProjectInput:
+      type: object
+      required: [name, location, societyType]
+      properties:
+        name: { type: string, minLength: 1 }
+        location: { type: string, minLength: 1 }
+        societyType: { type: string, minLength: 1 }
+        landType: { type: string }
+        memberCount: { type: number, minimum: 1 }
+    Dashboard:
+      type: object
+      required: [activeProject, totalReadiness, openRedFlags, completedSteps, recentActivity]
+      properties:
+        activeProject:
+          $ref: "#/components/schemas/Project"
+        totalReadiness: { type: number }
+        openRedFlags: { type: number }
+        completedSteps: { type: number }
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    Activity:
+      type: object
+      required: [id, title, detail, date, kind]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        date: { type: string }
+        kind: { type: string }
+    Professional:
+      type: object
+      required: [id, name, role, location, experience, match, specialties, verified]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        role: { type: string }
+        location: { type: string }
+        experience: { type: string }
+        match: { type: number }
+        specialties:
+          type: array
+          items: { type: string }
+        verified: { type: boolean }
+    Regulation:
+      type: object
+      required: [id, code, title, summary, authority, updatedAt, status]
+      properties:
+        id: { type: string }
+        code: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        authority: { type: string }
+        updatedAt: { type: string }
+        status: { type: string }

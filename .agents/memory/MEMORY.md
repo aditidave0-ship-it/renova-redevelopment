@@ -1,0 +1,1 @@
+- [RENOVA product principles](renova-product-principles.md) — assessment-first operating layer for Mumbai redevelopment, with qualified regulatory guidance
