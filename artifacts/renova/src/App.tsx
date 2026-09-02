@@ -44,7 +44,6 @@ import {
 import {
   getGetProjectQueryKey,
   getListProfessionalsQueryKey,
-  useCreateRequirement,
   useGetDashboard,
   useGetProject,
   useHealthCheck,
@@ -261,8 +260,8 @@ function Overview() {
 const requirementServices = ['Developer', 'PMC', 'Architect', 'Legal advisor', 'Structural consultant'];
 
 function Assessment() {
-  const createRequirement = useCreateRequirement();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<{ reference: string; status: string; nextStep: string; projectId?: string; demo?: boolean } | null>(null);
   const [form, setForm] = useState({
     societyName: '', location: '', societyType: '', memberCount: '', buildingAge: '',
@@ -291,14 +290,19 @@ function Assessment() {
       contactName: form.contactName.trim(), contactRole: form.contactRole, phone: form.phone.trim(),
       email: form.email.trim(), consent: form.consent,
     };
-    createRequirement.mutate({ data }, {
-      onSuccess: (result) => setSubmitted(result),
-      onError: () => {
+    setIsSubmitting(true);
+    fetch('/api/requirements', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Live requirement intake is not connected yet.');
+        return response.json() as Promise<{ reference: string; status: string; nextStep: string; projectId?: string }>;
+      })
+      .then((result) => setSubmitted(result))
+      .catch(() => {
         const reference = `RNV-DEMO-${String(Date.now()).slice(-6)}`;
         localStorage.setItem('renova:last-requirement', JSON.stringify({ ...data, reference, savedAt: new Date().toISOString() }));
         setSubmitted({ reference, status: 'Saved on this device', nextStep: 'Connect the production database to route this requirement into RENOVA’s review queue.', demo: true });
-      },
-    });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   if (submitted) return (
@@ -337,7 +341,7 @@ function Assessment() {
           {step === 2 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">02</span><div><h2>Set the property context</h2><p>It is fine to choose “Not sure” where documents need review.</p></div></div><div className="requirement-fields"><label>Land tenure<select value={form.landType} onChange={(event) => update('landType', event.target.value)}><option value="">Not sure</option><option>Freehold</option><option>Leasehold</option><option>MHADA lease</option><option>Collector land</option></select></label><label>Approx. plot area (sq. m.)<input type="number" min="1" value={form.plotArea} onChange={(event) => update('plotArea', event.target.value)} placeholder="Optional" /></label><label className="field-wide">Conveyance status<select required value={form.conveyanceStatus} onChange={(event) => update('conveyanceStatus', event.target.value)}><option value="">Select status</option><option>Registered conveyance completed</option><option>Deemed conveyance completed</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label><label className="field-wide">Structural audit<select required value={form.structuralAudit} onChange={(event) => update('structuralAudit', event.target.value)}><option value="">Select status</option><option>Completed in the last 3 years</option><option>Completed more than 3 years ago</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label></div></div>}
           {step === 3 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">03</span><div><h2>What does your society need?</h2><p>Select every service you want RENOVA to help you explore.</p></div></div><div className="requirement-choice-grid">{requirementServices.map((service) => <button type="button" key={service} aria-pressed={form.services.includes(service)} onClick={() => toggleService(service)} className={cn('requirement-choice', form.services.includes(service) && 'selected')}><span>{form.services.includes(service) && <Check size={15} />}</span>{service}</button>)}</div><label className="requirement-block-label">Preferred starting timeline<select required value={form.timeline} onChange={(event) => update('timeline', event.target.value)}><option value="">Select timeline</option><option>Immediately</option><option>Within 3 months</option><option>Within 6 months</option><option>Exploring for the future</option></select></label><label className="requirement-block-label">Anything RENOVA should know? <small>Optional</small><textarea maxLength={1000} value={form.brief} onChange={(event) => update('brief', event.target.value)} placeholder="Share committee priorities, past attempts, document concerns or the support you need most." /><span className="character-count">{form.brief.length}/1000</span></label></div>}
           {step === 4 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">04</span><div><h2>Who should RENOVA contact?</h2><p>Use the details of an authorised committee representative.</p></div></div><div className="requirement-fields"><label>Full name<input required value={form.contactName} onChange={(event) => update('contactName', event.target.value)} placeholder="Contact person" /></label><label>Committee role<select required value={form.contactRole} onChange={(event) => update('contactRole', event.target.value)}><option value="">Select role</option><option>Chairperson</option><option>Secretary</option><option>Treasurer</option><option>Committee member</option><option>Authorised representative</option></select></label><label>Mobile number<input required type="tel" value={form.phone} onChange={(event) => update('phone', event.target.value)} placeholder="10-digit mobile number" /></label><label>Email address<input required type="email" value={form.email} onChange={(event) => update('email', event.target.value)} placeholder="name@example.com" /></label></div><div className="requirement-review"><span>Requirement summary</span><div><strong>{form.societyName}</strong><small>{form.location} · {form.memberCount} households · {form.buildingAge}-year-old building</small></div><div><strong>{form.services.join(', ')}</strong><small>Preferred timeline: {form.timeline}</small></div></div><label className="consent-row"><input type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} /><span>I confirm that I am authorised to submit this requirement and agree to be contacted by RENOVA about it.</span></label></div>}
-          <div className="form-actions requirement-form-actions">{step > 1 ? <button type="button" className="button button-ghost" onClick={() => setStep(step - 1)}><ArrowLeft size={16} /> Back</button> : <span />} {step < 4 ? <button type="button" className="button button-dark" disabled={!canContinue} onClick={() => setStep(step + 1)}>Continue <ChevronRight size={16} /></button> : <button className="button button-accent" disabled={!canContinue || createRequirement.isPending}>{createRequirement.isPending ? <LoaderCircle size={16} className="spin" /> : <Send size={16} />} {createRequirement.isPending ? 'Submitting' : 'Submit requirement'}</button>}</div>
+          <div className="form-actions requirement-form-actions">{step > 1 ? <button type="button" className="button button-ghost" onClick={() => setStep(step - 1)}><ArrowLeft size={16} /> Back</button> : <span />} {step < 4 ? <button type="button" className="button button-dark" disabled={!canContinue} onClick={() => setStep(step + 1)}>Continue <ChevronRight size={16} /></button> : <button className="button button-accent" disabled={!canContinue || isSubmitting}>{isSubmitting ? <LoaderCircle size={16} className="spin" /> : <Send size={16} />} {isSubmitting ? 'Submitting' : 'Submit requirement'}</button>}</div>
         </form>
       </div>
     </div>

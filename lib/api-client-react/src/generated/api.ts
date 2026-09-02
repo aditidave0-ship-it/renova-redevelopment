@@ -26,9 +26,7 @@ import type {
   Professional,
   Project,
   ProjectInput,
-  Regulation,
-  RequirementInput,
-  RequirementSubmission
+  Regulation
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -436,77 +434,6 @@ export function useGetProject<TData = Awaited<ReturnType<typeof getProject>>, TE
 
 
 
-
-export const getCreateRequirementUrl = () => {
-
-
-
-
-  return `/api/requirements`
-}
-
-/**
- * @summary Post a society redevelopment requirement
- */
-export const createRequirement = async (requirementInput: RequirementInput, options?: Parameters<typeof customFetch>[1]): Promise<RequirementSubmission> => {
-
-  return customFetch<RequirementSubmission>(getCreateRequirementUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(requirementInput)
-  }
-);}
-
-
-
-
-
-export const getCreateRequirementMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRequirement>>, TError,{data: BodyType<RequirementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createRequirement>>, TError,{data: BodyType<RequirementInput>}, TContext> => {
-
-const mutationKey = ['createRequirement'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRequirement>>, {data: BodyType<RequirementInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createRequirement(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateRequirementMutationResult = NonNullable<Awaited<ReturnType<typeof createRequirement>>>
-    export type CreateRequirementMutationBody = BodyType<RequirementInput>
-    export type CreateRequirementMutationError = ErrorType<unknown>
-
-    /**
- * @summary Post a society redevelopment requirement
- */
-export const useCreateRequirement = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRequirement>>, TError,{data: BodyType<RequirementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createRequirement>>,
-        TError,
-        {data: BodyType<RequirementInput>},
-        TContext
-      > => {
-      return useMutation(getCreateRequirementMutationOptions(options));
-    }
 
 export const getListProfessionalsUrl = (params?: ListProfessionalsParams,) => {
   const normalizedParams = new URLSearchParams();
