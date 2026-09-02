@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BadgeCheck,
+  Bell,
   BookOpenText,
   Building2,
   CalendarDays,
@@ -18,9 +19,12 @@ import {
   Clock3,
   Compass,
   ExternalLink,
+  Eye,
   FileText,
   Filter,
   HardHat,
+  Handshake,
+  Home,
   LayoutDashboard,
   Landmark,
   ListFilter,
@@ -406,139 +410,151 @@ function Regulations() {
 }
 
 const publicNav = [
-  { href: '#about', label: 'About RENOVA' },
   { href: '#listings', label: 'Listings' },
   { href: '#opportunities', label: 'Opportunities' },
   { href: '#how-it-works', label: 'How it works' },
-  { href: '#knowledge', label: 'Knowledge centre' },
-  { href: '#stories', label: 'Success stories' },
+  { href: '#why-renova', label: 'Why RENOVA' },
 ];
 
 const stakeholderCards = [
-  { title: 'Housing societies', detail: 'Explore the people and pathways that can move your redevelopment forward.', icon: Building2 },
-  { title: 'Developers', detail: 'Discover genuine societies and redevelopment opportunities aligned to your strengths.', icon: HardHat },
-  { title: 'Architects', detail: 'Connect design expertise with societies ready to imagine what comes next.', icon: Compass },
-  { title: 'PMCs', detail: 'Bring structure, evaluation and project oversight to the right society mandates.', icon: ClipboardCheck },
-  { title: 'Professionals', detail: 'Make legal, technical and specialist expertise easier to find at the right moment.', icon: Scale },
+  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/professionals' },
+  { title: 'Explore Societies', detail: 'Discover genuine redevelopment opportunities across Mumbai.', icon: Landmark, href: '#opportunities' },
+  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals' },
+  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals' },
+];
+
+const featuredOpportunities = [
+  { status: 'Ready to explore', name: 'Ashirwad CHS', location: 'Andheri West', detail: 'A resident-led opportunity seeking a transparent redevelopment partner.', age: '42 yrs', homes: '96', area: '1.8 acres', scale: '₹80–120 Cr' },
+  { status: 'Shortlisting', name: 'Shantivan Cooperative', location: 'Chembur', detail: 'Large-format society with a clear committee mandate and strong connectivity.', age: '38 yrs', homes: '144', area: '2.4 acres', scale: '₹120–180 Cr' },
+  { status: 'New opportunity', name: 'Sea Breeze Apartments', location: 'Bandra East', detail: 'An established community looking for a capable PMC to begin feasibility.', age: '51 yrs', homes: '58', area: '0.9 acres', scale: '₹45–70 Cr' },
+  { status: 'Open for proposals', name: 'Navjeevan Nagar', location: 'Vikhroli', detail: 'A high-potential opportunity near major transit and employment corridors.', age: '34 yrs', homes: '212', area: '3.1 acres', scale: '₹180–260 Cr' },
+];
+
+const trustBenefits = [
+  { title: 'Verified Trust', detail: 'Developers, PMCs and professionals are reviewed before they enter the RENOVA network.', icon: ShieldCheck },
+  { title: 'Accelerated Timelines', detail: 'Structured requirements and milestone tracking reduce avoidable delays.', icon: Zap },
+  { title: 'Absolute Transparency', detail: 'Clear context, project details and expectations support better decisions.', icon: Eye },
 ];
 
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <div className="marketing-site" id="top">
-      <header className="marketing-header">
-        <div className="marketing-container marketing-nav-row">
+    <div className="marketing-site stitch-site" id="top">
+      <header className="stitch-header">
+        <div className="stitch-header-inner">
+          <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">
+            {menuOpen ? <X size={20} /> : <Compass size={20} />}
+          </button>
           <Logo />
-          <nav className={cn('marketing-nav', menuOpen && 'marketing-nav-open')} aria-label="RENOVA website navigation">
+          <button className="stitch-notification" aria-label="Notifications"><Bell size={19} /></button>
+          <nav className={cn('stitch-desktop-nav', menuOpen && 'is-open')} aria-label="RENOVA website navigation">
             <a href="#top" onClick={() => setMenuOpen(false)}>Home</a>
             {publicNav.map((item) => <a href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>)}
-            <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+            <Link href="/assessment" onClick={() => setMenuOpen(false)}>Post requirement</Link>
           </nav>
-          <div className="marketing-header-actions">
-            <Link href="/workspace" className="marketing-workspace-link">Society workspace</Link>
-            <a href="#requirement" className="button button-accent">Post your requirement <ArrowUpRight size={15} /></a>
-          </div>
-          <button className="marketing-menu-button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">
-            {menuOpen ? <X size={21} /> : <Menu size={21} />}
-          </button>
         </div>
       </header>
 
       <main>
-        <section className="marketing-hero">
-          <div className="marketing-container marketing-hero-grid">
-            <div className="marketing-hero-copy">
-              <p className="marketing-kicker"><span /> Mumbai's redevelopment network</p>
-              <h1>Redevelopment,<br /><em>reimagined.</em></h1>
-              <p className="marketing-lead">RENOVA brings housing societies, developers, PMCs, architects and redevelopment professionals into one better-connected ecosystem.</p>
-              <div className="marketing-hero-actions">
-                <a href="#requirement" className="button marketing-primary-button">Post your requirement <ArrowUpRight size={16} /></a>
-                <a href="#opportunities" className="marketing-text-link">Explore opportunities <ChevronDown size={16} /></a>
-              </div>
-              <div className="marketing-principles" aria-label="RENOVA principles">
-                <span><b>01</b> Renew</span><span><b>02</b> Connect</span><span><b>03</b> Redevelop</span>
-              </div>
-            </div>
-            <div className="marketing-hero-visual">
-              <img src="/renova-hero.png" alt="Modern residential redevelopment in Mumbai" />
-              <div className="marketing-image-note"><span>RENOVA</span><strong>From ageing property<br />to renewed possibility.</strong></div>
-            </div>
+        <section className="stitch-hero" aria-labelledby="renova-hero-title">
+          <div className="stitch-hero-image" role="img" aria-label="Modern residential redevelopment in Mumbai" />
+          <div className="stitch-hero-overlay" />
+          <div className="stitch-hero-copy">
+            <p className="stitch-eyebrow">01 / Mumbai redevelopment index</p>
+            <h1 id="renova-hero-title"><span>Where Mumbai's</span><em>next chapter</em><span>takes shape.</span></h1>
+            <p>A considered way for housing societies, developers and specialists to find the right fit for redevelopment.</p>
+            <a href="#opportunities" className="stitch-primary-button">Explore projects <ArrowUpRight size={16} /></a>
           </div>
         </section>
 
-        <section className="marketing-section marketing-intro" id="about">
-          <div className="marketing-container marketing-intro-grid">
-            <div><p className="marketing-kicker">About RENOVA</p><h2>One city. Many stakeholders.<br /><em>One clearer way forward.</em></h2></div>
-            <div className="marketing-copy-column">
-              <p>Mumbai's redevelopment is about more than new buildings. It is about renewing communities, restoring ageing properties and unlocking the potential of existing land.</p>
-              <p>RENOVA is a redevelopment-focused platform and service ecosystem designed to make that journey simpler, faster, more transparent and better connected.</p>
-              <div className="marketing-meaning"><span>RENOVA / Latin</span><strong>To renew. To restore. To transform.</strong></div>
-            </div>
+        <section className="stitch-actions" id="listings" aria-label="Explore RENOVA">
+          <div className="stitch-action-grid">
+            {stakeholderCards.map(({ title, detail, icon: Icon, href }) => (
+              href.startsWith('/') ? (
+                <Link href={href} className="stitch-action-card" key={title}>
+                  <span className="stitch-action-icon"><Icon size={22} /></span><strong>{title}</strong><p>{detail}</p><ArrowUpRight size={15} />
+                </Link>
+              ) : (
+                <a href={href} className="stitch-action-card" key={title}>
+                  <span className="stitch-action-icon"><Icon size={22} /></span><strong>{title}</strong><p>{detail}</p><ArrowUpRight size={15} />
+                </a>
+              )
+            ))}
           </div>
         </section>
 
-        <section className="marketing-section marketing-listings" id="listings">
-          <div className="marketing-container">
-            <div className="marketing-section-heading"><div><p className="marketing-kicker">The RENOVA network</p><h2>The right people,<br /><em>around the same table.</em></h2></div><p>Explore the stakeholders who shape a redevelopment project from its first conversation to execution.</p></div>
-            <div className="stakeholder-grid">
-              {stakeholderCards.map(({ title, detail, icon: Icon }, index) => (
-                <article className="stakeholder-card" key={title}>
-                  <div className="stakeholder-card-top"><span>0{index + 1}</span><Icon size={22} strokeWidth={1.6} /></div>
-                  <h3>{title}</h3><p>{detail}</p>
-                  <Link href={title === 'Housing societies' ? '/assessment' : '/professionals'} className="marketing-card-link">Explore <ArrowUpRight size={15} /></Link>
-                </article>
-              ))}
-            </div>
+        <section className="stitch-section stitch-opportunities" id="opportunities">
+          <div className="stitch-section-heading">
+            <div><p>Live possibilities</p><h2>Current redevelopment opportunities</h2></div>
+            <Link href="/workspace">View all <ArrowUpRight size={14} /></Link>
+          </div>
+          <div className="stitch-opportunity-grid">
+            {featuredOpportunities.map((item) => (
+              <article className="stitch-opportunity-card" key={item.name}>
+                <span className="stitch-status">{item.status}</span>
+                <h3>{item.name}</h3>
+                <p><MapPin size={14} /> {item.location}</p>
+                <p className="stitch-opportunity-detail">{item.detail}</p>
+                <div>
+                  <span>Building age<strong>{item.age}</strong></span>
+                  <span>Homes<strong>{item.homes}</strong></span>
+                  <span>Site area<strong>{item.area}</strong></span>
+                </div>
+                <Link href="/assessment" className="stitch-details-button">Explore · {item.scale} <ArrowUpRight size={14} /></Link>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section className="marketing-section marketing-opportunities" id="opportunities">
-          <div className="marketing-container">
-            <div className="marketing-section-heading marketing-section-heading-light"><div><p className="marketing-kicker">Redevelopment opportunities</p><h2>Better matches begin<br />with <em>better context.</em></h2></div><p>RENOVA helps both sides discover relevant possibilities and begin with a clearer understanding of what each project needs.</p></div>
-            <div className="opportunity-grid">
-              <article><span className="opportunity-label"><Building2 size={17} /> For housing societies</span><h3>Find the team your project deserves.</h3><ul><li>Suitable developers</li><li>Project management consultants</li><li>Architects and design practices</li><li>Legal and technical professionals</li></ul><a href="#requirement" className="button marketing-light-button">Share your requirement <ArrowUpRight size={15} /></a></article>
-              <article><span className="opportunity-label"><HardHat size={17} /> For developers &amp; professionals</span><h3>Find the opportunity where you fit.</h3><ul><li>Genuine redevelopment opportunities</li><li>Suitable housing societies</li><li>Relevant project mandates</li><li>Potential partners and consultants</li></ul><Link href="/professionals" className="button marketing-outline-light">Explore the network <ArrowUpRight size={15} /></Link></article>
-            </div>
+        <section className="stitch-section stitch-why" id="why-renova">
+          <div className="stitch-section-heading stitch-heading-stack">
+            <div><p>A clearer way forward</p><h2>Why RENOVA?</h2></div>
+            <span>Streamlining redevelopment through structured processes, verified connections and absolute clarity.</span>
+          </div>
+          <div className="stitch-benefit-grid">
+            {trustBenefits.map(({ title, detail, icon: Icon }) => (
+              <article key={title}><span><Icon size={22} /></span><div><h3>{title}</h3><p>{detail}</p></div></article>
+            ))}
           </div>
         </section>
 
-        <section className="marketing-section marketing-process" id="how-it-works">
-          <div className="marketing-container">
-            <div className="marketing-section-heading"><div><p className="marketing-kicker">How it works</p><h2>From requirement<br />to <em>right connection.</em></h2></div><p>A structured starting point replaces scattered searching, unclear introductions and months of avoidable drift.</p></div>
-            <div className="process-grid">
-              {[['01', 'Share your requirement', 'Tell RENOVA about your society, expertise or opportunity.'], ['02', 'Build the right context', 'Organise the project details that matter before introductions begin.'], ['03', 'Explore relevant matches', 'Find developers, societies and professionals suited to the need.'], ['04', 'Move forward clearly', 'Begin the next conversation with better information and direction.']].map(([number, title, detail]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p></article>)}
-            </div>
+        <section className="stitch-section stitch-process" id="how-it-works">
+          <div className="stitch-section-heading stitch-heading-stack">
+            <div><p>How it works</p><h2>From requirement to right connection.</h2></div>
+          </div>
+          <div className="stitch-process-grid">
+            {[['01', 'Make your intent clear', 'Tell us where you are in the journey, from first conversation to a ready opportunity.'], ['02', 'Meet the right people', 'Explore a focused network of developers, PMCs, architects and advisors.'], ['03', 'Move forward, together', 'Shortlist a match, start a conversation and shape a better brief.']].map(([number, title, detail]) => (
+              <article key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p></article>
+            ))}
+          </div>
+          <div className="stitch-requirement-cta" id="requirement">
+            <div><p>Ready to begin?</p><h2>Start your society's redevelopment journey.</h2></div>
+            <Link href="/assessment" className="stitch-primary-button">Post your requirement <ArrowUpRight size={16} /></Link>
           </div>
         </section>
 
-        <section className="marketing-section marketing-knowledge" id="knowledge">
-          <div className="marketing-container marketing-knowledge-grid">
-            <div className="knowledge-visual"><BookOpenText size={28} /><span>Knowledge centre / Mumbai</span><strong>Know the rules<br />before you negotiate.</strong></div>
-            <div><p className="marketing-kicker">Knowledge centre</p><h2>Complex policy,<br /><em>made more navigable.</em></h2><p>Explore plain-language orientation around the permissions, notices and approvals that can shape a Mumbai redevelopment journey.</p><Link href="/regulations" className="button marketing-primary-button">Open knowledge centre <ArrowUpRight size={15} /></Link></div>
-          </div>
-        </section>
-
-        <section className="marketing-section marketing-stories" id="stories">
-          <div className="marketing-container marketing-stories-grid">
-            <div><p className="marketing-kicker">Success stories</p><h2>Every renewed building<br />starts with <em>a first step.</em></h2></div>
-            <div className="story-placeholder"><Sparkles size={22} /><span>Stories in progress</span><p>As the first RENOVA journeys take shape, this space will document the decisions, partnerships and outcomes that moved redevelopment forward.</p></div>
-          </div>
-        </section>
-
-        <section className="marketing-section marketing-requirement" id="requirement">
-          <div className="marketing-container requirement-panel">
-            <div><p className="marketing-kicker">Post your requirement</p><h2>Tell us what needs<br /><em>to move forward.</em></h2><p>Whether you represent a housing society, developer or redevelopment practice, start with the opportunity in front of you.</p></div>
-            <div className="requirement-actions"><Link href="/assessment" className="button marketing-primary-button">I represent a society <ArrowUpRight size={16} /></Link><Link href="/professionals" className="button button-outline">I am a developer or professional <ArrowUpRight size={16} /></Link></div>
+        <section className="stitch-section stitch-about" id="about">
+          <p>About RENOVA</p>
+          <h2>Renewing communities. Restoring ageing properties. Creating better possibilities for Mumbai.</h2>
+          <div>
+            <p>RENOVA is a redevelopment-focused platform and service ecosystem that brings housing societies, developers, PMCs, architects and specialists together.</p>
+            <Link href="/regulations">Open knowledge centre <BookOpenText size={16} /></Link>
           </div>
         </section>
       </main>
 
-      <footer className="marketing-footer" id="contact">
-        <div className="marketing-container">
-          <div className="marketing-footer-main"><div><Logo /><p>Renew. Connect. Redevelop.</p></div><div><span>Start here</span><a href="#requirement">Post your requirement</a><Link href="/workspace">Society workspace</Link></div><div><span>Explore</span><a href="#listings">Listings</a><a href="#knowledge">Knowledge centre</a></div><div><span>RENOVA Mumbai</span><p>Making redevelopment easier to initiate, easier to connect and easier to execute.</p></div></div>
-          <div className="marketing-footer-bottom"><span>© {new Date().getFullYear()} RENOVA</span><a href="#top">Back to top <ArrowUpRight size={13} /></a></div>
-        </div>
+      <footer className="stitch-footer" id="contact">
+        <div><Logo /><p>Renew. Connect. Redevelop.</p></div>
+        <div><a href="#listings">Listings</a><a href="#opportunities">Opportunities</a><Link href="/regulations">Knowledge centre</Link><Link href="/assessment">Post requirement</Link></div>
+        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
       </footer>
+
+      <nav className="stitch-bottom-nav" aria-label="Mobile navigation">
+        <a href="#top" className="active"><Home size={20} /><span>Home</span></a>
+        <a href="#listings"><Building2 size={20} /><span>Listings</span></a>
+        <a href="#opportunities"><Handshake size={20} /><span>Opportunities</span></a>
+        <Link href="/assessment"><Plus size={22} /><span>Post</span></Link>
+      </nav>
     </div>
   );
 }
