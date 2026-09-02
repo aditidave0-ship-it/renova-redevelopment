@@ -124,6 +124,60 @@ export const GetProjectResponse = zod.object({
 
 
 /**
+ * @summary Post a society redevelopment requirement
+ */
+export const createRequirementBodySocietyNameMin = 2;
+
+export const createRequirementBodyLocationMin = 2;
+
+
+
+
+
+
+
+export const createRequirementBodyBriefMax = 1000;
+
+export const createRequirementBodyContactNameMin = 2;
+
+
+export const createRequirementBodyPhoneMin = 10;
+
+export const createRequirementBodyEmailMin = 3;
+
+
+
+export const CreateRequirementBody = zod.object({
+  "societyName": zod.string().min(createRequirementBodySocietyNameMin),
+  "location": zod.string().min(createRequirementBodyLocationMin),
+  "societyType": zod.string().min(1),
+  "memberCount": zod.number().min(1),
+  "buildingAge": zod.number().min(1),
+  "landType": zod.string().optional(),
+  "plotArea": zod.number().min(1).optional(),
+  "conveyanceStatus": zod.string().optional(),
+  "structuralAudit": zod.string().optional(),
+  "services": zod.array(zod.string()).min(1),
+  "timeline": zod.string().min(1),
+  "brief": zod.string().max(createRequirementBodyBriefMax).optional(),
+  "contactName": zod.string().min(createRequirementBodyContactNameMin),
+  "contactRole": zod.string().min(1),
+  "phone": zod.string().min(createRequirementBodyPhoneMin),
+  "email": zod.string().min(createRequirementBodyEmailMin),
+  "consent": zod.boolean()
+})
+
+export const CreateRequirementResponse = zod.object({
+  "id": zod.string(),
+  "reference": zod.string(),
+  "status": zod.string(),
+  "submittedAt": zod.string(),
+  "projectId": zod.string(),
+  "nextStep": zod.string()
+})
+
+
+/**
  * @summary List matched professionals
  */
 export const ListProfessionalsQueryParams = zod.object({

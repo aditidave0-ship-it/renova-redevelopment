@@ -36,6 +36,48 @@ export interface ProjectInput {
   memberCount?: number;
 }
 
+export interface RequirementInput {
+  /** @minLength 2 */
+  societyName: string;
+  /** @minLength 2 */
+  location: string;
+  /** @minLength 1 */
+  societyType: string;
+  /** @minimum 1 */
+  memberCount: number;
+  /** @minimum 1 */
+  buildingAge: number;
+  landType?: string;
+  /** @minimum 1 */
+  plotArea?: number;
+  conveyanceStatus?: string;
+  structuralAudit?: string;
+  /** @minItems 1 */
+  services: string[];
+  /** @minLength 1 */
+  timeline: string;
+  /** @maxLength 1000 */
+  brief?: string;
+  /** @minLength 2 */
+  contactName: string;
+  /** @minLength 1 */
+  contactRole: string;
+  /** @minLength 10 */
+  phone: string;
+  /** @minLength 3 */
+  email: string;
+  consent: boolean;
+}
+
+export interface RequirementSubmission {
+  id: string;
+  reference: string;
+  status: string;
+  submittedAt: string;
+  projectId: string;
+  nextStep: string;
+}
+
 export interface Activity {
   id: string;
   title: string;

@@ -14,3 +14,5 @@ export * from './professional';
 export * from './project';
 export * from './projectInput';
 export * from './regulation';
+export * from './requirementInput';
+export * from './requirementSubmission';

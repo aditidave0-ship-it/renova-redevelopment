@@ -44,7 +44,7 @@ import {
 import {
   getGetProjectQueryKey,
   getListProfessionalsQueryKey,
-  useCreateProject,
+  useCreateRequirement,
   useGetDashboard,
   useGetProject,
   useHealthCheck,
@@ -59,6 +59,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import './index.css';
 import './marketing.css';
+import './requirement.css';
 
 const queryClient = new QueryClient();
 
@@ -77,7 +78,7 @@ function Logo() {
 
 const navItems = [
   { href: '/workspace', label: 'Overview', icon: LayoutDashboard },
-  { href: '/assessment', label: 'New assessment', icon: ClipboardCheck },
+  { href: '/assessment', label: 'Post requirement', icon: ClipboardCheck },
   { href: '/professionals', label: 'Professionals', icon: UsersRound },
   { href: '/regulations', label: 'Regulation centre', icon: BookOpenText },
 ];
@@ -105,7 +106,7 @@ function AppShell({ children }: { children: ReactNode }) {
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link href={href} key={href} onClick={() => setMobileOpen(false)} className={cn('nav-link', location === href && 'active')} data-testid={`link-nav-${label.toLowerCase().replaceAll(' ', '-')}`}>
               <Icon size={18} strokeWidth={1.8} /><span>{label}</span>
-              {label === 'New assessment' && <span className="nav-dot" />}
+              {label === 'Post requirement' && <span className="nav-dot" />}
             </Link>
           ))}
         </nav>
@@ -257,31 +258,88 @@ function Overview() {
   );
 }
 
+const requirementServices = ['Developer', 'PMC', 'Architect', 'Legal advisor', 'Structural consultant'];
+
 function Assessment() {
-  const [, setLocation] = useLocation();
-  const createProject = useCreateProject();
+  const createRequirement = useCreateRequirement();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ name: '', location: '', societyType: '', landType: '', memberCount: '' });
-  const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const [submitted, setSubmitted] = useState<{ reference: string; status: string; nextStep: string; projectId?: string; demo?: boolean } | null>(null);
+  const [form, setForm] = useState({
+    societyName: '', location: '', societyType: '', memberCount: '', buildingAge: '',
+    landType: '', plotArea: '', conveyanceStatus: '', structuralAudit: '',
+    services: [] as string[], timeline: '', brief: '', contactName: '', contactRole: '',
+    phone: '', email: '', consent: false,
+  });
+  const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((current) => ({ ...current, [key]: value }));
+  const toggleService = (service: string) => update('services', form.services.includes(service) ? form.services.filter((item) => item !== service) : [...form.services, service]);
+  const canContinue = step === 1
+    ? Boolean(form.societyName && form.location && form.societyType && form.memberCount && form.buildingAge)
+    : step === 2
+      ? Boolean(form.conveyanceStatus && form.structuralAudit)
+      : step === 3
+        ? Boolean(form.services.length && form.timeline)
+        : Boolean(form.contactName && form.contactRole && form.phone.replace(/\D/g, '').length >= 10 && form.email.includes('@') && form.consent);
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    createProject.mutate({ data: { name: form.name, location: form.location, societyType: form.societyType, landType: form.landType || undefined, memberCount: form.memberCount ? Number(form.memberCount) : undefined } }, { onSuccess: (project) => setLocation(`/project/${project.id}`) });
+    if (!canContinue) return;
+    const data = {
+      societyName: form.societyName.trim(), location: form.location.trim(), societyType: form.societyType,
+      memberCount: Number(form.memberCount), buildingAge: Number(form.buildingAge),
+      landType: form.landType || undefined, plotArea: form.plotArea ? Number(form.plotArea) : undefined,
+      conveyanceStatus: form.conveyanceStatus || undefined, structuralAudit: form.structuralAudit || undefined,
+      services: form.services, timeline: form.timeline, brief: form.brief.trim() || undefined,
+      contactName: form.contactName.trim(), contactRole: form.contactRole, phone: form.phone.trim(),
+      email: form.email.trim(), consent: form.consent,
+    };
+    createRequirement.mutate({ data }, {
+      onSuccess: (result) => setSubmitted(result),
+      onError: () => {
+        const reference = `RNV-DEMO-${String(Date.now()).slice(-6)}`;
+        localStorage.setItem('renova:last-requirement', JSON.stringify({ ...data, reference, savedAt: new Date().toISOString() }));
+        setSubmitted({ reference, status: 'Saved on this device', nextStep: 'Connect the production database to route this requirement into RENOVA’s review queue.', demo: true });
+      },
+    });
   };
-  const canContinue = step === 1 ? form.name && form.location : form.societyType && form.memberCount;
+
+  if (submitted) return (
+    <div className="requirement-success" data-testid="state-requirement-success">
+      <div className="success-mark"><Check size={34} /></div>
+      <p className="section-kicker">Requirement submitted</p>
+      <h1>Your society has taken<br /><em>the first clear step.</em></h1>
+      <p className="success-lead">Your requirement reference is <strong>{submitted.reference}</strong>. Keep it handy for future conversations with RENOVA.</p>
+      <div className="submission-receipt">
+        <div><span>Status</span><strong>{submitted.status}</strong></div>
+        <div><span>Society</span><strong>{form.societyName}</strong></div>
+        <div><span>Services requested</span><strong>{form.services.join(', ')}</strong></div>
+        <div><span>Next step</span><strong>{submitted.nextStep}</strong></div>
+      </div>
+      {submitted.demo && <div className="demo-mode-note"><CircleHelp size={17} /><span>This submission is saved locally for the investor-ready demonstration. The live-data phase will add the production review queue and notifications.</span></div>}
+      <div className="success-actions"><Link href="/" className="button button-outline"><ArrowLeft size={16} /> RENOVA home</Link><Link href="/workspace" className="button button-dark">Open society workspace <ArrowUpRight size={16} /></Link></div>
+    </div>
+  );
+
   return (
-    <div className="assessment-layout">
-      <div className="assessment-main">
-        <PageIntro kicker="Guided assessment · 04 minutes" title={<>Start with the<br /><em>right questions.</em></>} detail="We’ll build a practical redevelopment brief for your committee. No jargon, no guesswork." />
-        <div className="assessment-steps"><span className={cn(step >= 1 && 'done')}>01 <b>Society basics</b></span><i /><span className={cn(step >= 2 && 'done')}>02 <b>Property context</b></span><i /><span className={cn(step >= 3 && 'done')}>03 <b>Your brief</b></span></div>
-        <form className="assessment-form" onSubmit={submit}>
-          {step === 1 && <div className="form-step"><div className="form-heading"><span className="step-number">01</span><div><h2>Tell us about your society</h2><p>Use the name members recognise. You can refine the brief later.</p></div></div><label>Society name<input required value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="e.g. Kirti Heights CHS" data-testid="input-society-name" /></label><label>Area / locality<input required value={form.location} onChange={(event) => update('location', event.target.value)} placeholder="e.g. Chembur, Mumbai" data-testid="input-society-location" /></label></div>}
-          {step === 2 && <div className="form-step"><div className="form-heading"><span className="step-number">02</span><div><h2>Set the property context</h2><p>These details shape the regulatory route we’ll recommend.</p></div></div><label>Society type<select required value={form.societyType} onChange={(event) => update('societyType', event.target.value)} data-testid="select-society-type"><option value="">Select a type</option><option value="Co-operative Housing Society">Co-operative Housing Society</option><option value="Apartment Owners Association">Apartment Owners Association</option><option value="MHADA Society">MHADA Society</option></select></label><label>Land tenure<select value={form.landType} onChange={(event) => update('landType', event.target.value)} data-testid="select-land-type"><option value="">Not sure yet</option><option value="Freehold">Freehold</option><option value="Leasehold">Leasehold</option><option value="MHADA lease">MHADA lease</option></select></label><label>Number of member households<input required type="number" min="1" value={form.memberCount} onChange={(event) => update('memberCount', event.target.value)} placeholder="e.g. 48" data-testid="input-member-count" /></label></div>}
-          {step === 3 && <div className="form-step"><div className="form-heading"><span className="step-number">03</span><div><h2>Your assessment is ready to begin</h2><p>Review the basics before we create your private project workspace.</p></div></div><div className="review-card"><div><span>Society</span><strong>{form.name}</strong></div><div><span>Location</span><strong>{form.location}</strong></div><div><span>Type</span><strong>{form.societyType}</strong></div><div><span>Households</span><strong>{form.memberCount}</strong></div></div><div className="privacy-note"><ShieldCheck size={17} /><span>Your information is kept within your society workspace and is never shared without your permission.</span></div></div>}
-          {createProject.isError && <div className="form-error" data-testid="status-assessment-error"><AlertTriangle size={16} /> We couldn’t create the assessment. Please check your connection and try again.</div>}
-          <div className="form-actions">{step > 1 && <button type="button" className="button button-ghost" onClick={() => setStep(step - 1)} data-testid="button-assessment-back"><ArrowLeft size={16} /> Back</button>}<span />{step < 3 ? <button type="button" className="button button-dark" disabled={!canContinue} onClick={() => setStep(step + 1)} data-testid="button-assessment-continue">Continue <ChevronRight size={16} /></button> : <button className="button button-accent" disabled={createProject.isPending} data-testid="button-create-assessment">{createProject.isPending ? <LoaderCircle size={16} className="spin" /> : <Send size={16} />} {createProject.isPending ? 'Creating workspace' : 'Create assessment'}</button>}</div>
+    <div className="requirement-page">
+      <div className="requirement-brand-row"><Logo /><span>Society requirement</span><Link href="/workspace">Existing workspace <ArrowUpRight size={14} /></Link></div>
+      <div className="requirement-heading">
+        <Link href="/" className="back-link"><ArrowLeft size={15} /> RENOVA home</Link>
+        <PageIntro kicker="Post your requirement · About 6 minutes" title={<>Put your society’s<br /><em>needs into focus.</em></>} detail="Share the essentials once. RENOVA will use this brief to understand the opportunity and prepare the right next conversation." />
+      </div>
+      <div className="requirement-shell">
+        <aside className="requirement-progress" aria-label="Submission progress">
+          {[['01', 'Society'], ['02', 'Property'], ['03', 'Requirement'], ['04', 'Contact']].map(([number, label], index) => <button type="button" key={number} onClick={() => index + 1 < step && setStep(index + 1)} className={cn(step === index + 1 && 'active', step > index + 1 && 'complete')}><span>{step > index + 1 ? <Check size={14} /> : number}</span><b>{label}</b><small>{index === 0 ? 'Who you are' : index === 1 ? 'What you have' : index === 2 ? 'What you need' : 'Who we contact'}</small></button>)}
+          <div className="requirement-trust"><ShieldCheck size={20} /><strong>Your details stay private.</strong><p>RENOVA will not share them with third parties without your permission.</p></div>
+        </aside>
+        <form className="requirement-form" onSubmit={submit}>
+          <div className="requirement-step-label"><span>Step {step} of 4</span><b>{step * 25}% complete</b></div>
+          <div className="requirement-progress-bar"><i style={{ width: `${step * 25}%` }} /></div>
+          {step === 1 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">01</span><div><h2>Tell us about your society</h2><p>Start with the details your committee already knows.</p></div></div><div className="requirement-fields"><label className="field-wide">Registered society name<input required value={form.societyName} onChange={(event) => update('societyName', event.target.value)} placeholder="e.g. Kirti Heights CHS" /></label><label className="field-wide">Area / locality<input required value={form.location} onChange={(event) => update('location', event.target.value)} placeholder="e.g. Chembur, Mumbai" /></label><label>Society type<select required value={form.societyType} onChange={(event) => update('societyType', event.target.value)}><option value="">Select type</option><option>Co-operative Housing Society</option><option>Apartment Owners Association</option><option>MHADA Society</option><option>Cessed building</option></select></label><label>Member households<input required type="number" min="1" value={form.memberCount} onChange={(event) => update('memberCount', event.target.value)} placeholder="e.g. 48" /></label><label>Building age (years)<input required type="number" min="1" value={form.buildingAge} onChange={(event) => update('buildingAge', event.target.value)} placeholder="e.g. 36" /></label></div></div>}
+          {step === 2 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">02</span><div><h2>Set the property context</h2><p>It is fine to choose “Not sure” where documents need review.</p></div></div><div className="requirement-fields"><label>Land tenure<select value={form.landType} onChange={(event) => update('landType', event.target.value)}><option value="">Not sure</option><option>Freehold</option><option>Leasehold</option><option>MHADA lease</option><option>Collector land</option></select></label><label>Approx. plot area (sq. m.)<input type="number" min="1" value={form.plotArea} onChange={(event) => update('plotArea', event.target.value)} placeholder="Optional" /></label><label className="field-wide">Conveyance status<select required value={form.conveyanceStatus} onChange={(event) => update('conveyanceStatus', event.target.value)}><option value="">Select status</option><option>Registered conveyance completed</option><option>Deemed conveyance completed</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label><label className="field-wide">Structural audit<select required value={form.structuralAudit} onChange={(event) => update('structuralAudit', event.target.value)}><option value="">Select status</option><option>Completed in the last 3 years</option><option>Completed more than 3 years ago</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label></div></div>}
+          {step === 3 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">03</span><div><h2>What does your society need?</h2><p>Select every service you want RENOVA to help you explore.</p></div></div><div className="requirement-choice-grid">{requirementServices.map((service) => <button type="button" key={service} aria-pressed={form.services.includes(service)} onClick={() => toggleService(service)} className={cn('requirement-choice', form.services.includes(service) && 'selected')}><span>{form.services.includes(service) && <Check size={15} />}</span>{service}</button>)}</div><label className="requirement-block-label">Preferred starting timeline<select required value={form.timeline} onChange={(event) => update('timeline', event.target.value)}><option value="">Select timeline</option><option>Immediately</option><option>Within 3 months</option><option>Within 6 months</option><option>Exploring for the future</option></select></label><label className="requirement-block-label">Anything RENOVA should know? <small>Optional</small><textarea maxLength={1000} value={form.brief} onChange={(event) => update('brief', event.target.value)} placeholder="Share committee priorities, past attempts, document concerns or the support you need most." /><span className="character-count">{form.brief.length}/1000</span></label></div>}
+          {step === 4 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">04</span><div><h2>Who should RENOVA contact?</h2><p>Use the details of an authorised committee representative.</p></div></div><div className="requirement-fields"><label>Full name<input required value={form.contactName} onChange={(event) => update('contactName', event.target.value)} placeholder="Contact person" /></label><label>Committee role<select required value={form.contactRole} onChange={(event) => update('contactRole', event.target.value)}><option value="">Select role</option><option>Chairperson</option><option>Secretary</option><option>Treasurer</option><option>Committee member</option><option>Authorised representative</option></select></label><label>Mobile number<input required type="tel" value={form.phone} onChange={(event) => update('phone', event.target.value)} placeholder="10-digit mobile number" /></label><label>Email address<input required type="email" value={form.email} onChange={(event) => update('email', event.target.value)} placeholder="name@example.com" /></label></div><div className="requirement-review"><span>Requirement summary</span><div><strong>{form.societyName}</strong><small>{form.location} · {form.memberCount} households · {form.buildingAge}-year-old building</small></div><div><strong>{form.services.join(', ')}</strong><small>Preferred timeline: {form.timeline}</small></div></div><label className="consent-row"><input type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} /><span>I confirm that I am authorised to submit this requirement and agree to be contacted by RENOVA about it.</span></label></div>}
+          <div className="form-actions requirement-form-actions">{step > 1 ? <button type="button" className="button button-ghost" onClick={() => setStep(step - 1)}><ArrowLeft size={16} /> Back</button> : <span />} {step < 4 ? <button type="button" className="button button-dark" disabled={!canContinue} onClick={() => setStep(step + 1)}>Continue <ChevronRight size={16} /></button> : <button className="button button-accent" disabled={!canContinue || createRequirement.isPending}>{createRequirement.isPending ? <LoaderCircle size={16} className="spin" /> : <Send size={16} />} {createRequirement.isPending ? 'Submitting' : 'Submit requirement'}</button>}</div>
         </form>
       </div>
-      <aside className="assessment-aside"><div className="aside-quote"><Sparkles size={19} /><p>“The best redevelopment decisions are made before a developer enters the room.”</p><span>— RENOVA field note 02</span></div><div className="aside-checklist"><p className="section-kicker">What you’ll get</p>{['A readiness score for your society', 'Your regulatory pathway, explained', 'A practical list of next steps'].map((item) => <div key={item}><Check size={16} /> {item}</div>)}</div><div className="aside-image"><img src="/renova-hero.png" alt="Mumbai redevelopment vision" /><span>From what is, to what could be.</span></div></aside>
     </div>
   );
 }
@@ -488,6 +546,7 @@ function WorkspaceRouter() {
 function Router() {
   const [location] = useLocation();
   if (location === '/') return <MarketingHome />;
+  if (location === '/assessment') return <Assessment />;
   return <AppShell><WorkspaceRouter /></AppShell>;
 }
 

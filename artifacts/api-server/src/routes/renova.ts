@@ -6,6 +6,8 @@ import {
   GetDashboardResponse,
   ListProjectsResponse,
   CreateProjectResponse,
+  CreateRequirementBody,
+  CreateRequirementResponse,
   GetProjectResponse,
   ListProfessionalsResponse,
   ListRegulationsResponse,
@@ -65,6 +67,8 @@ const activity = [
   { id: "a3", title: "Potential pathway found", detail: "DCPR 2034 · Regulation 33(5)", date: "Yesterday", kind: "regulation" },
 ];
 
+const requirements: Array<{ id: string; reference: string }> = [];
+
 router.get("/dashboard", (_req, res) => {
   const project = projects[0];
   res.json(GetDashboardResponse.parse({
@@ -96,6 +100,38 @@ router.post("/projects", (req, res) => {
   };
   projects.unshift(project);
   res.status(201).json(CreateProjectResponse.parse(project));
+});
+
+router.post("/requirements", (req, res) => {
+  const input = CreateRequirementBody.parse(req.body);
+  const sequence = requirements.length + 1;
+  const id = `requirement-${Date.now()}-${sequence}`;
+  const projectId = `project-${Date.now()}`;
+  const reference = `RNV-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`;
+  const project: Project = {
+    id: projectId,
+    name: input.societyName,
+    location: input.location,
+    societyType: input.societyType,
+    landType: input.landType,
+    stage: "Requirement received",
+    readiness: 12,
+    memberCount: input.memberCount,
+    updatedAt: "Just now",
+    redFlags: ["Property documents not reviewed", "Conveyance status requires confirmation"],
+    nextStep: "RENOVA requirement review",
+    pathway: ["Requirement review", "Professional matching", "Introductory consultation"],
+  };
+  projects.unshift(project);
+  requirements.unshift({ id, reference });
+  return res.status(201).json(CreateRequirementResponse.parse({
+    id,
+    reference,
+    status: "Received",
+    submittedAt: new Date().toISOString(),
+    projectId,
+    nextStep: "RENOVA will review the requirement and prepare the first matching shortlist.",
+  }));
 });
 
 router.get("/projects/:id", (req, res) => {
