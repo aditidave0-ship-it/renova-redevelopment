@@ -46,7 +46,9 @@ const projects: Project[] = [
 ];
 
 const professionals = [
+  { id: "dev-1", name: "Aarohan Redevelopers", role: "Redevelopment Developer", location: "Worli, Mumbai", experience: "24 years", match: 94, specialties: ["Occupied redevelopment", "Member transit planning", "High-rise delivery"], verified: true },
   { id: "pmc-1", name: "UrbanFrame Consultants", role: "Redevelopment PMC", location: "Andheri East", experience: "18 years", match: 96, specialties: ["MHADA", "CHS redevelopment", "Tender management"], verified: true },
+  { id: "pmc-2", name: "CivicGrid Advisory", role: "Redevelopment PMC", location: "Dadar West", experience: "15 years", match: 89, specialties: ["Feasibility", "Bid comparison", "Member coordination"], verified: true },
   { id: "legal-1", name: "Mehta & Iyer Associates", role: "Property & Title Legal", location: "Fort, Mumbai", experience: "22 years", match: 91, specialties: ["Conveyance", "Title due diligence", "Society law"], verified: true },
   { id: "arch-1", name: "Studio Northline", role: "Architect", location: "Bandra West", experience: "14 years", match: 87, specialties: ["Feasibility", "High-rise residential", "DCPR planning"], verified: true },
   { id: "tech-1", name: "Structura Labs", role: "Structural Consultant", location: "Powai", experience: "16 years", match: 84, specialties: ["Structural audits", "Dilapidated buildings", "Repair assessment"], verified: true },

@@ -70,6 +70,15 @@ function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
 }
 
+function readStoredArray<T>(key: string): T[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
 function Logo() {
   return (
     <Link href="/" className="brand-lockup" data-testid="link-home" aria-label="RENOVA home">
@@ -98,6 +107,7 @@ const navItems = [
 function AppShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [utilityPanel, setUtilityPanel] = useState<'help' | 'notifications' | null>(null);
   const health = useHealthCheck();
   const current = navItems.find((item) => item.href === location);
 
@@ -149,8 +159,8 @@ function AppShell({ children }: { children: ReactNode }) {
             <span className="breadcrumb-current">{location === '/workspace' ? 'Kirti Heights CHS' : current?.label}</span>
           </div>
           <div className="topbar-right">
-            <button className="topbar-help" data-testid="button-help"><CircleHelp size={17} /> Help desk</button>
-            <button className="notification-button" aria-label="Notifications" data-testid="button-notifications"><ActivityIcon size={18} /><span /></button>
+            <button className="topbar-help" onClick={() => setUtilityPanel('help')} data-testid="button-help"><CircleHelp size={17} /> Help desk</button>
+            <button className="notification-button" onClick={() => setUtilityPanel('notifications')} aria-label="Notifications" data-testid="button-notifications"><ActivityIcon size={18} /><span /></button>
             <span className="topbar-user">AR</span>
           </div>
         </header>
@@ -158,6 +168,22 @@ function AppShell({ children }: { children: ReactNode }) {
           <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>
         </div>
       </main>
+      <ExperienceDrawer open={utilityPanel === 'help'} onClose={() => setUtilityPanel(null)} eyebrow="RENOVA support" title="How can we help your committee?">
+        <div className="utility-intro"><span><Handshake size={22} /></span><div><strong>Redevelopment desk</strong><p>Get practical guidance on requirements, professionals, documents and your next committee step.</p></div></div>
+        <div className="utility-action-list">
+          <Link href="/assessment" onClick={() => setUtilityPanel(null)}><ClipboardCheck size={18} /><span><strong>Post a society requirement</strong><small>Share your brief with RENOVA</small></span><ChevronRight size={17} /></Link>
+          <Link href="/professionals" onClick={() => setUtilityPanel(null)}><UsersRound size={18} /><span><strong>Find a verified professional</strong><small>Explore developers, PMCs and architects</small></span><ChevronRight size={17} /></Link>
+          <Link href="/regulations" onClick={() => setUtilityPanel(null)}><BookOpenText size={18} /><span><strong>Understand the process</strong><small>Read plain-language guidance</small></span><ChevronRight size={17} /></Link>
+        </div>
+        <div className="utility-contact"><span>Need personal assistance?</span><Link href="/assessment" onClick={() => setUtilityPanel(null)}>Send your requirement to the redevelopment desk <ArrowUpRight size={14} /></Link></div>
+      </ExperienceDrawer>
+      <ExperienceDrawer open={utilityPanel === 'notifications'} onClose={() => setUtilityPanel(null)} eyebrow="Project pulse" title="Your latest updates">
+        <div className="drawer-feed">
+          <article><span className="drawer-feed-icon"><BadgeCheck size={18} /></span><div><strong>New verified PMC match</strong><p>UrbanFrame Consultants is a 96% match for your active project.</p><small>Today · 10:42 AM</small></div></article>
+          <article><span className="drawer-feed-icon"><AlertTriangle size={18} /></span><div><strong>Document action needed</strong><p>Your conveyance status still needs committee confirmation.</p><small>Yesterday</small></div></article>
+          <article><span className="drawer-feed-icon"><BookOpenText size={18} /></span><div><strong>Guidance updated</strong><p>The MHADA redevelopment overview has new committee notes.</p><small>2 days ago</small></div></article>
+        </div>
+      </ExperienceDrawer>
     </div>
   );
 }
@@ -195,6 +221,29 @@ function EmptyState({ icon: Icon, title, detail, action }: { icon: typeof Buildi
 
 function StatusPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'orange' | 'green' | 'red' }) {
   return <span className={`status-pill status-${tone}`} data-testid={`status-${String(children).toLowerCase().replaceAll(' ', '-')}`}>{children}</span>;
+}
+
+function ExperienceDrawer({ open, onClose, eyebrow, title, children }: { open: boolean; onClose: () => void; eyebrow: string; title: string; children: ReactNode }) {
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="experience-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="experience-drawer" role="dialog" aria-modal="true" aria-labelledby="experience-drawer-title">
+        <div className="experience-drawer-head"><div><p>{eyebrow}</p><h2 id="experience-drawer-title">{title}</h2></div><button type="button" className="icon-button" onClick={onClose} aria-label="Close" autoFocus><X size={20} /></button></div>
+        <div className="experience-drawer-body">{children}</div>
+      </section>
+    </div>
+  );
 }
 
 function ProgressRing({ value, size = 86 }: { value: number; size?: number }) {
@@ -384,18 +433,46 @@ function ProjectDetail() {
 }
 
 function Professionals() {
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState(() => new URLSearchParams(window.location.search).get('role') || '');
   const [search, setSearch] = useState('');
+  const [savedIds, setSavedIds] = useState<string[]>(() => readStoredArray<string>('renova:saved-professionals'));
+  const [showSaved, setShowSaved] = useState(false);
+  const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
+  const [drawerMode, setDrawerMode] = useState<'profile' | 'introduction'>('profile');
+  const [introductionSent, setIntroductionSent] = useState(false);
+  const [introductionNote, setIntroductionNote] = useState('');
   const params = useMemo(() => ({ role: role || undefined }), [role]);
   const professionals = useListProfessionals(params, { query: { queryKey: getListProfessionalsQueryKey(params) } });
   if (professionals.isLoading) return <LoadingPage label="Finding the right people for your project" />;
   if (professionals.isError) return <ErrorState onRetry={() => professionals.refetch()} label="The professional directory is unavailable." />;
-  const filtered = (professionals.data || []).filter((person) => `${person.name} ${person.role} ${person.location} ${person.specialties.join(' ')}`.toLowerCase().includes(search.toLowerCase()));
+  const activeProfessional = (professionals.data || []).find((person) => person.id === activeProfessionalId);
+  const filtered = (professionals.data || []).filter((person) => (!showSaved || savedIds.includes(person.id)) && `${person.name} ${person.role} ${person.location} ${person.specialties.join(' ')}`.toLowerCase().includes(search.toLowerCase()));
+  const saveProfessional = (id: string) => {
+    const next = savedIds.includes(id) ? savedIds.filter((savedId) => savedId !== id) : [...savedIds, id];
+    setSavedIds(next);
+    localStorage.setItem('renova:saved-professionals', JSON.stringify(next));
+  };
+  const openProfessional = (id: string, mode: 'profile' | 'introduction') => {
+    setActiveProfessionalId(id);
+    setDrawerMode(mode);
+    setIntroductionSent(false);
+    setIntroductionNote('');
+  };
+  const requestIntroduction = () => {
+    if (!activeProfessional) return;
+    const requests = readStoredArray<{ professionalId: string; note: string; requestedAt: string }>('renova:introduction-requests');
+    localStorage.setItem('renova:introduction-requests', JSON.stringify([...requests, { professionalId: activeProfessional.id, note: introductionNote.trim(), requestedAt: new Date().toISOString() }]));
+    setIntroductionSent(true);
+  };
   return (
     <div className="content-stack">
-      <PageIntro kicker="The people around the table" title={<>Find expertise<br /><em>that earns trust.</em></>} detail="A considered shortlist of professionals matched to the realities of Mumbai society redevelopment." action={<button className="button button-outline" data-testid="button-save-shortlist"><Check size={16} /> Saved shortlist <span className="button-count">0</span></button>} />
-      <div className="directory-toolbar"><div className="search-field"><Search size={17} /><input type="search" placeholder="Search by name, role, or specialty" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-search-professionals" /></div><div className="filter-group"><Filter size={15} /><span>Filter by</span>{['', 'PMC', 'Architect', 'Legal', 'Technical'].map((item) => <button key={item || 'all'} className={cn('filter-chip', role === item && 'selected')} onClick={() => setRole(item)} data-testid={`button-filter-${item || 'all'}`}>{item || 'All roles'}</button>)}</div><button className="icon-button filter-mobile" aria-label="More filters" data-testid="button-more-filters"><SlidersHorizontal size={17} /></button></div>
-      {filtered.length ? <div className="professional-list">{filtered.map((person) => <article className="professional-card" key={person.id} data-testid={`card-professional-${person.id}`}><div className="professional-top"><span className="professional-avatar">{person.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><div className="professional-title"><h3>{person.name} {person.verified && <BadgeCheck size={16} />}</h3><p>{person.role} · {person.location}</p></div><button className="save-button" aria-label={`Save ${person.name}`} data-testid={`button-save-${person.id}`}><Check size={16} /></button></div><div className="professional-match"><span><strong>{person.match}%</strong> match</span><div><i style={{ width: `${person.match}%` }} /></div><span className="experience">{person.experience}</span></div><div className="specialty-list">{person.specialties.map((specialty) => <span key={specialty}>{specialty}</span>)}</div><div className="professional-actions"><button className="button button-dark" data-testid={`button-request-intro-${person.id}`}>Request introduction <ArrowUpRight size={14} /></button><button className="text-link" data-testid={`button-view-profile-${person.id}`}>View profile <ChevronRight size={14} /></button></div></article>)}</div> : <EmptyState icon={UsersRound} title="No professionals match that search" detail="Try a broader role or a different search term." action={<button className="button button-ghost" onClick={() => { setSearch(''); setRole(''); }} data-testid="button-clear-professionals">Clear filters</button>} />}
+      <PageIntro kicker="The people around the table" title={<>Find expertise<br /><em>that earns trust.</em></>} detail="A considered shortlist of professionals matched to the realities of Mumbai society redevelopment." action={<button className={cn('button button-outline', showSaved && 'button-selected')} onClick={() => { setShowSaved((current) => !current); setRole(''); }} data-testid="button-save-shortlist"><Check size={16} /> Saved shortlist <span className="button-count">{savedIds.length}</span></button>} />
+      <div className="directory-toolbar"><div className="search-field"><Search size={17} /><input type="search" placeholder="Search by name, role, or specialty" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-search-professionals" /></div><div className="filter-group"><Filter size={15} /><span>Filter by</span>{['', 'Developer', 'PMC', 'Architect', 'Legal', 'Technical'].map((item) => <button key={item || 'all'} className={cn('filter-chip', role === item && 'selected')} onClick={() => setRole(item)} data-testid={`button-filter-${item || 'all'}`}>{item || 'All roles'}</button>)}</div><button className="icon-button filter-mobile" onClick={() => setRole('')} aria-label="Clear role filter" data-testid="button-more-filters"><SlidersHorizontal size={17} /></button></div>
+      <div className="directory-result-bar"><span>{filtered.length} verified matches</span>{(search || role || showSaved) && <button type="button" onClick={() => { setSearch(''); setRole(''); setShowSaved(false); }}>Reset view <RotateCcw size={13} /></button>}</div>
+      {filtered.length ? <div className="professional-list">{filtered.map((person) => <article className="professional-card" key={person.id} data-testid={`card-professional-${person.id}`}><div className="professional-top"><span className="professional-avatar">{person.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><div className="professional-title"><h3>{person.name} {person.verified && <BadgeCheck size={16} />}</h3><p>{person.role} · {person.location}</p></div><button className={cn('save-button', savedIds.includes(person.id) && 'saved')} onClick={() => saveProfessional(person.id)} aria-pressed={savedIds.includes(person.id)} aria-label={`${savedIds.includes(person.id) ? 'Remove' : 'Save'} ${person.name}`} data-testid={`button-save-${person.id}`}><Check size={16} /></button></div><div className="professional-match"><span><strong>{person.match}%</strong> match</span><div><i style={{ width: `${person.match}%` }} /></div><span className="experience">{person.experience}</span></div><div className="specialty-list">{person.specialties.map((specialty) => <span key={specialty}>{specialty}</span>)}</div><div className="professional-actions"><button className="button button-dark" onClick={() => openProfessional(person.id, 'introduction')} data-testid={`button-request-intro-${person.id}`}>Request introduction <ArrowUpRight size={14} /></button><button className="text-link" onClick={() => openProfessional(person.id, 'profile')} data-testid={`button-view-profile-${person.id}`}>View profile <ChevronRight size={14} /></button></div></article>)}</div> : <EmptyState icon={UsersRound} title={showSaved ? 'Your shortlist is ready to begin' : 'No professionals match that search'} detail={showSaved ? 'Save trusted professionals to compare them here.' : 'Try a broader role or a different search term.'} action={<button className="button button-ghost" onClick={() => { setSearch(''); setRole(''); setShowSaved(false); }} data-testid="button-clear-professionals">Clear filters</button>} />}
+      <ExperienceDrawer open={Boolean(activeProfessional)} onClose={() => setActiveProfessionalId(null)} eyebrow={drawerMode === 'profile' ? 'Verified RENOVA network' : 'Private introduction request'} title={activeProfessional?.name || 'Professional'}>
+        {activeProfessional && <>{drawerMode === 'profile' ? <div className="profile-detail"><div className="profile-identity"><span className="professional-avatar professional-avatar-large">{activeProfessional.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><div><StatusPill tone="green">Verified</StatusPill><p>{activeProfessional.role} · {activeProfessional.location}</p></div></div><div className="profile-score"><strong>{activeProfessional.match}%</strong><span>project match</span><i><b style={{ width: `${activeProfessional.match}%` }} /></i></div><div className="profile-facts"><div><span>Experience</span><strong>{activeProfessional.experience}</strong></div><div><span>Specialisms</span><strong>{activeProfessional.specialties.length} relevant areas</strong></div></div><div><p className="drawer-label">Relevant expertise</p><div className="specialty-list">{activeProfessional.specialties.map((specialty) => <span key={specialty}>{specialty}</span>)}</div></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA reviews credentials and project relevance before professionals enter the network. Societies should complete their own appointment due diligence.</p></div><button className="button button-dark button-full" onClick={() => setDrawerMode('introduction')}>Request an introduction <ArrowUpRight size={15} /></button></div> : introductionSent ? <div className="drawer-success"><span><Check size={30} /></span><h3>Request saved</h3><p>RENOVA will review the fit and prepare the next conversation. Your society’s contact details are never shared automatically.</p><button className="button button-outline" onClick={() => setActiveProfessionalId(null)}>Done</button></div> : <div className="introduction-card"><div className="drawer-note"><ShieldCheck size={18} /><p>This is a private request. RENOVA reviews both sides before making an introduction.</p></div><div className="intro-summary"><span>Professional</span><strong>{activeProfessional.name}</strong><small>{activeProfessional.role} · {activeProfessional.match}% match</small></div><label>What support do you need?<textarea value={introductionNote} onChange={(event) => setIntroductionNote(event.target.value)} placeholder="Briefly describe your society’s current stage and the help you need." /></label><button className="button button-dark button-full" disabled={introductionNote.trim().length < 10} onClick={requestIntroduction}>Send request <Send size={15} /></button></div>}</>}
+      </ExperienceDrawer>
     </div>
   );
 }
@@ -404,16 +481,36 @@ function Regulations() {
   const regulations = useListRegulations();
   const [search, setSearch] = useState('');
   const [activeStatus, setActiveStatus] = useState('All');
+  const [activeRegulationId, setActiveRegulationId] = useState<string | null>(null);
+  const [showOrientation, setShowOrientation] = useState(false);
   if (regulations.isLoading) return <LoadingPage label="Loading the regulation centre" />;
   if (regulations.isError) return <ErrorState onRetry={() => regulations.refetch()} label="The regulation centre is unavailable." />;
   const statuses = ['All', ...Array.from(new Set((regulations.data || []).map((item) => item.status)))];
   const filtered = (regulations.data || []).filter((item) => (activeStatus === 'All' || item.status === activeStatus) && `${item.code} ${item.title} ${item.summary} ${item.authority}`.toLowerCase().includes(search.toLowerCase()));
+  const activeRegulation = (regulations.data || []).find((item) => item.id === activeRegulationId);
+  const downloadGuide = () => {
+    const guide = ['RENOVA — SOCIETY REDEVELOPMENT COMMITTEE STARTER GUIDE', '', '1. Record the society’s redevelopment intent and committee authority.', '2. Collect title, conveyance, property-card and structural-audit records.', '3. Commission an independent feasibility study before inviting proposals.', '4. Define transparent evaluation criteria for PMC, architect and developer selection.', '5. Record every resolution, disclosure and member communication.', '', 'Important: This guide is an orientation tool, not legal or technical advice. Verify the applicable pathway with qualified professionals and the relevant authority.'].join('\n');
+    const url = URL.createObjectURL(new Blob([guide], { type: 'text/plain' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'RENOVA-committee-starter-guide.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <div className="content-stack">
-      <PageIntro kicker="Know the rules before you negotiate" title={<>The regulation<br /><em>centre.</em></>} detail="Plain-language guidance for the permissions, notices, and approvals that shape your redevelopment." action={<button className="button button-outline" data-testid="button-regulation-guide"><FileText size={16} /> Download committee guide</button>} />
-      <div className="regulation-feature"><div><span className="feature-label"><BookOpenText size={15} /> Start here</span><h2>What changes when<br />your society redevelops?</h2><p>A practical orientation to the decisions your committee will make, from consent to conveyance.</p><button className="text-link light-link" data-testid="button-read-orientation">Read the orientation <ArrowUpRight size={15} /></button></div><div className="feature-lines"><span>01&nbsp; Consent</span><span>02&nbsp; Feasibility</span><span>03&nbsp; Appointment</span><span>04&nbsp; Approvals</span></div></div>
+      <PageIntro kicker="Know the rules before you negotiate" title={<>The regulation<br /><em>centre.</em></>} detail="Plain-language guidance for the permissions, notices, and approvals that shape your redevelopment." action={<button className="button button-outline" onClick={downloadGuide} data-testid="button-regulation-guide"><FileText size={16} /> Download committee guide</button>} />
+      <div className="regulation-feature"><div><span className="feature-label"><BookOpenText size={15} /> Start here</span><h2>What changes when<br />your society redevelops?</h2><p>A practical orientation to the decisions your committee will make, from consent to conveyance.</p><button className="text-link light-link" onClick={() => setShowOrientation(true)} data-testid="button-read-orientation">Read the orientation <ArrowUpRight size={15} /></button></div><div className="feature-lines"><span>01&nbsp; Consent</span><span>02&nbsp; Feasibility</span><span>03&nbsp; Appointment</span><span>04&nbsp; Approvals</span></div></div>
       <div className="directory-toolbar regulation-toolbar"><div className="search-field"><Search size={17} /><input type="search" placeholder="Search codes, topics, or authorities" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-search-regulations" /></div><div className="filter-group"><ListFilter size={15} /><span>Show</span>{statuses.map((status) => <button key={status} className={cn('filter-chip', activeStatus === status && 'selected')} onClick={() => setActiveStatus(status)} data-testid={`button-regulation-filter-${status.toLowerCase().replaceAll(' ', '-')}`}>{status}</button>)}</div></div>
-      <div className="regulation-list">{filtered.length ? filtered.map((item) => <article className="regulation-row" key={item.id} data-testid={`row-regulation-${item.id}`}><div className="regulation-code">{item.code}</div><div className="regulation-copy"><div className="regulation-title-row"><h3>{item.title}</h3><StatusPill tone={item.status.toLowerCase().includes('active') ? 'green' : 'neutral'}>{item.status}</StatusPill></div><p>{item.summary}</p><div className="regulation-meta"><span><Landmark size={13} /> {item.authority}</span><span><CalendarDays size={13} /> Updated {item.updatedAt}</span></div></div><button className="icon-button regulation-open" aria-label={`Open ${item.code}`} data-testid={`button-open-regulation-${item.id}`}><ArrowUpRight size={17} /></button></article>) : <EmptyState icon={BookOpenText} title="No guidance found" detail="Try searching for a code, authority, or topic." />}</div>
+      <div className="directory-result-bar"><span>{filtered.length} guidance notes</span>{(search || activeStatus !== 'All') && <button type="button" onClick={() => { setSearch(''); setActiveStatus('All'); }}>Reset view <RotateCcw size={13} /></button>}</div>
+      <div className="regulation-list">{filtered.length ? filtered.map((item) => <article className="regulation-row" key={item.id} data-testid={`row-regulation-${item.id}`}><div className="regulation-code">{item.code}</div><div className="regulation-copy"><div className="regulation-title-row"><h3>{item.title}</h3><StatusPill tone={item.status.toLowerCase().includes('active') || item.status.toLowerCase().includes('current') ? 'green' : 'neutral'}>{item.status}</StatusPill></div><p>{item.summary}</p><div className="regulation-meta"><span><Landmark size={13} /> {item.authority}</span><span><CalendarDays size={13} /> Updated {item.updatedAt}</span></div></div><button className="icon-button regulation-open" onClick={() => setActiveRegulationId(item.id)} aria-label={`Open ${item.code}`} data-testid={`button-open-regulation-${item.id}`}><ArrowUpRight size={17} /></button></article>) : <EmptyState icon={BookOpenText} title="No guidance found" detail="Try searching for a code, authority, or topic." />}</div>
+      <ExperienceDrawer open={showOrientation} onClose={() => setShowOrientation(false)} eyebrow="Redevelopment orientation" title="Four decisions shape a safer start">
+        <div className="orientation-steps">{[['01', 'Build informed consent', 'Give members the same facts, record questions and define how decisions will be taken.'], ['02', 'Establish feasibility', 'Understand title, land, planning potential, liabilities and realistic project economics.'], ['03', 'Appoint independently', 'Use documented criteria and conflict disclosures when selecting advisors and development partners.'], ['04', 'Protect execution', 'Track approvals, bank guarantees, milestones, member obligations and handover evidence.']].map(([number, title, detail]) => <article key={number}><span>{number}</span><div><strong>{title}</strong><p>{detail}</p></div></article>)}</div>
+        <div className="drawer-note"><AlertTriangle size={18} /><p>Applicable rules depend on land tenure, building category and authority. Confirm your route with qualified legal and technical advisors.</p></div>
+      </ExperienceDrawer>
+      <ExperienceDrawer open={Boolean(activeRegulation)} onClose={() => setActiveRegulationId(null)} eyebrow={`Guidance note · ${activeRegulation?.code || ''}`} title={activeRegulation?.title || 'Regulation guidance'}>
+        {activeRegulation && <div className="regulation-detail"><div className="regulation-detail-status"><StatusPill tone="green">{activeRegulation.status}</StatusPill><span>Reviewed {activeRegulation.updatedAt}</span></div><p className="regulation-detail-lead">{activeRegulation.summary}</p><div className="profile-facts"><div><span>Authority</span><strong>{activeRegulation.authority}</strong></div><div><span>RENOVA status</span><strong>Orientation available</strong></div></div><div><p className="drawer-label">Committee questions to confirm</p><ul><li>Does the society and its land fall within this pathway?</li><li>Which documents establish eligibility and development potential?</li><li>Which authority approvals and member resolutions apply?</li><li>What should be independently verified before proposals are compared?</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA presents plain-language orientation. The governing notification, circular or regulation and professional advice remain authoritative.</p></div><Link href="/professionals?role=Legal" className="button button-dark button-full">Find a legal advisor <ArrowUpRight size={15} /></Link></div>}
+      </ExperienceDrawer>
     </div>
   );
 }
@@ -426,10 +523,10 @@ const publicNav = [
 ];
 
 const stakeholderCards = [
-  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/professionals' },
+  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/professionals?role=Developer' },
   { title: 'Explore Societies', detail: 'Discover genuine redevelopment opportunities across Mumbai.', icon: Landmark, href: '#opportunities' },
-  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals' },
-  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals' },
+  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals?role=PMC' },
+  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals?role=Architect' },
 ];
 
 const featuredOpportunities = [
@@ -535,6 +632,9 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoReveal, setShowLogoReveal] = useState(true);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [activeOpportunityName, setActiveOpportunityName] = useState<string | null>(null);
+  const activeOpportunity = featuredOpportunities.find((item) => item.name === activeOpportunityName);
   return (
     <div className="marketing-site stitch-site" id="top">
       {showLogoReveal && <CinematicLogoReveal onFinish={() => setShowLogoReveal(false)} />}
@@ -544,12 +644,13 @@ function MarketingHome() {
             {menuOpen ? <X size={20} /> : <Compass size={20} />}
           </button>
           <Logo />
-          <button className="stitch-notification" aria-label="Notifications"><Bell size={19} /></button>
+          <button className="stitch-notification" onClick={() => setUpdatesOpen((open) => !open)} aria-expanded={updatesOpen} aria-label="RENOVA updates"><Bell size={19} /><span className="stitch-notification-dot" /></button>
           <nav className={cn('stitch-desktop-nav', menuOpen && 'is-open')} aria-label="RENOVA website navigation">
             <a href="#top" onClick={() => setMenuOpen(false)}>Home</a>
             {publicNav.map((item) => <a href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>)}
             <Link href="/assessment" onClick={() => setMenuOpen(false)}>Post requirement</Link>
           </nav>
+          {updatesOpen && <div className="stitch-update-popover"><div><span>RENOVA pulse</span><button type="button" onClick={() => setUpdatesOpen(false)} aria-label="Close updates"><X size={16} /></button></div><article><BadgeCheck size={17} /><p><strong>Verified network growing</strong><span>New PMCs and architects are being reviewed for Mumbai societies.</span></p></article><article><Building2 size={17} /><p><strong>4 opportunities open</strong><span>Explore active society requirements across the city.</span></p></article><Link href="/assessment" onClick={() => setUpdatesOpen(false)}>Post your requirement <ArrowUpRight size={14} /></Link></div>}
         </div>
       </header>
 
@@ -584,7 +685,7 @@ function MarketingHome() {
         <section className="stitch-section stitch-opportunities" id="opportunities">
           <div className="stitch-section-heading">
             <div><p>Live possibilities</p><h2>Current redevelopment opportunities</h2></div>
-            <Link href="/workspace">View all <ArrowUpRight size={14} /></Link>
+            <Link href="/assessment">Post an opportunity <ArrowUpRight size={14} /></Link>
           </div>
           <div className="stitch-opportunity-grid">
             {featuredOpportunities.map((item) => (
@@ -598,7 +699,7 @@ function MarketingHome() {
                   <span>Homes<strong>{item.homes}</strong></span>
                   <span>Site area<strong>{item.area}</strong></span>
                 </div>
-                <Link href="/assessment" className="stitch-details-button">Explore · {item.scale} <ArrowUpRight size={14} /></Link>
+                <button type="button" className="stitch-details-button" onClick={() => setActiveOpportunityName(item.name)}>View opportunity · {item.scale} <ArrowUpRight size={14} /></button>
               </article>
             ))}
           </div>
@@ -653,6 +754,9 @@ function MarketingHome() {
         <a href="#opportunities"><Handshake size={20} /><span>Opportunities</span></a>
         <Link href="/assessment"><Plus size={22} /><span>Post</span></Link>
       </nav>
+      <ExperienceDrawer open={Boolean(activeOpportunity)} onClose={() => setActiveOpportunityName(null)} eyebrow="Verified redevelopment opportunity" title={activeOpportunity?.name || 'Opportunity'}>
+        {activeOpportunity && <div className="opportunity-detail"><div className="opportunity-detail-top"><span className="stitch-status">{activeOpportunity.status}</span><p><MapPin size={15} /> {activeOpportunity.location}</p></div><p className="regulation-detail-lead">{activeOpportunity.detail}</p><div className="opportunity-metrics"><div><span>Building age</span><strong>{activeOpportunity.age}</strong></div><div><span>Member homes</span><strong>{activeOpportunity.homes}</strong></div><div><span>Site area</span><strong>{activeOpportunity.area}</strong></div><div><span>Indicative scale</span><strong>{activeOpportunity.scale}</strong></div></div><div><p className="drawer-label">Current requirement</p><ul><li>Initial fit assessment and stakeholder verification</li><li>Professional support appropriate to the society’s stage</li><li>Transparent next-step discussion through RENOVA</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>Detailed society documents and contact information are shared only after an approved introduction.</p></div><Link href="/assessment" className="button button-dark button-full">Express interest through RENOVA <ArrowUpRight size={15} /></Link></div>}
+      </ExperienceDrawer>
     </div>
   );
 }

@@ -90,7 +90,10 @@ html { scroll-behavior: smooth; }
 .stitch-header .brand-name { font-size: 1.05rem; letter-spacing: -.02em; }
 .stitch-menu, .stitch-notification { width: 40px; height: 40px; padding: 0; display: grid; place-items: center; color: var(--stitch-ink); border: 0; background: transparent; }
 .stitch-menu { justify-self: start; }
-.stitch-notification { justify-self: end; }
+.stitch-notification { position: relative; justify-self: end; }
+.stitch-notification-dot { width: 6px; height: 6px; position: absolute; top: 9px; right: 8px; border: 1px solid #fff; border-radius: 50%; background: var(--stitch-copper); }
+.stitch-update-popover { width: min(92vw,350px); padding: 18px; position: absolute; z-index: 4; top: 58px; right: 0; display: grid; gap: 2px; color: var(--stitch-ink); background: #fff; border: 1px solid var(--stitch-line); box-shadow: 0 22px 55px rgba(7,23,47,.18); animation: stitch-popover-in .22s ease-out both; }
+.stitch-update-popover > div { padding-bottom: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--stitch-copper); font: 700 .66rem var(--app-font-mono); letter-spacing: .08em; text-transform: uppercase; }.stitch-update-popover > div button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: transparent; }.stitch-update-popover article { padding: 14px 0; display: grid; grid-template-columns: 25px 1fr; gap: 10px; border-top: 1px solid #e9ebee; }.stitch-update-popover article > svg { color: var(--stitch-copper); }.stitch-update-popover article p { margin: 0; display: grid; gap: 5px; }.stitch-update-popover article strong { font-size: .84rem; }.stitch-update-popover article span { color: var(--stitch-muted); font-size: .76rem; line-height: 1.45; }.stitch-update-popover > a { margin-top: 8px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; color: #fff; background: var(--stitch-ink); font-size: .75rem; font-weight: 700; }
 .stitch-desktop-nav { position: absolute; top: 64px; left: -14px; right: -14px; display: none; padding: 12px 22px 22px; background: #fff; border-bottom: 1px solid var(--stitch-line); box-shadow: 0 18px 38px rgba(7,23,47,.12); }
 .stitch-desktop-nav.is-open { display: grid; }
 .stitch-desktop-nav a { padding: 12px 0; color: var(--stitch-ink); border-bottom: 1px solid #eceef1; font-size: .82rem; font-weight: 700; }
@@ -133,7 +136,8 @@ html { scroll-behavior: smooth; }
 .stitch-opportunity-card > div { margin: auto 0 18px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
 .stitch-opportunity-card > div span { display: block; color: #858d98; font: 600 .55rem var(--app-font-mono); text-transform: uppercase; }
 .stitch-opportunity-card > div strong { display: block; margin-top: 4px; font-size: .76rem; line-height: 1.25; }
-.stitch-details-button { min-height: 36px; padding: 0 13px; font-size: .62rem; }
+.stitch-details-button { min-height: 36px; padding: 0 13px; border-radius: 2px; font-size: .62rem; cursor: pointer; }
+.opportunity-detail-top > p { margin: 0; display: inline-flex; align-items: center; gap: 6px; color: #6f7874; font-size: .8rem; }.opportunity-metrics { grid-template-columns: 1fr 1fr; }.opportunity-metrics > div:nth-child(2) { border-right: 0; }.opportunity-metrics > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
 
 .stitch-why { background: #f1f3f6; }
 .stitch-heading-stack { display: grid; align-items: start; }
@@ -213,6 +217,8 @@ html { scroll-behavior: smooth; }
   .stitch-hero h1 { font-size: clamp(4.7rem,7vw,6.4rem); line-height: 1.02; }
   .stitch-section { padding: 110px 80px; }
 }
+
+@keyframes stitch-popover-in { from { opacity: 0; transform: translateY(-8px); } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
