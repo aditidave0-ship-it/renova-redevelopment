@@ -449,7 +449,7 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const timer = window.setTimeout(onFinish, 5400);
+    const timer = window.setTimeout(onFinish, 6200);
     return () => {
       window.clearTimeout(timer);
       document.body.style.overflow = previousOverflow;
@@ -457,62 +457,77 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
   }, [onFinish]);
 
   return (
-    <div className="cinematic-logo-reveal" role="img" aria-label="An old building transforms and opens to reveal RENOVA">
+    <div className="cinematic-logo-reveal" role="img" aria-label="A premium redevelopment tower opens from the centre to reveal RENOVA, redevelopment reimagined">
       <button type="button" className="cinematic-skip" onClick={onFinish}>Skip intro</button>
       <div className="cinematic-atmosphere" aria-hidden="true" />
       <div className="cinematic-stage" aria-hidden="true">
         <div className="cinematic-wordmark">
-          <strong>RENOVA</strong>
-          <span>MAKE NEW AGAIN</span>
+          <strong className="cinematic-title" aria-label="RENOVA">
+            <span className="cinematic-letter cinematic-letter-r">R</span>
+            <span className="cinematic-letter cinematic-letter-existing">E</span>
+            <span className="cinematic-letter cinematic-letter-new">N</span>
+            <span className="cinematic-letter cinematic-letter-new">O</span>
+            <span className="cinematic-letter cinematic-letter-new">V</span>
+            <span className="cinematic-letter cinematic-letter-a">A</span>
+          </strong>
+          <span className="cinematic-tagline">REDEVELOPMENT, REIMAGINED.</span>
         </div>
-        <svg className="cinematic-building-scene" viewBox="0 0 800 500">
+        <svg className="cinematic-building-scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet">
           <defs>
-            <linearGradient id="old-concrete" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#9a9284" />
-              <stop offset=".55" stopColor="#716c64" />
-              <stop offset="1" stopColor="#4e4c49" />
+            <linearGradient id="existing-stone" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#8f887d" /><stop offset=".48" stopColor="#5f5b56" /><stop offset="1" stopColor="#393b3d" />
             </linearGradient>
-            <linearGradient id="new-glass" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#d9e5ef" />
-              <stop offset=".45" stopColor="#8ca7bb" />
-              <stop offset="1" stopColor="#35516a" />
+            <linearGradient id="tower-stone" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#d4d0c7" /><stop offset=".44" stopColor="#a49e93" /><stop offset="1" stopColor="#625f5b" />
+            </linearGradient>
+            <linearGradient id="tower-glass" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#b9d4e2" /><stop offset=".2" stopColor="#53758c" /><stop offset=".58" stopColor="#19364d" /><stop offset="1" stopColor="#0a1d30" />
+            </linearGradient>
+            <linearGradient id="glass-sheen" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#fff" stopOpacity=".04" /><stop offset=".38" stopColor="#fff" stopOpacity=".42" /><stop offset=".5" stopColor="#fff" stopOpacity=".08" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="balcony-metal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#e5e7e5" /><stop offset="1" stopColor="#6d7880" />
+            </linearGradient>
+            <linearGradient id="warm-interior" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#ffe4a9" /><stop offset="1" stopColor="#ba612a" />
             </linearGradient>
             <linearGradient id="light-cut" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#fff" stopOpacity="0" />
-              <stop offset=".25" stopColor="#fff4d8" />
-              <stop offset=".65" stopColor="#d77533" />
-              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+              <stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset=".25" stopColor="#fff4d8" /><stop offset=".65" stopColor="#d77533" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
+            <pattern id="window-grid-left" width="42" height="48" patternUnits="userSpaceOnUse">
+              <rect x="4" y="5" width="29" height="31" rx="1" fill="#0d273b" stroke="#91aabd" strokeOpacity=".32" /><rect x="7" y="8" width="12" height="25" fill="#d2e4ee" fillOpacity=".15" /><rect x="22" y="8" width="8" height="25" fill="url(#warm-interior)" fillOpacity=".34" /><path d="M3 40h33" stroke="#c8d0d2" strokeOpacity=".55" />
+            </pattern>
+            <pattern id="window-grid-right" width="42" height="48" patternUnits="userSpaceOnUse">
+              <rect x="8" y="5" width="29" height="31" rx="1" fill="#0d273b" stroke="#91aabd" strokeOpacity=".32" /><rect x="11" y="8" width="8" height="25" fill="url(#warm-interior)" fillOpacity=".28" /><rect x="22" y="8" width="12" height="25" fill="#d2e4ee" fillOpacity=".15" /><path d="M7 40h33" stroke="#c8d0d2" strokeOpacity=".55" />
+            </pattern>
+            <filter id="tower-shadow" x="-80%" y="-25%" width="260%" height="180%"><feDropShadow dx="0" dy="20" stdDeviation="18" floodColor="#00050c" floodOpacity=".72" /></filter>
             <filter id="cinematic-glow" x="-200%" y="-30%" width="500%" height="160%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feGaussianBlur stdDeviation="5" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
 
-          <ellipse className="cinematic-ground-shadow" cx="400" cy="430" rx="150" ry="18" />
+          <ellipse className="cinematic-ground-shadow" cx="600" cy="632" rx="205" ry="21" />
 
+          <g className="cinematic-tower" filter="url(#tower-shadow)">
           <g className="cinematic-building-half cinematic-building-left">
-            <path className="cinematic-old-face" d="M270 405V130L300 102H400V405Z" fill="url(#old-concrete)" />
-            <path className="cinematic-old-detail" d="M281 154H391M281 235H391M281 318H391" />
-            <path className="cinematic-old-detail" d="M300 171h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31z" />
-            <path className="cinematic-modern-face" d="M270 405V130L300 102H400V405Z" fill="url(#new-glass)" />
-            <path className="cinematic-modern-grid" d="M291 150H400M291 213H400M291 276H400M291 339H400M326 130V405M365 120V405" />
-            <path className="cinematic-copper-edge" d="M286 405V143" />
+            <path className="cinematic-modern-face cinematic-tower-silhouette" d="M420 610V164L454 122V92L478 66H600V610Z" fill="url(#tower-glass)" /><path className="cinematic-modern-face cinematic-stone-wing" d="M420 610V164L454 122H490V610Z" fill="url(#tower-stone)" /><path className="cinematic-modern-face" d="M492 96H600V610H492Z" fill="url(#window-grid-left)" /><path className="cinematic-modern-face cinematic-glass-sheen" d="M505 96H563V610H505Z" fill="url(#glass-sheen)" />
+            <path className="cinematic-modern-grid" d="M482 139H600M482 187H600M482 235H600M482 283H600M482 331H600M482 379H600M482 427H600M482 475H600M482 523H600M482 571H600" /><path className="cinematic-modern-face cinematic-balcony-slab" d="M444 188H600v7H444zm-9 96h165v7H435zm-5 96h170v7H430zm-2 96h172v7H428zm-1 96h173v7H427z" fill="url(#balcony-metal)" /><path className="cinematic-modern-face cinematic-balcony-rail" d="M449 164v24m19-24v24m-29 96v24m20-24v24m-28 96v24m20-24v24m-22 96v24m21-24v24m-21 96v24m21-24v24" />
+            <path className="cinematic-modern-face cinematic-crown" d="M478 66H600V91H454Z" fill="#c8c3ba" /><path className="cinematic-modern-face cinematic-crown-glass" d="M496 73H600V88H481Z" fill="#28465b" /><path className="cinematic-old-face" d="M420 610V164L454 122V92L478 66H600V610Z" fill="url(#existing-stone)" /><path className="cinematic-old-detail" d="M444 151H600M444 218H600M444 285H600M444 352H600M444 419H600M444 486H600M444 553H600M480 119V610M530 86V610" /><path className="cinematic-copper-edge" d="M465 610V133" />
           </g>
 
           <g className="cinematic-building-half cinematic-building-right">
-            <path className="cinematic-old-face" d="M400 102H500L530 130V405H400Z" fill="url(#old-concrete)" />
-            <path className="cinematic-old-detail" d="M409 154H519M409 235H519M409 318H519" />
-            <path className="cinematic-old-detail" d="M412 171h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31z" />
-            <path className="cinematic-modern-face" d="M400 102H500L530 130V405H400Z" fill="url(#new-glass)" />
-            <path className="cinematic-modern-grid" d="M400 150H509M400 213H509M400 276H509M400 339H509M435 120V405M474 130V405" />
-            <path className="cinematic-copper-edge" d="M514 405V143" />
+            <path className="cinematic-modern-face cinematic-tower-silhouette" d="M600 66H722L746 92V122L780 164V610H600Z" fill="url(#tower-glass)" /><path className="cinematic-modern-face cinematic-stone-wing" d="M710 122H746L780 164V610H710Z" fill="url(#tower-stone)" /><path className="cinematic-modern-face" d="M600 96H708V610H600Z" fill="url(#window-grid-right)" /><path className="cinematic-modern-face cinematic-glass-sheen" d="M637 96H695V610H637Z" fill="url(#glass-sheen)" />
+            <path className="cinematic-modern-grid" d="M600 139H718M600 187H718M600 235H718M600 283H718M600 331H718M600 379H718M600 427H718M600 475H718M600 523H718M600 571H718" /><path className="cinematic-modern-face cinematic-balcony-slab" d="M600 188h156v7H600zm0 96h165v7H600zm0 96h170v7H600zm0 96h172v7H600zm0 96h173v7H600z" fill="url(#balcony-metal)" /><path className="cinematic-modern-face cinematic-balcony-rail" d="M751 164v24m-19-24v24m29 96v24m-20-24v24m28 96v24m-20-24v24m22 96v24m-21-24v24m21 96v24m-21-24v24" />
+            <path className="cinematic-modern-face cinematic-crown" d="M600 66H722L746 91H600Z" fill="#c8c3ba" /><path className="cinematic-modern-face cinematic-crown-glass" d="M600 73H704L719 88H600Z" fill="#28465b" /><path className="cinematic-old-face" d="M600 66H722L746 92V122L780 164V610H600Z" fill="url(#existing-stone)" /><path className="cinematic-old-detail" d="M600 151H756M600 218H756M600 285H756M600 352H756M600 419H756M600 486H756M600 553H756M720 119V610M670 86V610" /><path className="cinematic-copper-edge" d="M735 610V133" />
+          </g>
           </g>
 
-          <path className="cinematic-light-line" d="M400 77V426" stroke="url(#light-cut)" filter="url(#cinematic-glow)" />
+          <path className="cinematic-light-line" d="M600 42V630" stroke="url(#light-cut)" filter="url(#cinematic-glow)" />
         </svg>
       </div>
-      <div className="cinematic-story" aria-hidden="true"><span>OLD</span><i /><span>TRANSFORMATION</span><i /><span>NEW</span></div>
+      <div className="cinematic-story" aria-hidden="true"><span>EXISTING</span><i /><span>TRANSFORMATION</span><i /><span>REIMAGINED</span></div>
     </div>
   );
 }
