@@ -224,3 +224,207 @@ html { scroll-behavior: smooth; }
   html { scroll-behavior: auto; }
   .stitch-action-card, .stitch-primary-button, .stitch-details-button { transition: none; }
 }
+
+/* Architectural opening — inspired by editorial real-estate identities, built for RENOVA */
+.stitch-site > main { width: min(100%, 1440px); }
+.stitch-hero {
+  min-height: 720px;
+  margin: 0;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #dfe5eb;
+  isolation: isolate;
+}
+.stitch-hero-image {
+  inset: 0;
+  background-position: 69% 50%;
+  transform: scale(1.025);
+  animation: stitch-hero-image-in 1.35s cubic-bezier(.16,1,.3,1) both;
+}
+.stitch-hero-overlay {
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(7,23,47,.08) 0%, transparent 45%),
+    linear-gradient(0deg, rgba(5,15,31,.78) 0%, rgba(5,15,31,.08) 38%, transparent 60%);
+}
+.stitch-blueprint-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .22;
+  background-image:
+    linear-gradient(rgba(255,255,255,.34) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.34) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(90deg, #000 0%, transparent 72%);
+}
+.stitch-hero-brand-panel {
+  min-height: 238px;
+  width: min(71%, 910px);
+  padding: 34px clamp(28px, 4.8vw, 72px) 30px;
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--stitch-ink);
+  background: rgba(255,255,255,.965);
+  clip-path: polygon(0 0,100% 0,100% 70%,92% 70%,92% 100%,0 100%);
+  box-shadow: 0 22px 70px rgba(7,23,47,.14);
+  animation: stitch-panel-in .8s .12s cubic-bezier(.16,1,.3,1) both;
+}
+.stitch-hero-brand-panel > span {
+  margin-bottom: 10px;
+  color: var(--stitch-copper);
+  font: 700 .67rem var(--app-font-mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.stitch-hero-brand-panel > strong {
+  font: 780 clamp(4.1rem, 9.1vw, 8.1rem)/.78 var(--app-font-sans);
+  letter-spacing: -.065em;
+}
+.stitch-hero-brand-panel > small {
+  margin-top: 18px;
+  color: #506077;
+  font: 650 .65rem var(--app-font-mono);
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+.stitch-hero-copy {
+  width: min(50%, 610px);
+  padding: 34px clamp(26px, 4.6vw, 66px) 38px;
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  bottom: 54px;
+  color: #fff;
+  background: rgba(5,18,37,.91);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,.25);
+  animation: stitch-copy-in .9s .34s cubic-bezier(.16,1,.3,1) both;
+}
+.stitch-hero .stitch-eyebrow {
+  margin: 0 0 14px;
+  color: #e6a66e;
+  font-size: .64rem;
+  letter-spacing: .14em;
+}
+.stitch-hero h1 {
+  margin: 0;
+  display: grid;
+  color: #fff;
+  font: 750 clamp(2.3rem, 4.5vw, 4.8rem)/.98 var(--app-font-sans);
+  letter-spacing: -.055em;
+}
+.stitch-hero h1 span:last-child { color: #d9e2eb; }
+.stitch-hero-copy > p:not(.stitch-eyebrow) {
+  max-width: 500px;
+  margin: 20px 0 24px;
+  color: #d5dce5;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.stitch-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.stitch-hero-actions .stitch-primary-button,
+.stitch-secondary-button {
+  min-height: 48px;
+  padding: 0 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 0;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+  transition: color .2s ease, background .2s ease, transform .2s ease;
+}
+.stitch-hero-actions .stitch-primary-button { color: var(--stitch-ink); background: #fff; }
+.stitch-secondary-button { color: #fff; background: transparent; }
+.stitch-hero-actions .stitch-primary-button:hover,
+.stitch-secondary-button:hover { color: var(--stitch-ink); background: #f2f5f7; transform: translateY(-2px); }
+.stitch-hero-index {
+  height: 54px;
+  padding: 0 clamp(28px, 4.6vw, 66px);
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #fff;
+  background: #07172f;
+  font: 650 .61rem var(--app-font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.stitch-hero-index i { width: 28px; height: 1px; background: #bd6a35; }
+.stitch-actions { padding-top: 22px; }
+
+@keyframes stitch-panel-in {
+  from { opacity: 0; transform: translateY(-24px); }
+}
+@keyframes stitch-copy-in {
+  from { opacity: 0; transform: translateY(28px); }
+}
+@keyframes stitch-hero-image-in {
+  from { opacity: .6; transform: scale(1.08); }
+  to { opacity: 1; transform: scale(1.025); }
+}
+
+@media (max-width: 699px) {
+  .stitch-hero { min-height: 790px; }
+  .stitch-hero-image { inset: 166px 0 0; background-position: 64% center; }
+  .stitch-hero-overlay { inset: 166px 0 0; }
+  .stitch-blueprint-grid { inset: 166px 0 0; background-size: 42px 42px; }
+  .stitch-hero-brand-panel {
+    min-height: 166px;
+    width: 100%;
+    padding: 24px 22px;
+    clip-path: none;
+  }
+  .stitch-hero-brand-panel > strong { font-size: clamp(3.55rem, 19vw, 5rem); }
+  .stitch-hero-brand-panel > small { margin-top: 13px; font-size: .54rem; letter-spacing: .1em; }
+  .stitch-hero-copy {
+    width: calc(100% - 28px);
+    padding: 25px 22px 27px;
+    left: 14px;
+    bottom: 52px;
+  }
+  .stitch-hero h1 { font-size: clamp(2.55rem, 13vw, 4rem); }
+  .stitch-hero-copy > p:not(.stitch-eyebrow) { margin: 17px 0 20px; font-size: .94rem; }
+  .stitch-hero-actions { display: grid; }
+  .stitch-hero-actions .stitch-primary-button,
+  .stitch-secondary-button { width: 100%; }
+  .stitch-hero-index { height: 52px; padding: 0 18px; justify-content: space-between; gap: 7px; overflow: hidden; font-size: .53rem; letter-spacing: .07em; }
+  .stitch-hero-index i { width: 10px; }
+  .stitch-actions { padding-top: 14px; }
+}
+
+@media (min-width: 700px) {
+  .stitch-site > main { padding: 0; }
+  .stitch-hero { min-height: min(790px, calc(100vh - 76px)); margin: 0; }
+  .stitch-actions { padding: 28px 22px 78px; }
+}
+
+@media (min-width: 960px) {
+  .stitch-hero { min-height: min(820px, calc(100vh - 76px)); }
+  .stitch-hero-image { background-position: 70% 50%; }
+  .stitch-hero-overlay { background: linear-gradient(0deg, rgba(5,15,31,.82) 0%, rgba(5,15,31,.04) 44%, transparent 68%); }
+  .stitch-actions { padding-inline: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stitch-hero-image, .stitch-hero-brand-panel, .stitch-hero-copy { animation: none; }
+}
