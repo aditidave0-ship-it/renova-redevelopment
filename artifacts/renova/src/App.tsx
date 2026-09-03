@@ -72,9 +72,18 @@ function cn(...values: Array<string | false | null | undefined>) {
 
 function Logo() {
   return (
-    <Link href="/" className="brand-lockup" data-testid="link-home">
-      <span className="brand-mark" aria-hidden="true"><span /></span>
-      <span className="brand-name">RENOVA</span>
+    <Link href="/" className="brand-lockup" data-testid="link-home" aria-label="RENOVA home">
+      <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
+        <path className="brand-r-stem" d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15" />
+        <path className="brand-r-leg" d="m26 30 11 9" />
+        <path className="brand-building" d="M20 38V23l5-3v18" />
+      </svg>
+      <span className="brand-name" aria-hidden="true">
+        {'RENOVA'.split('').map((letter, index) => (
+          <span key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
+        ))}
+      </span>
     </Link>
   );
 }
