@@ -675,29 +675,22 @@ function MarketingHome() {
         <section className="stitch-hero" aria-labelledby="renova-hero-title">
           <div className="stitch-hero-image" role="img" aria-label="A contemporary residential redevelopment tower in Mumbai" />
           <div className="stitch-hero-overlay" />
-          <div className="stitch-blueprint-grid" aria-hidden="true" />
-
-          <div className="stitch-hero-brand-panel" aria-hidden="true">
-            <span>Redevelopment, reimagined</span>
-            <strong>RENOVA</strong>
-            <small>Renew&nbsp;&nbsp;·&nbsp;&nbsp;Connect&nbsp;&nbsp;·&nbsp;&nbsp;Redevelop</small>
-          </div>
+          <div className="stitch-hero-frame" aria-hidden="true" />
+          <div className="stitch-hero-meta" aria-hidden="true"><span>01 / Mumbai</span><span>19.0760° N&nbsp;&nbsp;72.8777° E</span></div>
 
           <div className="stitch-hero-copy">
-            <p className="stitch-eyebrow">Mumbai / Built for what comes next</p>
-            <h1 id="renova-hero-title"><span>Make new.</span><span>Move forward.</span></h1>
-            <p>One professional ecosystem connecting housing societies with trusted developers, PMCs, architects and redevelopment specialists.</p>
+            <p className="stitch-eyebrow">Redevelopment, reimagined.</p>
+            <h1 id="renova-hero-title"><span>Renew Mumbai.</span><span>Responsibly.</span></h1>
+            <p>RENOVA brings societies, developers and specialists into one clear, professional redevelopment process.</p>
             <div className="stitch-hero-actions">
-              <Link href="/assessment" className="stitch-primary-button"><UsersRound size={17} /> I represent a society <ArrowUpRight size={15} /></Link>
-              <a href="#opportunities" className="stitch-secondary-button"><Building2 size={17} /> I am a developer <ArrowUpRight size={15} /></a>
+              <Link href="/assessment" className="stitch-primary-button">Post a requirement <ArrowUpRight size={15} /></Link>
+              <a href="#opportunities" className="stitch-secondary-button">View opportunities <ArrowUpRight size={15} /></a>
             </div>
           </div>
 
+          <div className="stitch-hero-word" aria-hidden="true">RENOVA</div>
           <div className="stitch-hero-index" aria-label="RENOVA connects the redevelopment ecosystem">
-            <span>Societies</span><i />
-            <span>Developers</span><i />
-            <span>PMCs</span><i />
-            <span>Architects</span>
+            <span>For societies</span><span>For developers</span><span>For professionals</span><span>Explore RENOVA <ArrowUpRight size={14} /></span>
           </div>
         </section>
 
