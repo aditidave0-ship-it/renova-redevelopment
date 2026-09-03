@@ -56,7 +56,7 @@ import {
   useListRegulations,
 } from '@workspace/api-client-react';
 import { Link, Route, Switch, useLocation, useParams } from 'wouter';
-import { ErrorBoundary } from '@/components/error-boundary';
+import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-boundary';
 import NotFound from '@/pages/not-found';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -82,15 +82,23 @@ function readStoredArray<T>(key: string): T[] {
 function Logo() {
   return (
     <Link href="/" className="brand-lockup" data-testid="link-home" aria-label="RENOVA home">
-      <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
-        <path className="brand-r-stem" d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15" />
-        <path className="brand-r-leg" d="m26 30 11 9" />
-        <path className="brand-building" d="M20 38V23l5-3v18" />
-      </svg>
+      <span className="brand-mark-wrap" aria-hidden="true">
+        <svg className="brand-mark" viewBox="0 0 56 56">
+          <g className="brand-tower-half brand-tower-left">
+            <path className="brand-tower-face" d="M6 45V18L17 8H28V45Z" />
+            <path className="brand-tower-grid" d="M12 20H25M12 27H25M12 34H25M12 41H25M18.5 13V45" />
+          </g>
+          <g className="brand-tower-half brand-tower-right">
+            <path className="brand-tower-face" d="M28 8H39L50 18V45H28Z" />
+            <path className="brand-tower-grid" d="M31 20H44M31 27H44M31 34H44M31 41H44M37.5 13V45" />
+          </g>
+          <path className="brand-reveal-line" d="M28 5V47" />
+          <path className="brand-foundation" d="M4 48H52" />
+        </svg>
+      </span>
       <span className="brand-name" aria-hidden="true">
         {'RENOVA'.split('').map((letter, index) => (
-          <span key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
+          <span className={index > 1 ? 'brand-letter-new' : undefined} key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
         ))}
       </span>
     </Link>
@@ -165,7 +173,7 @@ function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <div className="page-wrap">
-          <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>
+          <ErrorBoundary resetKey={location} FallbackComponent={WorkspaceErrorFallback}>{children}</ErrorBoundary>
         </div>
       </main>
       <ExperienceDrawer open={utilityPanel === 'help'} onClose={() => setUtilityPanel(null)} eyebrow="RENOVA support" title="How can we help your committee?">
@@ -206,6 +214,18 @@ function ErrorState({ onRetry, label = 'We could not load this view.' }: { onRet
       <h2>Something got in the way</h2>
       <p>{label} Your work is safe. Try again in a moment.</p>
       <button className="button button-dark" onClick={onRetry} data-testid="button-retry"><RotateCcw size={16} /> Try again</button>
+    </div>
+  );
+}
+
+function WorkspaceErrorFallback({ resetError }: ErrorFallbackProps) {
+  return (
+    <div className="state-page workspace-error" data-testid="state-workspace-error">
+      <div className="state-icon state-icon-red"><AlertTriangle size={23} /></div>
+      <p className="section-kicker">Workspace recovery</p>
+      <h2>We could not open this view.</h2>
+      <p>Your information is safe. Refresh the workspace connection and continue where you left off.</p>
+      <button className="button button-dark" onClick={resetError} data-testid="button-recover-workspace"><RotateCcw size={16} /> Reload workspace</button>
     </div>
   );
 }
@@ -274,7 +294,12 @@ function Overview() {
   const projects = useListProjects();
   if (dashboard.isLoading) return <LoadingPage label="Loading your society workspace" />;
   if (dashboard.isError || !dashboard.data) return <ErrorState onRetry={() => dashboard.refetch()} />;
-  const { activeProject, recentActivity } = dashboard.data;
+  const activeProject = dashboard.data.activeProject ?? projects.data?.[0];
+  if (!activeProject) {
+    if (projects.isLoading) return <LoadingPage label="Finding your active project" />;
+    return <ErrorState onRetry={() => { void dashboard.refetch(); void projects.refetch(); }} label="We could not find an active society project." />;
+  }
+  const { recentActivity } = dashboard.data;
 
   return (
     <div className="content-stack">

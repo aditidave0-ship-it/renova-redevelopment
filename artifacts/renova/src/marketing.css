@@ -86,8 +86,11 @@ html { scroll-behavior: smooth; }
 .stitch-header { position: sticky; top: 0; z-index: 50; height: 64px; border-bottom: 1px solid var(--stitch-line); background: rgba(247,248,250,.96); backdrop-filter: blur(18px); }
 .stitch-header-inner { width: min(100% - 28px, 1180px); height: 100%; margin: 0 auto; position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .stitch-header .brand-lockup { color: var(--stitch-ink); }
-.stitch-header .brand-mark { display: none; color: var(--stitch-ink); }
-.stitch-header .brand-name { font-size: 1.05rem; letter-spacing: -.02em; }
+.stitch-header .brand-mark-wrap { width: 32px; height: 32px; border-color: rgba(179,80,24,.45); background: rgba(179,80,24,.035); }
+.stitch-header .brand-mark { width: 25px; height: 25px; display: block; color: var(--stitch-ink); }
+.stitch-header .brand-tower-face { fill: rgba(179,80,24,.08); stroke: var(--stitch-copper); }
+.stitch-header .brand-name { font-size: 1.05rem; letter-spacing: .05em; }
+.stitch-header .brand-name .brand-letter-new { color: var(--stitch-copper); }
 .stitch-menu, .stitch-notification { width: 40px; height: 40px; padding: 0; display: grid; place-items: center; color: var(--stitch-ink); border: 0; background: transparent; }
 .stitch-menu { justify-self: start; }
 .stitch-notification { position: relative; justify-self: end; }
