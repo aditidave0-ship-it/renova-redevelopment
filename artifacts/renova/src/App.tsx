@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity as ActivityIcon,
@@ -445,10 +445,84 @@ const trustBenefits = [
   { title: 'Absolute Transparency', detail: 'Clear context, project details and expectations support better decisions.', icon: Eye },
 ];
 
+function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const timer = window.setTimeout(onFinish, 5400);
+    return () => {
+      window.clearTimeout(timer);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onFinish]);
+
+  return (
+    <div className="cinematic-logo-reveal" role="img" aria-label="An old building transforms and opens to reveal RENOVA">
+      <button type="button" className="cinematic-skip" onClick={onFinish}>Skip intro</button>
+      <div className="cinematic-atmosphere" aria-hidden="true" />
+      <div className="cinematic-stage" aria-hidden="true">
+        <div className="cinematic-wordmark">
+          <strong>RENOVA</strong>
+          <span>MAKE NEW AGAIN</span>
+        </div>
+        <svg className="cinematic-building-scene" viewBox="0 0 800 500">
+          <defs>
+            <linearGradient id="old-concrete" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#9a9284" />
+              <stop offset=".55" stopColor="#716c64" />
+              <stop offset="1" stopColor="#4e4c49" />
+            </linearGradient>
+            <linearGradient id="new-glass" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#d9e5ef" />
+              <stop offset=".45" stopColor="#8ca7bb" />
+              <stop offset="1" stopColor="#35516a" />
+            </linearGradient>
+            <linearGradient id="light-cut" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#fff" stopOpacity="0" />
+              <stop offset=".25" stopColor="#fff4d8" />
+              <stop offset=".65" stopColor="#d77533" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+            <filter id="cinematic-glow" x="-200%" y="-30%" width="500%" height="160%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+
+          <ellipse className="cinematic-ground-shadow" cx="400" cy="430" rx="150" ry="18" />
+
+          <g className="cinematic-building-half cinematic-building-left">
+            <path className="cinematic-old-face" d="M270 405V130L300 102H400V405Z" fill="url(#old-concrete)" />
+            <path className="cinematic-old-detail" d="M281 154H391M281 235H391M281 318H391" />
+            <path className="cinematic-old-detail" d="M300 171h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31z" />
+            <path className="cinematic-modern-face" d="M270 405V130L300 102H400V405Z" fill="url(#new-glass)" />
+            <path className="cinematic-modern-grid" d="M291 150H400M291 213H400M291 276H400M291 339H400M326 130V405M365 120V405" />
+            <path className="cinematic-copper-edge" d="M286 405V143" />
+          </g>
+
+          <g className="cinematic-building-half cinematic-building-right">
+            <path className="cinematic-old-face" d="M400 102H500L530 130V405H400Z" fill="url(#old-concrete)" />
+            <path className="cinematic-old-detail" d="M409 154H519M409 235H519M409 318H519" />
+            <path className="cinematic-old-detail" d="M412 171h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31zm-57 81h31v40h-31zm57 0h31v40h-31z" />
+            <path className="cinematic-modern-face" d="M400 102H500L530 130V405H400Z" fill="url(#new-glass)" />
+            <path className="cinematic-modern-grid" d="M400 150H509M400 213H509M400 276H509M400 339H509M435 120V405M474 130V405" />
+            <path className="cinematic-copper-edge" d="M514 405V143" />
+          </g>
+
+          <path className="cinematic-light-line" d="M400 77V426" stroke="url(#light-cut)" filter="url(#cinematic-glow)" />
+        </svg>
+      </div>
+      <div className="cinematic-story" aria-hidden="true"><span>OLD</span><i /><span>TRANSFORMATION</span><i /><span>NEW</span></div>
+    </div>
+  );
+}
+
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogoReveal, setShowLogoReveal] = useState(true);
   return (
     <div className="marketing-site stitch-site" id="top">
+      {showLogoReveal && <CinematicLogoReveal onFinish={() => setShowLogoReveal(false)} />}
       <header className="stitch-header">
         <div className="stitch-header-inner">
           <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">

@@ -1,6 +1,56 @@
 /* RENOVA public site — Stitch visual direction with RENOVA ecosystem content */
 html { scroll-behavior: smooth; }
 
+/* Cinematic identity reveal — old building, transformation, RENOVA */
+.cinematic-logo-reveal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; overflow: hidden; color: #f7f8fa; background: #030914; isolation: isolate; animation: cinematic-exit .72s 4.55s cubic-bezier(.7,0,.84,0) forwards; }
+.cinematic-logo-reveal:before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .24; background-image: linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center,#000 20%,transparent 72%); }
+.cinematic-atmosphere { position: absolute; inset: -20%; z-index: -2; background: radial-gradient(circle at 50% 56%,rgba(179,80,24,.18),transparent 20%), radial-gradient(circle at 50% 45%,#12233b 0%,#06101f 35%,#020610 72%); animation: cinematic-atmosphere 4.4s ease-in-out both; }
+.cinematic-skip { position: absolute; z-index: 5; top: 22px; right: 24px; padding: 8px 2px; color: rgba(255,255,255,.58); border: 0; border-bottom: 1px solid rgba(255,255,255,.18); background: transparent; font: 600 .62rem var(--app-font-mono); letter-spacing: .12em; text-transform: uppercase; transition: color .2s ease; }
+.cinematic-skip:hover { color: #fff; }
+.cinematic-stage { width: min(94vw,960px); height: min(72vh,620px); position: relative; display: grid; place-items: center; perspective: 1100px; }
+.cinematic-building-scene { width: min(94vw,800px); position: relative; z-index: 2; overflow: visible; filter: drop-shadow(0 32px 28px rgba(0,0,0,.42)); animation: cinematic-building-arrive .75s cubic-bezier(.16,1,.3,1) both; }
+.cinematic-ground-shadow { fill: rgba(0,0,0,.55); filter: blur(7px); animation: cinematic-shadow-open 1.45s 1.28s ease-in-out forwards; }
+.cinematic-building-half { transform-box: fill-box; transform-origin: center bottom; }
+.cinematic-building-left { animation: cinematic-left-open 1.5s 1.35s cubic-bezier(.65,0,.2,1) forwards; }
+.cinematic-building-right { animation: cinematic-right-open 1.5s 1.35s cubic-bezier(.65,0,.2,1) forwards; }
+.cinematic-old-face { opacity: 1; animation: cinematic-old-to-new .9s 1.42s ease-in-out forwards; }
+.cinematic-old-detail { fill: none; stroke: rgba(35,32,28,.58); stroke-width: 5; animation: cinematic-old-to-new .9s 1.42s ease-in-out forwards; }
+.cinematic-modern-face { opacity: 0; animation: cinematic-new-arrives 1s 1.52s ease-out forwards; }
+.cinematic-modern-grid { fill: none; stroke: rgba(235,246,255,.44); stroke-width: 2; opacity: 0; animation: cinematic-new-arrives .9s 1.72s ease-out forwards; }
+.cinematic-copper-edge { fill: none; stroke: #c76a2a; stroke-width: 6; stroke-dasharray: 280; stroke-dashoffset: 280; animation: cinematic-edge-draw .9s 1.72s ease-out forwards; }
+.cinematic-light-line { fill: none; stroke-width: 4; stroke-dasharray: 350; stroke-dashoffset: 350; opacity: 0; animation: cinematic-cut 1.05s .68s cubic-bezier(.6,0,.25,1) forwards; }
+.cinematic-wordmark { position: absolute; z-index: 1; top: 50%; left: 50%; width: 100%; display: grid; place-items: center; transform: translate(-50%,-42%) scale(.92); clip-path: inset(0 50% 0 50%); opacity: 0; animation: cinematic-word-reveal 1.32s 1.62s cubic-bezier(.16,1,.3,1) forwards; }
+.cinematic-wordmark strong { color: #f7f8fa; font: 800 clamp(3.5rem,12vw,8.2rem)/.9 var(--app-font-sans); letter-spacing: .13em; text-indent: .13em; text-shadow: 0 10px 42px rgba(0,0,0,.54); }
+.cinematic-wordmark span { margin-top: clamp(20px,3vw,34px); color: #d8844b; font: 600 clamp(.58rem,1.35vw,.78rem) var(--app-font-mono); letter-spacing: .5em; text-indent: .5em; opacity: 0; animation: cinematic-tagline .7s 2.7s ease-out forwards; }
+.cinematic-story { position: absolute; bottom: clamp(24px,5vh,54px); display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,.33); font: 500 .53rem var(--app-font-mono); letter-spacing: .16em; opacity: 0; animation: cinematic-story-in .65s 3.12s ease-out forwards; }
+.cinematic-story i { width: clamp(18px,4vw,46px); height: 1px; display: block; background: linear-gradient(90deg,transparent,#b35018,transparent); }
+
+@keyframes cinematic-building-arrive { from { opacity: 0; transform: translateY(24px) scale(.96); filter: blur(7px) drop-shadow(0 32px 28px rgba(0,0,0,.42)); } to { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 32px 28px rgba(0,0,0,.42)); } }
+@keyframes cinematic-cut { 0% { opacity: 0; stroke-dashoffset: 350; } 30% { opacity: 1; } 78% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+@keyframes cinematic-left-open { 0% { transform: translateX(0) rotateY(0); } 100% { transform: translateX(-180px) rotateY(-8deg); } }
+@keyframes cinematic-right-open { 0% { transform: translateX(0) rotateY(0); } 100% { transform: translateX(180px) rotateY(8deg); } }
+@keyframes cinematic-old-to-new { to { opacity: 0; } }
+@keyframes cinematic-new-arrives { to { opacity: 1; } }
+@keyframes cinematic-edge-draw { to { stroke-dashoffset: 0; } }
+@keyframes cinematic-shadow-open { to { rx: 245px; opacity: .3; } }
+@keyframes cinematic-word-reveal { 0% { opacity: 0; clip-path: inset(0 50% 0 50%); transform: translate(-50%,-42%) scale(.92); } 100% { opacity: 1; clip-path: inset(0 0 0 0); transform: translate(-50%,-42%) scale(1); } }
+@keyframes cinematic-tagline { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+@keyframes cinematic-story-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+@keyframes cinematic-atmosphere { 50% { transform: scale(1.05); filter: saturate(1.22); } }
+@keyframes cinematic-exit { to { opacity: 0; visibility: hidden; transform: scale(1.015); } }
+
+@media (max-width: 620px) {
+  .cinematic-stage { height: 66vh; transform: scale(.92); }
+  .cinematic-building-scene { min-width: 660px; }
+  .cinematic-wordmark strong { font-size: clamp(2.8rem,15vw,4.5rem); letter-spacing: .08em; text-indent: .08em; }
+  .cinematic-wordmark span { letter-spacing: .28em; text-indent: .28em; }
+  .cinematic-story { gap: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-logo-reveal { display: none; }
+}
+
 .stitch-site {
   --stitch-ink: #07172f;
   --stitch-copper: #b35018;
