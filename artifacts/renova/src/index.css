@@ -456,29 +456,26 @@ button { cursor: pointer; }
 .app-shell { min-height: 100dvh; display: flex; color: var(--ink); }
 .sidebar { width: 255px; flex: 0 0 255px; min-height: 100dvh; background: var(--ink); color: #f5f1e9; padding: 27px 15px 18px; display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; z-index: 40; }
 .sidebar-top { display: flex; justify-content: space-between; align-items: center; padding: 0 11px; }
-.brand-lockup { display: inline-flex; align-items: center; gap: 10px; }
-.brand-mark-wrap { width: 34px; height: 34px; display: grid; place-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--orange) 64%, transparent); background: rgba(255,255,255,.035); box-shadow: inset 0 0 18px rgba(233,149,82,.08); }
-.brand-mark { width: 27px; height: 27px; display: block; overflow: visible; color: currentColor; }
-.brand-tower-half { transform-box: fill-box; transition: transform .42s cubic-bezier(.22,.8,.3,1); }
-.brand-tower-left { animation: brand-left-reveal .9s cubic-bezier(.22,.8,.3,1) both; }
-.brand-tower-right { animation: brand-right-reveal .9s cubic-bezier(.22,.8,.3,1) both; }
-.brand-tower-face { fill: rgba(233,149,82,.13); stroke: var(--orange); stroke-width: 2; stroke-linejoin: bevel; }
-.brand-tower-grid { fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linecap: square; opacity: .76; }
-.brand-reveal-line { fill: none; stroke: #ffd5ad; stroke-width: 1.5; stroke-dasharray: 44; stroke-dashoffset: 44; filter: drop-shadow(0 0 3px rgba(233,149,82,.9)); animation: brand-line-reveal .72s .32s ease-out forwards; }
-.brand-foundation { fill: none; stroke: var(--orange); stroke-width: 2; stroke-dasharray: 48; stroke-dashoffset: 48; animation: brand-line-reveal .5s .65s ease-out forwards; }
+.brand-lockup { display: inline-flex; align-items: center; gap: 9px; }
+.brand-mark { width: 30px; height: 30px; display: block; overflow: visible; color: currentColor; }
+.brand-renewal-arc, .brand-r-stem, .brand-r-leg { fill: none; stroke-linecap: square; stroke-linejoin: bevel; }
+.brand-renewal-arc { stroke: var(--orange); stroke-width: 2.7; stroke-dasharray: 96; stroke-dashoffset: 96; animation: brand-draw-arc .85s cubic-bezier(.22,.8,.3,1) forwards; }
+.brand-r-stem { stroke: currentColor; stroke-width: 4.4; stroke-dasharray: 92; stroke-dashoffset: 92; animation: brand-draw-r .72s .28s cubic-bezier(.22,.8,.3,1) forwards; }
+.brand-r-leg { stroke: currentColor; stroke-width: 4.4; stroke-dasharray: 20; stroke-dashoffset: 20; animation: brand-draw-r .34s .82s ease-out forwards; }
+.brand-building { fill: var(--orange); transform-box: fill-box; transform-origin: center bottom; transform: scaleY(0); animation: brand-rise .42s .66s cubic-bezier(.2,.9,.3,1.25) forwards; }
 .brand-name { display: inline-flex; color: currentColor; font-size: 14px; font-weight: 750; letter-spacing: .12em; }
-.brand-name > span { opacity: 0; transform: translateY(5px); animation: brand-letter-in .38s calc(.64s + var(--brand-letter) * 55ms) ease-out forwards; }
-.brand-name .brand-letter-new { color: var(--orange); }
-.brand-lockup:hover .brand-tower-left { transform: translateX(-2.5px); }
-.brand-lockup:hover .brand-tower-right { transform: translateX(2.5px); }
+.brand-name > span { opacity: 0; transform: translateY(5px); animation: brand-letter-in .38s calc(.7s + var(--brand-letter) * 55ms) ease-out forwards; }
+.brand-lockup:hover .brand-renewal-arc { transform-box: fill-box; transform-origin: center; animation: brand-orbit .7s ease-in-out; }
+.brand-lockup:hover .brand-r-stem, .brand-lockup:hover .brand-r-leg, .brand-lockup:hover .brand-building { transform: translateY(-1px); }
 
-@keyframes brand-left-reveal { 0% { opacity: .2; transform: translateX(7px); } 62% { opacity: 1; transform: translateX(-2px); } 100% { opacity: 1; transform: translateX(0); } }
-@keyframes brand-right-reveal { 0% { opacity: .2; transform: translateX(-7px); } 62% { opacity: 1; transform: translateX(2px); } 100% { opacity: 1; transform: translateX(0); } }
-@keyframes brand-line-reveal { to { stroke-dashoffset: 0; } }
+@keyframes brand-draw-arc { to { stroke-dashoffset: 0; } }
+@keyframes brand-draw-r { to { stroke-dashoffset: 0; } }
+@keyframes brand-rise { to { transform: scaleY(1); } }
 @keyframes brand-letter-in { to { opacity: 1; transform: translateY(0); } }
+@keyframes brand-orbit { 50% { transform: rotate(9deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-tower-left, .brand-tower-right, .brand-reveal-line, .brand-foundation, .brand-name > span {
+  .brand-renewal-arc, .brand-r-stem, .brand-r-leg, .brand-building, .brand-name > span {
     animation: none;
     opacity: 1;
     stroke-dashoffset: 0;

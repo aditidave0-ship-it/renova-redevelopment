@@ -82,23 +82,15 @@ function readStoredArray<T>(key: string): T[] {
 function Logo() {
   return (
     <Link href="/" className="brand-lockup" data-testid="link-home" aria-label="RENOVA home">
-      <span className="brand-mark-wrap" aria-hidden="true">
-        <svg className="brand-mark" viewBox="0 0 56 56">
-          <g className="brand-tower-half brand-tower-left">
-            <path className="brand-tower-face" d="M6 45V18L17 8H28V45Z" />
-            <path className="brand-tower-grid" d="M12 20H25M12 27H25M12 34H25M12 41H25M18.5 13V45" />
-          </g>
-          <g className="brand-tower-half brand-tower-right">
-            <path className="brand-tower-face" d="M28 8H39L50 18V45H28Z" />
-            <path className="brand-tower-grid" d="M31 20H44M31 27H44M31 34H44M31 41H44M37.5 13V45" />
-          </g>
-          <path className="brand-reveal-line" d="M28 5V47" />
-          <path className="brand-foundation" d="M4 48H52" />
-        </svg>
-      </span>
+      <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
+        <path className="brand-r-stem" d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15" />
+        <path className="brand-r-leg" d="m26 30 11 9" />
+        <path className="brand-building" d="M20 38V23l5-3v18" />
+      </svg>
       <span className="brand-name" aria-hidden="true">
         {'RENOVA'.split('').map((letter, index) => (
-          <span className={index > 1 ? 'brand-letter-new' : undefined} key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
+          <span key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
         ))}
       </span>
     </Link>
