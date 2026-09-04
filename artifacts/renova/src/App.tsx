@@ -575,6 +575,9 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
       <button type="button" className="cinematic-skip" onClick={onFinish}>Skip intro</button>
       <div className="cinematic-atmosphere" aria-hidden="true" />
       <div className="cinematic-stage" aria-hidden="true">
+        <video className="cinematic-intro-video" autoPlay muted playsInline preload="auto" poster="/renova-blueprint-city.webp">
+          <source src="/renova-intro.mp4" type="video/mp4" />
+        </video>
         <div className="cinematic-city-scene">
           <div className="cinematic-city-panel cinematic-city-left" />
           <div className="cinematic-city-panel cinematic-city-right" />
