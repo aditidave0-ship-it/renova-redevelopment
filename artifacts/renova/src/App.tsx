@@ -575,8 +575,12 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
       <button type="button" className="cinematic-skip" onClick={onFinish}>Skip intro</button>
       <div className="cinematic-atmosphere" aria-hidden="true" />
       <div className="cinematic-stage" aria-hidden="true">
+        <div className="cinematic-city-scene">
+          <div className="cinematic-city-panel cinematic-city-left" />
+          <div className="cinematic-city-panel cinematic-city-right" />
+          <span className="cinematic-city-cut" />
+        </div>
         <div className="cinematic-wordmark">
-          <span className="cinematic-eyebrow">MUMBAI · REDEVELOPMENT ECOSYSTEM</span>
           <strong className="cinematic-title" aria-label="RENOVA">
             <span className="cinematic-letter cinematic-letter-r">R</span>
             <span className="cinematic-letter cinematic-letter-existing">E</span>
