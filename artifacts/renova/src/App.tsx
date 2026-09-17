@@ -533,11 +533,67 @@ function Regulations() {
 }
 
 const publicNav = [
-  { href: '#listings', label: 'Listings' },
-  { href: '#opportunities', label: 'Opportunities' },
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#why-renova', label: 'Why RENOVA' },
+  { href: '/', label: 'Home' },
+  { href: '/projects', label: 'Projects', items: [
+    { href: '/projects', label: 'All Projects' },
+    { href: '/projects/current', label: 'Current Opportunities' },
+    { href: '/projects/ongoing', label: 'Ongoing Projects' },
+    { href: '/projects/upcoming', label: 'Upcoming Projects' },
+    { href: '/projects/completed', label: 'Completed Projects' },
+  ] },
+  { href: '/societies', label: 'For Societies', items: [
+    { href: '/societies', label: 'Why RENOVA' },
+    { href: '/societies/how-it-works', label: 'How It Works' },
+    { href: '/assessment', label: 'Register Society' },
+  ] },
+  { href: '/developers', label: 'For Developers', items: [
+    { href: '/projects/current', label: 'Find Opportunities' },
+    { href: '/developers', label: 'Developer Benefits' },
+    { href: '/join/developer', label: 'Register Developer' },
+  ] },
+  { href: '/professionals', label: 'Professionals', items: [
+    { href: '/professionals?role=PMC', label: 'PMCs' },
+    { href: '/professionals?role=Architect', label: 'Architects' },
+    { href: '/professionals?role=Legal', label: 'Legal' },
+    { href: '/professionals', label: 'Other Professionals' },
+  ] },
+  { href: '/join', label: 'Join RENOVA', items: [
+    { href: '/assessment', label: 'Society Registration' },
+    { href: '/join/developer', label: 'Developer Registration' },
+    { href: '/join/pmc', label: 'PMC Registration' },
+    { href: '/join/architect', label: 'Architect Registration' },
+  ] },
+  { href: '/knowledge-centre', label: 'Knowledge Centre', items: [
+    { href: '/knowledge-centre/redevelopment-guide', label: 'Redevelopment Guide' },
+    { href: '/regulations', label: 'DCPR' },
+    { href: '/knowledge-centre/society-process', label: 'Society Process' },
+    { href: '/knowledge-centre/developer-selection', label: 'Developer Selection' },
+    { href: '/knowledge-centre/faqs', label: 'FAQs' },
+  ] },
+  { href: '/success-stories', label: 'Success Stories' },
+  { href: '/about', label: 'About RENOVA' },
+  { href: '/contact', label: 'Contact' },
 ];
+
+function PublicNavLink({ href, children, onClick, className }: { href: string; children: ReactNode; onClick?: () => void; className?: string }) {
+  if (href.startsWith('#')) return <a href={href} onClick={onClick} className={className}>{children}</a>;
+  return <Link href={href} onClick={onClick} className={className}>{children}</Link>;
+}
+
+function PublicNavigation({ menuOpen, onNavigate }: { menuOpen: boolean; onNavigate: () => void }) {
+  return (
+    <nav className={cn('stitch-desktop-nav public-mega-nav', menuOpen && 'is-open')} aria-label="RENOVA website navigation">
+      {publicNav.map((section) => section.items ? (
+        <div className="public-nav-item" key={section.label}>
+          <PublicNavLink href={section.href} onClick={onNavigate} className="public-nav-trigger">{section.label}<ChevronDown size={12} /></PublicNavLink>
+          <div className="public-nav-dropdown">
+            {section.items.map((item) => <PublicNavLink href={item.href} onClick={onNavigate} key={item.href + item.label}>{item.label}<ChevronRight size={13} /></PublicNavLink>)}
+          </div>
+        </div>
+      ) : <PublicNavLink href={section.href} onClick={onNavigate} key={section.href}>{section.label}</PublicNavLink>)}
+    </nav>
+  );
+}
 
 const stakeholderCards = [
   { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/professionals?role=Developer' },
@@ -670,11 +726,7 @@ function MarketingHome() {
           </button>
           <Logo />
           <button className="stitch-notification" onClick={() => setUpdatesOpen((open) => !open)} aria-expanded={updatesOpen} aria-label="RENOVA updates"><Bell size={19} /><span className="stitch-notification-dot" /></button>
-          <nav className={cn('stitch-desktop-nav', menuOpen && 'is-open')} aria-label="RENOVA website navigation">
-            <a href="#top" onClick={() => setMenuOpen(false)}>Home</a>
-            {publicNav.map((item) => <a href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>)}
-            <Link href="/assessment" onClick={() => setMenuOpen(false)}>Post requirement</Link>
-          </nav>
+          <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
           {updatesOpen && <div className="stitch-update-popover"><div><span>RENOVA pulse</span><button type="button" onClick={() => setUpdatesOpen(false)} aria-label="Close updates"><X size={16} /></button></div><article><BadgeCheck size={17} /><p><strong>Verified network growing</strong><span>New PMCs and architects are being reviewed for Mumbai societies.</span></p></article><article><Building2 size={17} /><p><strong>4 opportunities open</strong><span>Explore active society requirements across the city.</span></p></article><Link href="/assessment" onClick={() => setUpdatesOpen(false)}>Post your requirement <ArrowUpRight size={14} /></Link></div>}
         </div>
       </header>
@@ -797,14 +849,293 @@ function MarketingHome() {
   );
 }
 
+type PublicPageData = {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  highlights: Array<{ title: string; detail: string }>;
+  ctaLabel: string;
+  ctaHref: string;
+};
+
+const publicPageMap: Record<string, PublicPageData> = {
+  '/projects': {
+    eyebrow: 'RENOVA project directory',
+    title: 'Redevelopment opportunities, clearly organised.',
+    intro: 'Explore society opportunities and follow projects from early intent through active execution and completion.',
+    highlights: [
+      { title: 'Current Opportunities', detail: 'Societies actively seeking the right development or professional partner.' },
+      { title: 'Ongoing Projects', detail: 'Redevelopment journeys that have moved into planning, approvals or execution.' },
+      { title: 'Upcoming Projects', detail: 'Early-stage societies preparing documents, feasibility and committee alignment.' },
+      { title: 'Completed Projects', detail: 'Finished redevelopment stories with practical outcomes and learning.' },
+    ],
+    ctaLabel: 'View current opportunities', ctaHref: '/projects/current',
+  },
+  '/projects/current': {
+    eyebrow: 'Current opportunities',
+    title: 'Verified opportunities ready for the next conversation.',
+    intro: 'Review active society requirements with clear location, scale, project stage and professional needs.',
+    highlights: featuredOpportunities.map((item) => ({ title: item.name + ' · ' + item.location, detail: item.detail + ' Indicative scale: ' + item.scale + '.' })),
+    ctaLabel: 'Post a society requirement', ctaHref: '/assessment',
+  },
+  '/projects/ongoing': {
+    eyebrow: 'Ongoing projects',
+    title: 'Track redevelopment beyond the first introduction.',
+    intro: 'RENOVA brings milestones, project context and stakeholder visibility into one structured view.',
+    highlights: [
+      { title: 'Planning & feasibility', detail: 'Track technical studies, member inputs and project viability.' },
+      { title: 'Selection & appointment', detail: 'Keep evaluation criteria, proposals and decisions transparent.' },
+      { title: 'Approvals & execution', detail: 'Follow permissions, vacating, construction and handover milestones.' },
+    ],
+    ctaLabel: 'Open society workspace', ctaHref: '/workspace',
+  },
+  '/projects/upcoming': {
+    eyebrow: 'Upcoming projects',
+    title: 'Discover societies preparing for redevelopment.',
+    intro: 'Early visibility helps developers and professionals understand where future opportunities are forming.',
+    highlights: [
+      { title: 'Intent recorded', detail: 'The society has begun internal redevelopment discussions.' },
+      { title: 'Documents in preparation', detail: 'Title, conveyance, audit and property information are being organised.' },
+      { title: 'Professional guidance required', detail: 'PMCs, architects and legal advisors can support the next step.' },
+    ],
+    ctaLabel: 'Join the RENOVA network', ctaHref: '/join',
+  },
+  '/projects/completed': {
+    eyebrow: 'Completed projects',
+    title: 'Successful redevelopment, documented with clarity.',
+    intro: 'See how communities, developers and professionals worked together to create safer, better homes.',
+    highlights: [
+      { title: 'Before and after', detail: 'Understand the property challenge and the completed transformation.' },
+      { title: 'Delivery journey', detail: 'Review key milestones, decisions and project safeguards.' },
+      { title: 'Community outcome', detail: 'See the residential, amenity and long-term value created.' },
+    ],
+    ctaLabel: 'Explore success stories', ctaHref: '/success-stories',
+  },
+  '/societies': {
+    eyebrow: 'For housing societies',
+    title: 'Make the first redevelopment decision with confidence.',
+    intro: 'RENOVA helps committees understand potential, organise requirements and connect with verified developers and specialists.',
+    highlights: [
+      { title: 'Clear first step', detail: 'Post your society requirement in a structured, private format.' },
+      { title: 'Verified connections', detail: 'Meet developers, PMCs, architects and advisors suited to your stage.' },
+      { title: 'Better comparison', detail: 'Bring project information and expectations into one consistent process.' },
+    ],
+    ctaLabel: 'Register your society', ctaHref: '/assessment',
+  },
+  '/societies/how-it-works': {
+    eyebrow: 'Society journey',
+    title: 'From committee intent to the right redevelopment team.',
+    intro: 'A practical route designed around society readiness, independent understanding and transparent selection.',
+    highlights: [
+      { title: '01 · Register', detail: 'Share society, property and committee details.' },
+      { title: '02 · Review', detail: 'RENOVA understands your stage, needs and documentation gaps.' },
+      { title: '03 · Connect', detail: 'Explore appropriate developers and professional specialists.' },
+      { title: '04 · Progress', detail: 'Use a structured workspace to follow decisions and milestones.' },
+    ],
+    ctaLabel: 'Start society registration', ctaHref: '/assessment',
+  },
+  '/developers': {
+    eyebrow: 'For developers',
+    title: 'Find better-qualified redevelopment opportunities.',
+    intro: 'RENOVA helps developers discover genuine society requirements with clearer project context and professional introductions.',
+    highlights: [
+      { title: 'Relevant opportunities', detail: 'Filter society requirements by location, scale, stage and need.' },
+      { title: 'Structured briefs', detail: 'Understand the opportunity before investing time in a proposal.' },
+      { title: 'Credible presence', detail: 'Present capabilities, experience and project fit within a verified network.' },
+    ],
+    ctaLabel: 'Register as a developer', ctaHref: '/join/developer',
+  },
+  '/join': {
+    eyebrow: 'Join RENOVA',
+    title: 'Choose how you want to participate.',
+    intro: 'Create the right RENOVA pathway for your society, development business or professional practice.',
+    highlights: [
+      { title: 'Housing Society', detail: 'Post a requirement and organise your redevelopment journey.' },
+      { title: 'Developer', detail: 'Find suitable opportunities and build a trusted profile.' },
+      { title: 'PMC', detail: 'Support societies with feasibility, process and oversight.' },
+      { title: 'Architect', detail: 'Bring design, planning and redevelopment potential to life.' },
+    ],
+    ctaLabel: 'Register a society', ctaHref: '/assessment',
+  },
+  '/join/developer': {
+    eyebrow: 'Developer registration',
+    title: 'Build your verified RENOVA developer profile.',
+    intro: 'Share your organisation, experience, preferred locations, project scale and redevelopment capabilities.',
+    highlights: [
+      { title: 'Company profile', detail: 'Organisation, leadership, registration and contact information.' },
+      { title: 'Redevelopment experience', detail: 'Completed, ongoing and relevant society projects.' },
+      { title: 'Opportunity preferences', detail: 'Locations, plot sizes, member counts and project values.' },
+    ],
+    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+  },
+  '/join/pmc': {
+    eyebrow: 'PMC registration',
+    title: 'Help societies move forward with structure.',
+    intro: 'Create a professional profile covering feasibility, tendering, project management and delivery oversight.',
+    highlights: [
+      { title: 'Practice credentials', detail: 'Team, registrations, years of experience and service areas.' },
+      { title: 'Society experience', detail: 'Relevant redevelopment mandates and completed assignments.' },
+      { title: 'Specialist services', detail: 'Feasibility, tendering, evaluation, approvals and monitoring.' },
+    ],
+    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+  },
+  '/join/architect': {
+    eyebrow: 'Architect registration',
+    title: 'Shape what Mumbai communities can become.',
+    intro: 'Present your redevelopment design, planning, approvals and society consultation capabilities.',
+    highlights: [
+      { title: 'Practice profile', detail: 'Team, registrations, portfolio and design approach.' },
+      { title: 'Planning expertise', detail: 'DCPR pathways, potential studies and authority coordination.' },
+      { title: 'Relevant portfolio', detail: 'Residential, mixed-use and society redevelopment work.' },
+    ],
+    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+  },
+  '/knowledge-centre': {
+    eyebrow: 'Knowledge centre',
+    title: 'Redevelopment knowledge, without the confusion.',
+    intro: 'Plain-language guidance for committees, developers and professionals navigating Mumbai redevelopment.',
+    highlights: [
+      { title: 'Redevelopment Guide', detail: 'A stage-by-stage orientation from first intent to possession.' },
+      { title: 'DCPR', detail: 'Understand the planning routes and terms that may shape project potential.' },
+      { title: 'Society Process', detail: 'Learn the resolutions, documents and committee actions involved.' },
+      { title: 'Developer Selection', detail: 'Compare capability, commercial terms and execution safeguards.' },
+      { title: 'FAQs', detail: 'Practical answers to common redevelopment questions.' },
+    ],
+    ctaLabel: 'Open DCPR guidance', ctaHref: '/regulations',
+  },
+  '/knowledge-centre/redevelopment-guide': {
+    eyebrow: 'Redevelopment guide',
+    title: 'A clearer route from intent to possession.',
+    intro: 'Use this guide to understand the major decisions, documents and safeguards across the redevelopment lifecycle.',
+    highlights: [
+      { title: 'Prepare', detail: 'Align members, confirm authority and collect property records.' },
+      { title: 'Assess', detail: 'Commission feasibility and understand the applicable planning pathway.' },
+      { title: 'Select', detail: 'Appoint advisors and evaluate developers through recorded criteria.' },
+      { title: 'Execute', detail: 'Protect milestones, payments, quality and handover obligations.' },
+    ],
+    ctaLabel: 'Post your requirement', ctaHref: '/assessment',
+  },
+  '/knowledge-centre/society-process': {
+    eyebrow: 'Society process',
+    title: 'Every committee step, organised.',
+    intro: 'Understand the sequence of member communication, resolutions, professional appointments and project decisions.',
+    highlights: [
+      { title: 'Committee readiness', detail: 'Define roles, communication and record-keeping.' },
+      { title: 'Member consent', detail: 'Share consistent information and record decisions transparently.' },
+      { title: 'Professional appointments', detail: 'Use documented scope, criteria and conflict disclosures.' },
+      { title: 'Project safeguards', detail: 'Review agreements, guarantees, timelines and reporting.' },
+    ],
+    ctaLabel: 'Register your society', ctaHref: '/assessment',
+  },
+  '/knowledge-centre/developer-selection': {
+    eyebrow: 'Developer selection',
+    title: 'Compare more than the headline offer.',
+    intro: 'A strong selection process tests capability, financial strength, design quality, terms and execution safeguards.',
+    highlights: [
+      { title: 'Track record', detail: 'Review comparable redevelopment work and delivery performance.' },
+      { title: 'Commercial clarity', detail: 'Compare area, corpus, rent, timelines and obligations consistently.' },
+      { title: 'Execution strength', detail: 'Assess approvals capability, funding and construction systems.' },
+      { title: 'Member protection', detail: 'Verify guarantees, insurance, default provisions and reporting.' },
+    ],
+    ctaLabel: 'Find verified developers', ctaHref: '/professionals?role=Developer',
+  },
+  '/knowledge-centre/faqs': {
+    eyebrow: 'Frequently asked questions',
+    title: 'Straight answers for redevelopment decisions.',
+    intro: 'Start with the questions societies most often ask before beginning a formal redevelopment process.',
+    highlights: [
+      { title: 'When should a society consider redevelopment?', detail: 'When structural, functional or long-term value needs justify a feasibility review.' },
+      { title: 'Who should advise the society?', detail: 'Independent technical, legal and financial professionals appropriate to the property.' },
+      { title: 'How should developers be compared?', detail: 'Through documented criteria covering capability, proposal terms, safeguards and delivery.' },
+      { title: 'Does RENOVA replace professional advice?', detail: 'No. RENOVA organises information and connections; qualified advice remains essential.' },
+    ],
+    ctaLabel: 'Ask RENOVA', ctaHref: '/contact',
+  },
+  '/success-stories': {
+    eyebrow: 'Success stories',
+    title: 'Better redevelopment starts with better alignment.',
+    intro: 'RENOVA success stories will document the challenge, the people, the process and the community outcome.',
+    highlights: [
+      { title: 'Society perspective', detail: 'What mattered to members and how decisions became clearer.' },
+      { title: 'Developer perspective', detail: 'How project fit, planning and execution were established.' },
+      { title: 'Professional perspective', detail: 'How specialists protected quality and process.' },
+    ],
+    ctaLabel: 'Explore completed projects', ctaHref: '/projects/completed',
+  },
+  '/about': {
+    eyebrow: 'About RENOVA',
+    title: 'Redevelopment, reimagined for Mumbai.',
+    intro: 'RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.',
+    highlights: [
+      { title: 'Our purpose', detail: 'Make redevelopment easier to understand, compare and progress.' },
+      { title: 'Our role', detail: 'Create structured requirements, verified discovery and clearer connections.' },
+      { title: 'Our principle', detail: 'Support informed decisions without replacing independent professional advice.' },
+    ],
+    ctaLabel: 'See how RENOVA works', ctaHref: '/societies/how-it-works',
+  },
+  '/contact': {
+    eyebrow: 'Contact RENOVA',
+    title: 'Tell us where you are in the journey.',
+    intro: 'Whether you represent a society, developer or professional practice, RENOVA can help identify the right next step.',
+    highlights: [
+      { title: 'Housing societies', detail: 'Share your property context and current redevelopment stage.' },
+      { title: 'Developers', detail: 'Tell us your opportunity preferences and redevelopment experience.' },
+      { title: 'Professionals', detail: 'Introduce your practice, specialisation and Mumbai project portfolio.' },
+    ],
+    ctaLabel: 'Post a society requirement', ctaHref: '/assessment',
+  },
+};
+
+function PublicPage({ page }: { page: PublicPageData }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <div className="marketing-site public-content-page">
+      <header className="stitch-header public-page-header">
+        <div className="stitch-header-inner">
+          <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+          <Logo />
+          <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
+          <Link href="/assessment" className="public-header-cta">Post requirement <ArrowUpRight size={14} /></Link>
+        </div>
+      </header>
+      <main>
+        <section className="public-page-hero">
+          <div className="public-page-grid" aria-hidden="true" />
+          <div className="public-page-hero-inner">
+            <Link href="/" className="public-page-back"><ArrowLeft size={14} /> RENOVA home</Link>
+            <p>{page.eyebrow}</p>
+            <h1>{page.title}</h1>
+            <span>{page.intro}</span>
+          </div>
+        </section>
+        <section className="public-page-highlights">
+          {page.highlights.map((item, index) => <article key={item.title}><small>{String(index + 1).padStart(2, '0')}</small><h2>{item.title}</h2><p>{item.detail}</p></article>)}
+        </section>
+        <section className="public-page-cta">
+          <div><p>Move forward with clarity.</p><h2>Bring your next redevelopment step to RENOVA.</h2></div>
+          <Link href={page.ctaHref} className="stitch-primary-button">{page.ctaLabel} <ArrowUpRight size={15} /></Link>
+        </section>
+      </main>
+      <footer className="stitch-footer">
+        <div><Logo /><p>Renew. Connect. Redevelop.</p></div>
+        <div><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/about">About RENOVA</Link><Link href="/contact">Contact</Link></div>
+        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
+      </footer>
+    </div>
+  );
+}
+
 function WorkspaceRouter() {
   return <Switch><Route path="/workspace" component={Overview} /><Route path="/assessment" component={Assessment} /><Route path="/project/:id" component={ProjectDetail} /><Route path="/professionals" component={Professionals} /><Route path="/regulations" component={Regulations} /><Route component={NotFound} /></Switch>;
 }
 
 function Router() {
   const [location] = useLocation();
-  if (location === '/') return <MarketingHome />;
-  if (location === '/assessment') return <Assessment />;
+  const pathname = location.split('?')[0];
+  if (pathname === '/') return <MarketingHome />;
+  if (pathname === '/assessment') return <Assessment />;
+  const publicPage = publicPageMap[pathname];
+  if (publicPage) return <PublicPage page={publicPage} />;
   return <AppShell><WorkspaceRouter /></AppShell>;
 }
 
