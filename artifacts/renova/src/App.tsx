@@ -1086,6 +1086,162 @@ const publicPageMap: Record<string, PublicPageData> = {
   },
 };
 
+function PublicWorkingHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <header className="stitch-header public-page-header">
+      <div className="stitch-header-inner">
+        <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+        <Logo />
+        <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
+        <Link href="/assessment" className="public-header-cta">Post requirement <ArrowUpRight size={14} /></Link>
+      </div>
+    </header>
+  );
+}
+
+const projectTabs = [
+  { label: 'All Projects', href: '/projects', stage: 'all' },
+  { label: 'Current Opportunities', href: '/projects/current', stage: 'current' },
+  { label: 'Ongoing Projects', href: '/projects/ongoing', stage: 'ongoing' },
+  { label: 'Upcoming Projects', href: '/projects/upcoming', stage: 'upcoming' },
+  { label: 'Completed Projects', href: '/projects/completed', stage: 'completed' },
+];
+
+function ProjectsDirectory() {
+  const [location] = useLocation();
+  const pathname = location.split('?')[0];
+  const activeStage = projectTabs.find((tab) => tab.href === pathname)?.stage || 'all';
+  const [search, setSearch] = useState('');
+  const isActiveListing = activeStage === 'all' || activeStage === 'current';
+  const visibleProjects = isActiveListing
+    ? featuredOpportunities.filter((item) => (item.name + ' ' + item.location + ' ' + item.status).toLowerCase().includes(search.toLowerCase()))
+    : [];
+
+  return (
+    <div className="marketing-site public-content-page working-page">
+      <PublicWorkingHeader />
+      <main>
+        <section className="working-hero">
+          <div><p>RENOVA project directory</p><h1>Explore redevelopment opportunities.</h1><span>Search verified society opportunities and follow projects through every stage of redevelopment.</span></div>
+          <Link href="/assessment" className="stitch-primary-button">Post an opportunity <ArrowUpRight size={15} /></Link>
+        </section>
+        <section className="project-directory-shell">
+          <div className="project-directory-tabs" role="navigation" aria-label="Project categories">
+            {projectTabs.map((tab) => <Link href={tab.href} key={tab.href} className={activeStage === tab.stage ? 'active' : ''}>{tab.label}</Link>)}
+          </div>
+          <div className="project-directory-toolbar">
+            <label><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by society, area or status" aria-label="Search projects" /></label>
+            <span>{visibleProjects.length} {visibleProjects.length === 1 ? 'project' : 'projects'} found</span>
+          </div>
+          {visibleProjects.length ? (
+            <div className="working-project-grid">
+              {visibleProjects.map((item) => <article key={item.name}>
+                <div><span className="stitch-status">{item.status}</span><small>{item.scale}</small></div>
+                <h2>{item.name}</h2>
+                <p className="working-project-location"><MapPin size={14} /> {item.location}</p>
+                <p>{item.detail}</p>
+                <dl><div><dt>Building age</dt><dd>{item.age}</dd></div><div><dt>Homes</dt><dd>{item.homes}</dd></div><div><dt>Site area</dt><dd>{item.area}</dd></div></dl>
+                <Link href="/contact">Request project details <ArrowUpRight size={14} /></Link>
+              </article>)}
+            </div>
+          ) : (
+            <div className="working-empty">
+              <Building2 size={30} />
+              <h2>{search ? 'No matching projects found.' : 'No public projects in this stage yet.'}</h2>
+              <p>{search ? 'Try another society name, locality or status.' : 'New verified opportunities will appear here after society approval.'}</p>
+              {search ? <button type="button" onClick={() => setSearch('')}>Clear search</button> : <Link href="/assessment">Post a society opportunity</Link>}
+            </div>
+          )}
+        </section>
+      </main>
+      <footer className="stitch-footer"><div><Logo /><p>Renew. Connect. Redevelop.</p></div><div><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/about">About RENOVA</Link><Link href="/contact">Contact</Link></div><small>© {new Date().getFullYear()} RENOVA · Mumbai</small></footer>
+    </div>
+  );
+}
+
+const registrationCopy: Record<string, { eyebrow: string; title: string; detail: string }> = {
+  Developer: { eyebrow: 'Developer registration', title: 'Join RENOVA as a verified developer.', detail: 'Tell us about your organisation, redevelopment experience and preferred opportunities.' },
+  PMC: { eyebrow: 'PMC registration', title: 'Bring structure to society redevelopment.', detail: 'Share your feasibility, tendering, project management and oversight capabilities.' },
+  Architect: { eyebrow: 'Architect registration', title: 'Shape Mumbai’s next generation of communities.', detail: 'Introduce your practice, redevelopment portfolio and planning expertise.' },
+  Contact: { eyebrow: 'Contact RENOVA', title: 'Tell us where you are in the journey.', detail: 'Share a few details and the RENOVA team will understand the right next conversation.' },
+};
+
+function NetworkRegistrationPage({ role }: { role: 'Developer' | 'PMC' | 'Architect' | 'Contact' }) {
+  const copy = registrationCopy[role];
+  const [submitted, setSubmitted] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: '', organisation: '', email: '', phone: '', city: 'Mumbai', experience: '', interest: role === 'Contact' ? 'Housing Society' : role, message: '', consent: false });
+  const setField = (key: keyof typeof form, value: string | boolean) => setForm((current) => ({ ...current, [key]: value }));
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const reference = 'RNV-' + role.slice(0, 3).toUpperCase() + '-' + String(Date.now()).slice(-6);
+    const record = { ...form, role, reference, submittedAt: new Date().toISOString() };
+    const existing = readStoredArray<typeof record>('renova:network-registrations');
+    localStorage.setItem('renova:network-registrations', JSON.stringify([record, ...existing]));
+    setSubmitted(reference);
+  };
+
+  if (submitted) return (
+    <div className="marketing-site public-content-page working-page">
+      <PublicWorkingHeader />
+      <main className="working-success"><span><CheckCircle2 size={34} /></span><p>Details received</p><h1>Thank you, {form.name}.</h1><div>Your RENOVA reference is <strong>{submitted}</strong>. Your information has been saved and is ready for review.</div><Link href="/" className="stitch-primary-button">Return to RENOVA home <ArrowUpRight size={15} /></Link></main>
+    </div>
+  );
+
+  return (
+    <div className="marketing-site public-content-page working-page">
+      <PublicWorkingHeader />
+      <main className="working-form-page">
+        <section className="working-form-intro"><p>{copy.eyebrow}</p><h1>{copy.title}</h1><span>{copy.detail}</span><div><ShieldCheck size={19} /><p>Your information remains private and is only used to review your RENOVA request.</p></div></section>
+        <form className="working-form" onSubmit={submit}>
+          <div className="working-form-heading"><span>RENOVA intake</span><h2>{role === 'Contact' ? 'Start a conversation' : 'Create your profile'}</h2><p>Complete the details below. Fields marked * are required.</p></div>
+          <div className="working-form-grid">
+            <label>Full name *<input required value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="Your full name" /></label>
+            <label>Organisation / Society *<input required value={form.organisation} onChange={(event) => setField('organisation', event.target.value)} placeholder={role === 'Contact' ? 'Society or company name' : 'Registered organisation name'} /></label>
+            <label>Email address *<input required type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="name@company.com" /></label>
+            <label>Mobile number *<input required inputMode="tel" pattern="[0-9+ ()-]{10,}" value={form.phone} onChange={(event) => setField('phone', event.target.value)} placeholder="+91 98765 43210" /></label>
+            <label>City / Primary market *<input required value={form.city} onChange={(event) => setField('city', event.target.value)} /></label>
+            {role === 'Contact' ? <label>I represent *<select required value={form.interest} onChange={(event) => setField('interest', event.target.value)}><option>Housing Society</option><option>Developer</option><option>PMC</option><option>Architect</option><option>Legal / Other Professional</option></select></label> : <label>Years of relevant experience *<input required type="number" min="0" value={form.experience} onChange={(event) => setField('experience', event.target.value)} placeholder="e.g. 8" /></label>}
+            <label className="working-field-wide">How can RENOVA help? *<textarea required rows={5} value={form.message} onChange={(event) => setField('message', event.target.value)} placeholder="Tell us about your projects, requirement or the opportunity you are looking for." /></label>
+            <label className="working-consent working-field-wide"><input required type="checkbox" checked={form.consent} onChange={(event) => setField('consent', event.target.checked)} /><span>I confirm these details are accurate and permit RENOVA to contact me about this request.</span></label>
+          </div>
+          <button type="submit" className="stitch-primary-button">Submit to RENOVA <Send size={15} /></button>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+const frequentlyAskedQuestions = [
+  ['When should a society consider redevelopment?', 'A society can begin with a feasibility review when its building has structural, functional or long-term value concerns. The first step is understanding the property and member priorities, not selecting a developer immediately.'],
+  ['What information is needed to register a society?', 'Basic society details, location, member count, building age, property context, current documents and the services required are enough to begin.'],
+  ['How does RENOVA verify developers and professionals?', 'RENOVA reviews organisation details, registrations, relevant experience and supporting project information before presenting a profile as verified.'],
+  ['Does RENOVA replace a PMC, architect or legal advisor?', 'No. RENOVA organises requirements, discovery and connections. Societies should still appoint qualified independent professionals for technical and legal advice.'],
+  ['How are society details protected?', 'Sensitive documents and contact information should only be shared after permission and an approved introduction. Public listings use limited opportunity information.'],
+  ['Can developers search opportunities by location and stage?', 'Yes. The project directory is structured around location, status and redevelopment stage, with more filters added as verified listings grow.'],
+];
+
+function FaqPage() {
+  const [openIndex, setOpenIndex] = useState(0);
+  const [search, setSearch] = useState('');
+  const visible = frequentlyAskedQuestions.filter(([question, answer]) => (question + ' ' + answer).toLowerCase().includes(search.toLowerCase()));
+  return (
+    <div className="marketing-site public-content-page working-page">
+      <PublicWorkingHeader />
+      <main>
+        <section className="working-hero faq-hero"><div><p>Knowledge centre · FAQs</p><h1>Redevelopment questions, answered clearly.</h1><span>Search practical guidance for societies, developers and professionals.</span></div></section>
+        <section className="faq-shell">
+          <label className="faq-search"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search questions" /></label>
+          <div className="working-faq-list">
+            {visible.map(([question, answer], index) => <article key={question} className={openIndex === index ? 'open' : ''}><button type="button" onClick={() => setOpenIndex(openIndex === index ? -1 : index)} aria-expanded={openIndex === index}><span>{question}</span><ChevronDown size={19} /></button>{openIndex === index && <p>{answer}</p>}</article>)}
+          </div>
+          {!visible.length && <div className="working-empty"><CircleHelp size={30} /><h2>No matching answer found.</h2><p>Try a broader term or contact the RENOVA team.</p><Link href="/contact">Ask RENOVA</Link></div>}
+        </section>
+      </main>
+    </div>
+  );
+}
+
 function PublicPage({ page }: { page: PublicPageData }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -1134,6 +1290,12 @@ function Router() {
   const pathname = location.split('?')[0];
   if (pathname === '/') return <MarketingHome />;
   if (pathname === '/assessment') return <Assessment />;
+  if (pathname.startsWith('/projects')) return <ProjectsDirectory />;
+  if (pathname === '/join/developer') return <NetworkRegistrationPage role="Developer" />;
+  if (pathname === '/join/pmc') return <NetworkRegistrationPage role="PMC" />;
+  if (pathname === '/join/architect') return <NetworkRegistrationPage role="Architect" />;
+  if (pathname === '/contact') return <NetworkRegistrationPage role="Contact" />;
+  if (pathname === '/knowledge-centre/faqs') return <FaqPage />;
   const publicPage = publicPageMap[pathname];
   if (publicPage) return <PublicPage page={publicPage} />;
   return <AppShell><WorkspaceRouter /></AppShell>;
