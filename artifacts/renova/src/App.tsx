@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity as ActivityIcon,
@@ -60,6 +60,7 @@ import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-bound
 import NotFound from '@/pages/not-found';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { getOrganization, organizationCategories, organizations, type Organization } from '@/data/organizations';
 import './index.css';
 import './marketing.css';
 import './requirement.css';
@@ -549,6 +550,13 @@ const publicNav = [
     { href: '/projects/upcoming', label: 'Upcoming Projects' },
     { href: '/projects/completed', label: 'Completed Projects' },
   ] },
+  { href: '/ecosystem', label: 'Ecosystem', items: [
+    { href: '/ecosystem', label: 'Explore Directory' },
+    { href: '/ecosystem?category=Developers', label: 'Developers' },
+    { href: '/ecosystem?category=PMC', label: 'PMCs' },
+    { href: '/ecosystem?category=Architects', label: 'Architects' },
+    { href: '/ecosystem?category=Legal', label: 'Legal & Specialists' },
+  ] },
   { href: '/societies', label: 'For Societies', items: [
     { href: '/societies', label: 'Why RENOVA' },
     { href: '/societies/how-it-works', label: 'How It Works' },
@@ -604,10 +612,10 @@ function PublicNavigation({ menuOpen, onNavigate }: { menuOpen: boolean; onNavig
 }
 
 const stakeholderCards = [
-  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/developers' },
+  { title: 'Find a Developer', detail: 'Explore public developer profiles and their documented services.', icon: Building2, href: '/ecosystem?category=Developers' },
   { title: 'Explore Societies', detail: 'Discover genuine redevelopment opportunities across Mumbai.', icon: Landmark, href: '#opportunities' },
-  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals/pmcs' },
-  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals/architects' },
+  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/ecosystem?category=PMC' },
+  { title: 'Find an Architect', detail: 'Explore architecture practices across the ecosystem.', icon: Compass, href: '/ecosystem?category=Architects' },
 ];
 
 const featuredOpportunities = [
@@ -618,7 +626,7 @@ const featuredOpportunities = [
 ];
 
 const trustBenefits = [
-  { title: 'Verified Trust', detail: 'Developers, PMCs and professionals are reviewed before they enter the RENOVA network.', icon: ShieldCheck },
+  { title: 'Clear Profile Status', detail: 'Public profiles and RENOVA-verified organizations are labelled distinctly, so provenance stays visible.', icon: ShieldCheck },
   { title: 'Accelerated Timelines', detail: 'Structured requirements and milestone tracking reduce avoidable delays.', icon: Zap },
   { title: 'Absolute Transparency', detail: 'Clear context, project details and expectations support better decisions.', icon: Eye },
 ];
@@ -1175,6 +1183,134 @@ function ProjectsDirectory() {
   );
 }
 
+const directoryCategoryLabels = ['All', ...organizationCategories] as const;
+
+function OrganizationMonogram({ organization }: { organization: Organization }) {
+  const initials = organization.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
+  return <span className="ecosystem-monogram" aria-label={`${organization.name} logo not provided`}>{initials}</span>;
+}
+
+function EcosystemFooter() {
+  return <footer className="stitch-footer"><div><Logo /><p>Renew. Connect. Redevelop.</p></div><div><Link href="/ecosystem">Ecosystem</Link><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/contact">Contact</Link></div><small>© {new Date().getFullYear()} RENOVA · Mumbai</small></footer>;
+}
+
+function EcosystemDirectory() {
+  const [location] = useLocation();
+  const requestedCategory = new URLSearchParams(location.split('?')[1] || '').get('category');
+  const initialCategory = organizationCategories.includes(requestedCategory as typeof organizationCategories[number]) ? requestedCategory! : 'All';
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search.trim().toLowerCase());
+  const [category, setCategory] = useState(initialCategory);
+  const [place, setPlace] = useState('All');
+  const [service, setService] = useState('All');
+  const [redevelopmentType, setRedevelopmentType] = useState('All');
+  const [status, setStatus] = useState('All');
+
+  const options = useMemo(() => ({
+    places: ['All', ...Array.from(new Set(organizations.map((item) => item.location))).sort()],
+    services: ['All', ...Array.from(new Set(organizations.flatMap((item) => item.services))).sort()],
+    types: ['All', ...Array.from(new Set(organizations.flatMap((item) => item.redevelopmentTypes))).sort()],
+  }), []);
+
+  const filtered = useMemo(() => organizations.filter((item) => {
+    const searchable = [item.name, item.category, item.location, ...item.areasServed, ...item.specializations, ...item.services].join(' ').toLowerCase();
+    return (!deferredSearch || searchable.includes(deferredSearch))
+      && (category === 'All' || item.category === category)
+      && (place === 'All' || item.location === place)
+      && (service === 'All' || item.services.includes(service))
+      && (redevelopmentType === 'All' || item.redevelopmentTypes.includes(redevelopmentType))
+      && (status === 'All' || item.profileStatus === status);
+  }), [category, deferredSearch, place, redevelopmentType, service, status]);
+
+  const reset = () => { setSearch(''); setCategory('All'); setPlace('All'); setService('All'); setRedevelopmentType('All'); setStatus('All'); };
+  const hasFilters = Boolean(search) || category !== 'All' || place !== 'All' || service !== 'All' || redevelopmentType !== 'All' || status !== 'All';
+
+  return (
+    <div className="marketing-site public-content-page working-page ecosystem-page">
+      <PublicWorkingHeader />
+      <main>
+        <section className="ecosystem-hero">
+          <div className="ecosystem-hero-grid" aria-hidden="true" />
+          <div className="ecosystem-hero-copy">
+            <p>RENOVA ecosystem directory · Mumbai</p>
+            <h1>Explore the <span>Redevelopment Ecosystem.</span></h1>
+            <div>Find developers, PMCs and professionals across Mumbai’s redevelopment ecosystem — in one place.</div>
+          </div>
+          <div className="ecosystem-hero-stat"><strong>{organizations.length}</strong><span>public profiles with source links</span></div>
+        </section>
+
+        <section className="ecosystem-directory-shell">
+          <div className="ecosystem-search-panel">
+            <label className="ecosystem-search"><Search size={22} /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search developers, PMCs, architects or redevelopment professionals..." aria-label="Search the redevelopment ecosystem" /></label>
+            <div className="ecosystem-category-filters" aria-label="Organization categories">
+              {directoryCategoryLabels.map((label) => <button type="button" key={label} className={category === label ? 'active' : ''} onClick={() => setCategory(label)}>{label}</button>)}
+            </div>
+            <div className="ecosystem-secondary-filters">
+              <label><span>Location</span><select value={place} onChange={(event) => setPlace(event.target.value)}>{options.places.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span>Service</span><select value={service} onChange={(event) => setService(event.target.value)}>{options.services.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span>Redevelopment type</span><select value={redevelopmentType} onChange={(event) => setRedevelopmentType(event.target.value)}>{options.types.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span>Verified status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="All">All statuses</option><option value="public">Public profile</option><option value="verified">RENOVA verified</option></select></label>
+            </div>
+          </div>
+
+          <div className="ecosystem-results-bar"><div><strong>{filtered.length}</strong><span>{filtered.length === 1 ? 'organization' : 'organizations'} found</span></div>{hasFilters && <button type="button" onClick={reset}><RotateCcw size={14} /> Reset filters</button>}</div>
+          {filtered.length ? <div className="ecosystem-card-grid">
+            {filtered.map((organization) => <article className="ecosystem-card" key={organization.slug}>
+              <div className="ecosystem-card-top"><OrganizationMonogram organization={organization} /><span className={cn('ecosystem-status', organization.profileStatus === 'verified' && 'verified')}>{organization.profileStatus === 'verified' ? <><BadgeCheck size={13} /> RENOVA VERIFIED</> : 'PUBLIC PROFILE'}</span></div>
+              <div className="ecosystem-card-title"><p>{organization.category}</p><h2>{organization.name}</h2><span><MapPin size={14} /> {organization.location}</span></div>
+              <div className="ecosystem-tags">{organization.specializations.slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div>
+              <dl><div><dt>Areas served</dt><dd>{organization.areasServed.join(', ') || 'Information not yet provided'}</dd></div><div><dt>Services</dt><dd>{organization.services.join(', ') || 'Information not yet provided'}</dd></div></dl>
+              <div className="ecosystem-card-actions"><Link href={`/ecosystem/${organization.slug}`}>View Profile <ArrowUpRight size={14} /></Link><a href={organization.website} target="_blank" rel="noreferrer">Website <ExternalLink size={13} /></a></div>
+            </article>)}
+          </div> : <div className="working-empty ecosystem-empty"><Search size={30} /><h2>No matching organizations.</h2><p>Try a broader search or reset the directory filters.</p><button type="button" onClick={reset}>Reset filters</button></div>}
+        </section>
+
+        <section className="ecosystem-list-cta"><div><p>For developers, PMCs and specialists</p><h2>List your organization on RENOVA.</h2><span>Create a structured profile and begin the RENOVA verification process.</span></div><Link href="/contact" className="stitch-primary-button">List Your Organization on RENOVA <ArrowUpRight size={15} /></Link></section>
+      </main>
+      <EcosystemFooter />
+    </div>
+  );
+}
+
+function InformationValue({ values, children }: { values?: string[]; children?: ReactNode }) {
+  if (values?.length) return <>{values.map((value) => <span className="organization-detail-chip" key={value}>{value}</span>)}</>;
+  return <span className="organization-information-missing">{children || 'Information not yet provided'}</span>;
+}
+
+function OrganizationProfilePage() {
+  const { slug } = useParams<{ slug: string }>();
+  const organization = getOrganization(slug);
+  if (!organization) return <NotFound />;
+  return (
+    <div className="marketing-site public-content-page working-page organization-profile-page">
+      <PublicWorkingHeader />
+      <main>
+        <section className="organization-profile-hero">
+          <Link href="/ecosystem" className="public-page-back"><ArrowLeft size={14} /> Ecosystem directory</Link>
+          <div className="organization-profile-heading"><OrganizationMonogram organization={organization} /><div><span className={cn('ecosystem-status', organization.profileStatus === 'verified' && 'verified')}>{organization.profileStatus === 'verified' ? <><BadgeCheck size={13} /> RENOVA VERIFIED</> : 'PUBLIC PROFILE'}</span><p>{organization.category}</p><h1>{organization.name}</h1><div><MapPin size={15} /> {organization.location}</div></div></div>
+          <p className="organization-profile-disclaimer">This profile is compiled from public information and has not been independently verified by RENOVA.</p>
+        </section>
+        <section className="organization-profile-layout">
+          <div className="organization-profile-content">
+            <article><p>01 · Overview</p><h2>Overview</h2><div>{organization.overview || 'Information not yet provided'}</div></article>
+            <article><p>02 · Services</p><h2>Redevelopment services</h2><div className="organization-detail-chips"><InformationValue values={organization.services} /></div></article>
+            <article><p>03 · Specializations</p><h2>Specializations</h2><div className="organization-detail-chips"><InformationValue values={organization.specializations} /></div></article>
+            <article><p>04 · Locations</p><h2>Areas served</h2><div className="organization-detail-chips"><InformationValue values={organization.areasServed} /></div></article>
+            <article><p>05 · Projects</p><h2>Redevelopment projects</h2><div className="organization-detail-chips"><InformationValue values={organization.projects} /></div></article>
+            <article><p>06 · Company information</p><h2>Company information</h2><div>{organization.companyInformation || 'Information not yet provided'}</div></article>
+          </div>
+          <aside className="organization-profile-aside">
+            <div><p>Contact / website</p><a href={organization.website} target="_blank" rel="noreferrer">Visit official website <ExternalLink size={15} /></a><a href={organization.sourceUrl} target="_blank" rel="noreferrer">View public source <ExternalLink size={15} /></a></div>
+            <div className="organization-claim-card"><ShieldCheck size={22} /><h2>Is this your company?</h2><p>Claim this profile to submit accurate company information and begin RENOVA verification.</p><Link href="/contact">Claim this profile <ArrowUpRight size={15} /></Link></div>
+            <Link href="/contact" className="organization-list-link">List Your Organization on RENOVA <ArrowUpRight size={15} /></Link>
+          </aside>
+        </section>
+      </main>
+      <EcosystemFooter />
+    </div>
+  );
+}
+
 const registrationCopy: Record<string, { eyebrow: string; title: string; detail: string }> = {
   Developer: { eyebrow: 'Developer registration', title: 'Join RENOVA as a verified developer.', detail: 'Tell us about your organisation, redevelopment experience and preferred opportunities.' },
   PMC: { eyebrow: 'PMC registration', title: 'Bring structure to society redevelopment.', detail: 'Share your feasibility, tendering, project management and oversight capabilities.' },
@@ -1306,6 +1442,8 @@ function Router() {
   if (pathname === '/') return <MarketingHome />;
   if (pathname === '/assessment') return <Assessment />;
   if (pathname.startsWith('/projects')) return <ProjectsDirectory />;
+  if (pathname.startsWith('/ecosystem/')) return <OrganizationProfilePage />;
+  if (pathname === '/ecosystem') return <EcosystemDirectory />;
   if (pathname === '/join/developer') return <NetworkRegistrationPage role="Developer" />;
   if (pathname === '/join/pmc') return <NetworkRegistrationPage role="PMC" />;
   if (pathname === '/join/architect') return <NetworkRegistrationPage role="Architect" />;
