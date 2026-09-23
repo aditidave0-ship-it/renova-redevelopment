@@ -662,25 +662,11 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
 
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showLogoReveal, setShowLogoReveal] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return sessionStorage.getItem('renova_intro_seen') !== '1' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    } catch {
-      return true;
-    }
-  });
+  const [showLogoReveal, setShowLogoReveal] = useState(true);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [activeOpportunityName, setActiveOpportunityName] = useState<string | null>(null);
   const activeOpportunity = featuredOpportunities.find((item) => item.name === activeOpportunityName);
-  const finishLogoReveal = () => {
-    try {
-      sessionStorage.setItem('renova_intro_seen', '1');
-    } catch {
-      // The intro should still close when storage is unavailable.
-    }
-    setShowLogoReveal(false);
-  };
+  const finishLogoReveal = () => setShowLogoReveal(false);
   return (
     <div className={cn('marketing-site stitch-site', showLogoReveal && 'intro-active')} id="top">
       {showLogoReveal && <CinematicVideoIntro onFinish={finishLogoReveal} />}
