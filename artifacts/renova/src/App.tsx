@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity as ActivityIcon,
@@ -710,15 +710,119 @@ function CinematicLogoReveal({ onFinish }: { onFinish: () => void }) {
   );
 }
 
+function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const exitTimerRef = useRef<number | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isExiting, setIsExiting] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const finishIntro = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+    exitTimerRef.current = window.setTimeout(onFinish, 820);
+  };
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
+    };
+  }, []);
+
+  const toggleSound = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = nextMuted;
+      void videoRef.current.play().catch(() => undefined);
+    }
+  };
+
+  const updateProgress = () => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+    setProgress(Math.min(100, (video.currentTime / video.duration) * 100));
+  };
+
+  return (
+    <section
+      className={`renova-film-intro${isExiting ? ' is-exiting' : ''}`}
+      role="dialog"
+      aria-label="RENOVA introduction film"
+      aria-modal="true"
+    >
+      <video
+        ref={videoRef}
+        className="renova-film-video"
+        autoPlay
+        muted={isMuted}
+        playsInline
+        preload="metadata"
+        poster="/renova-blueprint-city.webp"
+        onTimeUpdate={updateProgress}
+        onEnded={finishIntro}
+        onError={finishIntro}
+      >
+          <source
+            src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
+            type="video/mp4"
+          />
+      </video>
+
+      <div className="renova-film-shade" aria-hidden="true" />
+
+      <div className="renova-film-topbar">
+        <div className="renova-film-brand">
+          <strong>RENOVA</strong>
+          <span>A Mumbai redevelopment story</span>
+        </div>
+        <div className="renova-film-controls">
+          <button type="button" onClick={toggleSound} aria-label={isMuted ? 'Turn sound on' : 'Turn sound off'}>
+            {isMuted ? 'Sound on' : 'Sound off'}
+          </button>
+          <button type="button" onClick={finishIntro}>Skip intro</button>
+        </div>
+      </div>
+
+      <div className="renova-film-footer">
+        <div>
+          <span>Existing</span><i aria-hidden="true" /><span>Transformation</span><i aria-hidden="true" /><span>Reimagined</span>
+        </div>
+        <button type="button" onClick={finishIntro}>Enter RENOVA <ArrowUpRight size={15} /></button>
+      </div>
+
+      <div className="renova-film-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
+    </section>
+  );
+}
+
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showLogoReveal, setShowLogoReveal] = useState(true);
+  const [showLogoReveal, setShowLogoReveal] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return sessionStorage.getItem('renova_intro_seen') !== '1' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return true;
+    }
+  });
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [activeOpportunityName, setActiveOpportunityName] = useState<string | null>(null);
   const activeOpportunity = featuredOpportunities.find((item) => item.name === activeOpportunityName);
+  const finishLogoReveal = () => {
+    try {
+      sessionStorage.setItem('renova_intro_seen', '1');
+    } catch {
+      // The intro should still close when storage is unavailable.
+    }
+    setShowLogoReveal(false);
+  };
   return (
     <div className="marketing-site stitch-site" id="top">
-      {showLogoReveal && <CinematicLogoReveal onFinish={() => setShowLogoReveal(false)} />}
+      {showLogoReveal && <CinematicVideoIntro onFinish={finishLogoReveal} />}
       <header className="stitch-header">
         <div className="stitch-header-inner">
           <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">
