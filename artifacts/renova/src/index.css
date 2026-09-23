@@ -79,63 +79,63 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  --background: 39 33% 95%;
+  --background: 204 38% 95%;
 
-  --foreground: 211 36% 17%;
+  --foreground: 210 77% 10%;
 
-  --border: 38 21% 84%;
+  --border: 207 31% 84%;
 
-  --card: 42 37% 98%;
+  --card: 204 100% 99%;
 
-  --card-foreground: 211 36% 17%;
+  --card-foreground: 210 77% 10%;
 
-  --card-border: 39 23% 87%;
+  --card-border: 207 31% 86%;
 
-  --sidebar: 211 36% 17%;
+  --sidebar: 210 77% 10%;
 
-  --sidebar-foreground: 39 33% 95%;
+  --sidebar-foreground: 204 100% 98%;
 
-  --sidebar-border: 211 30% 26%;
+  --sidebar-border: 207 52% 24%;
 
-  --sidebar-primary: 28 78% 61%;
+  --sidebar-primary: 201 72% 53%;
 
-  --sidebar-primary-foreground: 211 36% 17%;
+  --sidebar-primary-foreground: 210 77% 10%;
 
-  --sidebar-accent: 211 29% 25%;
+  --sidebar-accent: 208 60% 22%;
 
-  --sidebar-accent-foreground: 39 33% 95%;
+  --sidebar-accent-foreground: 204 100% 98%;
 
-  --sidebar-ring: 28 78% 61%;
+  --sidebar-ring: 201 72% 53%;
 
-  --popover: 42 37% 98%;
+  --popover: 204 100% 99%;
 
-  --popover-foreground: 211 36% 17%;
+  --popover-foreground: 210 77% 10%;
 
-  --popover-border: 39 23% 87%;
+  --popover-border: 207 31% 86%;
 
-  --primary: 211 36% 17%;
+  --primary: 210 77% 10%;
 
-  --primary-foreground: 39 33% 95%;
+  --primary-foreground: 204 100% 98%;
 
-  --secondary: 32 48% 89%;
+  --secondary: 202 58% 91%;
 
-  --secondary-foreground: 211 36% 17%;
+  --secondary-foreground: 210 77% 10%;
 
-  --muted: 38 24% 90%;
+  --muted: 205 29% 91%;
 
-  --muted-foreground: 211 15% 45%;
+  --muted-foreground: 207 20% 43%;
 
-  --accent: 28 78% 61%;
+  --accent: 201 72% 53%;
 
-  --accent-foreground: 211 36% 17%;
+  --accent-foreground: 210 77% 10%;
 
   --destructive: 4 67% 53%;
 
   --destructive-foreground: 39 33% 95%;
 
-  --input: 38 21% 80%;
-  --ring: 28 78% 61%;
-  --chart-1: 28 78% 61%;
+  --input: 207 31% 80%;
+  --ring: 201 72% 53%;
+  --chart-1: 201 72% 53%;
   --chart-2: 163 39% 38%;
   --chart-3: 211 36% 17%;
   --chart-4: 41 73% 67%;
@@ -435,15 +435,16 @@
 
 /* RENOVA workspace — editorial field guide meets operating system */
 :root {
-  --ink: #20303d;
-  --ink-soft: #53636a;
-  --paper: #f5f1e9;
-  --paper-bright: #fbfaf6;
-  --line: #ddd7cb;
-  --orange: #e99552;
-  --orange-deep: #c66c32;
-  --green: #357f70;
-  --red: #bf5548;
+  --ink: #061a2f;
+  --ink-soft: #536b80;
+  --paper: #edf4f8;
+  --paper-bright: #f9fcff;
+  --line: #cbd9e5;
+  --orange: #2f9fdf;
+  --orange-deep: #1672ae;
+  --green: #26866f;
+  --red: #c14f4a;
+  --font-display: var(--app-font-sans);
 }
 
 * { box-sizing: border-box; }
