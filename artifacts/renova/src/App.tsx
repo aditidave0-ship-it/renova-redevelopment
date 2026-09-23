@@ -616,11 +616,8 @@ const trustBenefits = [
 ];
 
 function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const exitTimerRef = useRef<number | null>(null);
-  const [isMuted, setIsMuted] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const finishIntro = () => {
     if (isExiting) return;
@@ -637,21 +634,6 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
     };
   }, []);
 
-  const toggleSound = () => {
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    if (videoRef.current) {
-      videoRef.current.muted = nextMuted;
-      void videoRef.current.play().catch(() => undefined);
-    }
-  };
-
-  const updateProgress = () => {
-    const video = videoRef.current;
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-    setProgress(Math.min(100, (video.currentTime / video.duration) * 100));
-  };
-
   return (
     <section
       className={`renova-film-intro${isExiting ? ' is-exiting' : ''}`}
@@ -660,14 +642,11 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
       aria-modal="true"
     >
       <video
-        ref={videoRef}
         className="renova-film-video"
         autoPlay
-        muted={isMuted}
+        muted
         playsInline
         preload="metadata"
-        poster="/renova-blueprint-city.webp"
-        onTimeUpdate={updateProgress}
         onEnded={finishIntro}
         onError={finishIntro}
       >
@@ -675,31 +654,8 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
             src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
             type="video/mp4"
           />
-      </video>
-
-      <div className="renova-film-shade" aria-hidden="true" />
-
-      <div className="renova-film-topbar">
-        <div className="renova-film-brand">
-          <strong>RENOVA</strong>
-          <span>A Mumbai redevelopment story</span>
-        </div>
-        <div className="renova-film-controls">
-          <button type="button" onClick={toggleSound} aria-label={isMuted ? 'Turn sound on' : 'Turn sound off'}>
-            {isMuted ? 'Sound on' : 'Sound off'}
-          </button>
-          <button type="button" onClick={finishIntro}>Skip intro</button>
-        </div>
-      </div>
-
-      <div className="renova-film-footer">
-        <div>
-          <span>Existing</span><i aria-hidden="true" /><span>Transformation</span><i aria-hidden="true" /><span>Reimagined</span>
-        </div>
-        <button type="button" onClick={finishIntro}>Enter RENOVA <ArrowUpRight size={15} /></button>
-      </div>
-
-      <div className="renova-film-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
+        </video>
+      <button type="button" className="renova-film-skip" onClick={finishIntro}>Skip Intro <ArrowUpRight size={14} /></button>
     </section>
   );
 }
@@ -726,7 +682,7 @@ function MarketingHome() {
     setShowLogoReveal(false);
   };
   return (
-    <div className="marketing-site stitch-site" id="top">
+    <div className={cn('marketing-site stitch-site', showLogoReveal && 'intro-active')} id="top">
       {showLogoReveal && <CinematicVideoIntro onFinish={finishLogoReveal} />}
       <header className="stitch-header">
         <div className="stitch-header-inner">
