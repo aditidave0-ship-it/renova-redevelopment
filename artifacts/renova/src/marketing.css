@@ -38,6 +38,104 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .renova-film-intro { display: none; }
 }
+
+/* RENOVA Ecosystem Directory */
+.ecosystem-page, .organization-profile-page { --ecosystem-blue: #45b8f4; --ecosystem-ink: #031426; --ecosystem-line: #bfd4e2; }
+.ecosystem-page > main, .organization-profile-page > main { width: min(100%, 1440px); margin: 0 auto; }
+.ecosystem-hero { min-height: 520px; padding: 120px clamp(22px,7vw,96px) 72px; position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; color: #fff; background: radial-gradient(circle at 82% 22%, rgba(69,184,244,.28), transparent 28%), linear-gradient(135deg,#020812 0%,#061e38 58%,#0a4d7d 100%); }
+.ecosystem-hero-grid { position: absolute; inset: 0; z-index: -1; opacity: .17; background-image: linear-gradient(rgba(158,220,251,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(158,220,251,.2) 1px,transparent 1px); background-size: 68px 68px; mask-image: linear-gradient(90deg,#000,transparent 85%); }
+.ecosystem-hero-copy { max-width: 860px; }
+.ecosystem-hero-copy > p { margin: 0 0 22px; color: var(--ecosystem-blue); font: 700 .68rem var(--app-font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.ecosystem-hero h1 { margin: 0; font: 620 clamp(3.1rem,7.6vw,7rem)/.96 var(--app-font-sans); letter-spacing: -.065em; }
+.ecosystem-hero h1 span { display: block; color: transparent; -webkit-text-stroke: 1.2px rgba(221,244,255,.84); }
+.ecosystem-hero-copy > div { max-width: 650px; margin-top: 28px; color: rgba(226,242,251,.7); font-size: 1.02rem; line-height: 1.6; }
+.ecosystem-hero-stat { min-width: 170px; padding: 22px; border-left: 1px solid rgba(157,217,249,.36); }
+.ecosystem-hero-stat strong { display: block; font-size: 3rem; letter-spacing: -.06em; }
+.ecosystem-hero-stat span { display: block; margin-top: 5px; color: rgba(225,241,251,.62); font-size: .72rem; line-height: 1.45; text-transform: uppercase; }
+.ecosystem-directory-shell { padding: 0 clamp(18px,5vw,72px) 88px; background: #edf4f8; }
+.ecosystem-search-panel { padding: 28px; position: relative; z-index: 3; transform: translateY(-42px); border: 1px solid var(--ecosystem-line); border-radius: 7px; background: rgba(249,252,255,.98); box-shadow: 0 24px 70px rgba(3,25,44,.15); }
+.ecosystem-search { height: 62px; padding: 0 20px; display: flex; align-items: center; gap: 13px; color: #0b76b1; border: 1px solid #a9c9dc; border-radius: 4px; background: #fff; }
+.ecosystem-search:focus-within { border-color: #1184c2; box-shadow: 0 0 0 4px rgba(17,132,194,.1); }
+.ecosystem-search input { min-width: 0; width: 100%; height: 100%; color: var(--ecosystem-ink); border: 0; outline: 0; background: transparent; font-size: .95rem; }
+.ecosystem-category-filters { margin-top: 18px; display: flex; gap: 7px; overflow-x: auto; padding-bottom: 3px; }
+.ecosystem-category-filters button { min-height: 36px; padding: 0 13px; flex: 0 0 auto; color: #536b80; border: 1px solid #c4d6e2; border-radius: 999px; background: #f6fafc; font-size: .68rem; font-weight: 750; }
+.ecosystem-category-filters button.active { color: #fff; border-color: #075f98; background: #075f98; }
+.ecosystem-secondary-filters { margin-top: 20px; padding-top: 20px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; border-top: 1px solid #dce6ed; }
+.ecosystem-secondary-filters label { display: grid; gap: 7px; }
+.ecosystem-secondary-filters label span { color: #6b7f91; font: 700 .57rem var(--app-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.ecosystem-secondary-filters select { width: 100%; height: 42px; padding: 0 32px 0 11px; color: #16334b; border: 1px solid #c3d4df; border-radius: 3px; background: #fff; font-size: .72rem; }
+.ecosystem-results-bar { margin: -15px 0 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.ecosystem-results-bar > div { display: flex; align-items: baseline; gap: 8px; }
+.ecosystem-results-bar strong { color: #075f98; font-size: 1.5rem; }
+.ecosystem-results-bar span { color: #5e7487; font-size: .78rem; }
+.ecosystem-results-bar button { display: inline-flex; align-items: center; gap: 6px; color: #075f98; border: 0; background: transparent; font-size: .7rem; font-weight: 750; }
+.ecosystem-card-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.ecosystem-card { min-height: 440px; padding: 23px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #c6d8e4; border-radius: 6px; background: #f9fcff; box-shadow: 0 14px 38px rgba(5,33,55,.06); transition: transform .22s ease,border-color .22s ease,box-shadow .22s ease; }
+.ecosystem-card:hover { transform: translateY(-4px); border-color: #58afd9; box-shadow: 0 24px 55px rgba(5,33,55,.13); }
+.ecosystem-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.ecosystem-monogram { width: 54px; height: 54px; flex: 0 0 auto; display: grid; place-items: center; color: #dff4ff; border: 1px solid rgba(104,197,245,.42); border-radius: 5px; background: linear-gradient(145deg,#092a49,#0876ad); font: 750 .86rem var(--app-font-mono); letter-spacing: .04em; }
+.ecosystem-status { padding: 6px 8px; display: inline-flex; align-items: center; gap: 5px; color: #577083; border: 1px solid #c7d6df; border-radius: 2px; background: #eef4f7; font: 750 .54rem var(--app-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.ecosystem-status.verified { color: #075f98; border-color: #8bc6e5; background: #def3fd; }
+.ecosystem-card-title { margin-top: 22px; }
+.ecosystem-card-title p { margin: 0 0 7px; color: #0871aa; font: 700 .61rem var(--app-font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.ecosystem-card-title h2 { margin: 0; min-height: 56px; color: #061a2f; font-size: 1.22rem; line-height: 1.18; letter-spacing: -.025em; }
+.ecosystem-card-title > span { margin-top: 10px; display: flex; align-items: center; gap: 6px; color: #627789; font-size: .72rem; }
+.ecosystem-tags { min-height: 66px; margin: 18px 0; display: flex; align-content: flex-start; flex-wrap: wrap; gap: 6px; }
+.ecosystem-tags span,.organization-detail-chip { padding: 6px 8px; color: #24536f; border: 1px solid #cce0ec; border-radius: 2px; background: #edf7fb; font-size: .62rem; }
+.ecosystem-card dl { margin: 0; display: grid; gap: 11px; }
+.ecosystem-card dl > div { display: grid; grid-template-columns: 82px 1fr; gap: 9px; }
+.ecosystem-card dt { color: #7b8e9d; font: 700 .55rem var(--app-font-mono); text-transform: uppercase; }
+.ecosystem-card dd { margin: 0; color: #3d566a; font-size: .68rem; line-height: 1.4; }
+.ecosystem-card-actions { margin-top: auto; padding-top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid #dce7ee; }
+.ecosystem-card-actions a { display: inline-flex; align-items: center; gap: 5px; color: #076da7; font-size: .68rem; font-weight: 800; }
+.ecosystem-card-actions a:first-child { color: #fff; padding: 10px 12px; border-radius: 2px; background: #075f98; }
+.ecosystem-empty { margin-top: 0; }
+.ecosystem-list-cta { margin: 0 clamp(18px,5vw,72px) 90px; padding: 46px; display: flex; align-items: center; justify-content: space-between; gap: 38px; color: #fff; border-radius: 6px; background: linear-gradient(120deg,#031427,#0a527f); }
+.ecosystem-list-cta p { margin: 0 0 8px; color: var(--ecosystem-blue); font: 700 .62rem var(--app-font-mono); text-transform: uppercase; }
+.ecosystem-list-cta h2 { margin: 0; font: 620 clamp(1.8rem,4vw,3rem)/1.05 var(--app-font-sans); letter-spacing: -.045em; }
+.ecosystem-list-cta span { margin-top: 10px; display: block; color: rgba(224,241,250,.66); font-size: .82rem; }
+.ecosystem-list-cta .stitch-primary-button { flex: 0 0 auto; color: #031427; background: #fff; border-color: #fff; }
+
+.organization-profile-hero { padding: 105px clamp(22px,7vw,96px) 58px; color: #fff; background: radial-gradient(circle at 80% 5%,rgba(63,177,235,.22),transparent 28%),#020812; }
+.organization-profile-heading { margin-top: 55px; display: flex; align-items: flex-start; gap: 24px; }
+.organization-profile-heading .ecosystem-monogram { width: 82px; height: 82px; font-size: 1.15rem; }
+.organization-profile-heading p { margin: 14px 0 5px; color: var(--ecosystem-blue); font: 700 .64rem var(--app-font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.organization-profile-heading h1 { max-width: 920px; margin: 0; font: 620 clamp(2.5rem,6vw,5.3rem)/1 var(--app-font-sans); letter-spacing: -.06em; }
+.organization-profile-heading > div > div { margin-top: 15px; display: flex; align-items: center; gap: 6px; color: rgba(224,241,250,.66); font-size: .78rem; }
+.organization-profile-disclaimer { max-width: 720px; margin: 35px 0 0 106px; padding-top: 18px; color: rgba(218,237,248,.55); border-top: 1px solid rgba(149,210,242,.18); font-size: .72rem; line-height: 1.55; }
+.organization-profile-layout { padding: 60px clamp(18px,5vw,72px) 90px; display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 24px; background: #edf4f8; }
+.organization-profile-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.organization-profile-content article { min-height: 210px; padding: 27px; border: 1px solid #c6d8e4; border-radius: 5px; background: #f9fcff; }
+.organization-profile-content article > p,.organization-profile-aside > div > p { margin: 0 0 22px; color: #0870aa; font: 700 .58rem var(--app-font-mono); letter-spacing: .09em; text-transform: uppercase; }
+.organization-profile-content h2 { margin: 0 0 18px; color: #061a2f; font: 620 1.35rem var(--app-font-sans); letter-spacing: -.03em; }
+.organization-profile-content article > div { color: #587084; font-size: .8rem; line-height: 1.65; }
+.organization-detail-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.organization-information-missing { color: #788b9b; font-style: italic; }
+.organization-profile-aside { display: grid; align-content: start; gap: 12px; }
+.organization-profile-aside > div,.organization-list-link { padding: 24px; border: 1px solid #c6d8e4; border-radius: 5px; background: #f9fcff; }
+.organization-profile-aside > div:first-child a { padding: 12px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #075f98; border-top: 1px solid #dce7ee; font-size: .72rem; font-weight: 750; }
+.organization-claim-card { color: #fff; border-color: #0d5b8a !important; background: linear-gradient(145deg,#04182d,#0a4f7b) !important; }
+.organization-claim-card > svg { color: var(--ecosystem-blue); }
+.organization-claim-card h2 { margin: 16px 0 9px; font-size: 1.3rem; }
+.organization-claim-card p { margin: 0 0 20px; color: rgba(225,241,250,.68); font-size: .76rem; line-height: 1.55; }
+.organization-claim-card a,.organization-list-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #fff; font-size: .72rem; font-weight: 800; }
+.organization-claim-card a { padding: 12px 14px; color: #041427; border-radius: 2px; background: #fff; }
+.organization-list-link { color: #075f98; }
+
+@media (max-width: 1050px) { .ecosystem-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .ecosystem-secondary-filters { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 760px) {
+  .ecosystem-hero { min-height: 620px; padding-top: 100px; align-items: flex-start; flex-direction: column; justify-content: flex-end; gap: 30px; }
+  .ecosystem-hero h1 { font-size: clamp(3rem,14vw,4.8rem); }
+  .ecosystem-hero-stat { border-left: 0; border-top: 1px solid rgba(157,217,249,.36); }
+  .ecosystem-search-panel { padding: 18px; }
+  .ecosystem-secondary-filters,.ecosystem-card-grid,.organization-profile-layout,.organization-profile-content { grid-template-columns: 1fr; }
+  .ecosystem-card { min-height: 410px; }
+  .ecosystem-list-cta { padding: 32px 24px; align-items: flex-start; flex-direction: column; }
+  .organization-profile-heading { flex-direction: column; }
+  .organization-profile-disclaimer { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) { .ecosystem-card { transition: none; } }
 .stitch-site {
   --stitch-ink: #07172f;
   --stitch-copper: #b35018;
