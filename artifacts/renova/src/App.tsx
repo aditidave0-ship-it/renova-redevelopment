@@ -526,14 +526,22 @@ function Regulations() {
         <div className="drawer-note"><AlertTriangle size={18} /><p>Applicable rules depend on land tenure, building category and authority. Confirm your route with qualified legal and technical advisors.</p></div>
       </ExperienceDrawer>
       <ExperienceDrawer open={Boolean(activeRegulation)} onClose={() => setActiveRegulationId(null)} eyebrow={`Guidance note · ${activeRegulation?.code || ''}`} title={activeRegulation?.title || 'Regulation guidance'}>
-        {activeRegulation && <div className="regulation-detail"><div className="regulation-detail-status"><StatusPill tone="green">{activeRegulation.status}</StatusPill><span>Reviewed {activeRegulation.updatedAt}</span></div><p className="regulation-detail-lead">{activeRegulation.summary}</p><div className="profile-facts"><div><span>Authority</span><strong>{activeRegulation.authority}</strong></div><div><span>RENOVA status</span><strong>Orientation available</strong></div></div><div><p className="drawer-label">Committee questions to confirm</p><ul><li>Does the society and its land fall within this pathway?</li><li>Which documents establish eligibility and development potential?</li><li>Which authority approvals and member resolutions apply?</li><li>What should be independently verified before proposals are compared?</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA presents plain-language orientation. The governing notification, circular or regulation and professional advice remain authoritative.</p></div><Link href="/professionals?role=Legal" className="button button-dark button-full">Find a legal advisor <ArrowUpRight size={15} /></Link></div>}
+        {activeRegulation && <div className="regulation-detail"><div className="regulation-detail-status"><StatusPill tone="green">{activeRegulation.status}</StatusPill><span>Reviewed {activeRegulation.updatedAt}</span></div><p className="regulation-detail-lead">{activeRegulation.summary}</p><div className="profile-facts"><div><span>Authority</span><strong>{activeRegulation.authority}</strong></div><div><span>RENOVA status</span><strong>Orientation available</strong></div></div><div><p className="drawer-label">Committee questions to confirm</p><ul><li>Does the society and its land fall within this pathway?</li><li>Which documents establish eligibility and development potential?</li><li>Which authority approvals and member resolutions apply?</li><li>What should be independently verified before proposals are compared?</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA presents plain-language orientation. The governing notification, circular or regulation and professional advice remain authoritative.</p></div><Link href="/professionals/legal" className="button button-dark button-full">Find a legal advisor <ArrowUpRight size={15} /></Link></div>}
       </ExperienceDrawer>
     </div>
   );
 }
 
 const publicNav = [
-  { href: '/', label: 'Home' },
+  { href: '/', label: 'Home', items: [
+    { href: '/#top', label: 'Hero' },
+    { href: '/#about', label: 'What is RENOVA?' },
+    { href: '/#listings', label: 'Who Are You?' },
+    { href: '/#opportunities', label: 'Featured Opportunities' },
+    { href: '/#how-it-works', label: 'How RENOVA Works' },
+    { href: '/#why-renova', label: 'Why RENOVA' },
+    { href: '/#requirement', label: 'CTA' },
+  ] },
   { href: '/projects', label: 'Projects', items: [
     { href: '/projects', label: 'All Projects' },
     { href: '/projects/current', label: 'Current Opportunities' },
@@ -552,10 +560,10 @@ const publicNav = [
     { href: '/join/developer', label: 'Register Developer' },
   ] },
   { href: '/professionals', label: 'Professionals', items: [
-    { href: '/professionals?role=PMC', label: 'PMCs' },
-    { href: '/professionals?role=Architect', label: 'Architects' },
-    { href: '/professionals?role=Legal', label: 'Legal' },
-    { href: '/professionals', label: 'Other Professionals' },
+    { href: '/professionals/pmcs', label: 'PMCs' },
+    { href: '/professionals/architects', label: 'Architects' },
+    { href: '/professionals/legal', label: 'Legal' },
+    { href: '/professionals/others', label: 'Other Professionals' },
   ] },
   { href: '/join', label: 'Join RENOVA', items: [
     { href: '/assessment', label: 'Society Registration' },
@@ -596,10 +604,10 @@ function PublicNavigation({ menuOpen, onNavigate }: { menuOpen: boolean; onNavig
 }
 
 const stakeholderCards = [
-  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/professionals?role=Developer' },
+  { title: 'Find a Developer', detail: 'Explore verified developers suited to your society and project.', icon: Building2, href: '/developers' },
   { title: 'Explore Societies', detail: 'Discover genuine redevelopment opportunities across Mumbai.', icon: Landmark, href: '#opportunities' },
-  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals?role=PMC' },
-  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals?role=Architect' },
+  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/professionals/pmcs' },
+  { title: 'Find an Architect', detail: 'Connect with practices ready to shape what comes next.', icon: Compass, href: '/professionals/architects' },
 ];
 
 const featuredOpportunities = [
@@ -896,6 +904,62 @@ const publicPageMap: Record<string, PublicPageData> = {
     ],
     ctaLabel: 'Register as a developer', ctaHref: '/join/developer',
   },
+  '/professionals': {
+    eyebrow: 'RENOVA professional network',
+    title: 'The right expertise for every redevelopment stage.',
+    intro: 'Discover PMCs, architects, legal advisors and specialist professionals who understand Mumbai society redevelopment.',
+    highlights: [
+      { title: 'PMCs', detail: 'Feasibility, tendering, developer evaluation, project controls and society representation.' },
+      { title: 'Architects', detail: 'Planning potential, DCPR strategy, design, approvals and redevelopment coordination.' },
+      { title: 'Legal', detail: 'Title, conveyance, agreements, member protection and redevelopment documentation.' },
+      { title: 'Other Professionals', detail: 'Structural, financial, valuation, liaison and specialist project support.' },
+    ],
+    ctaLabel: 'Join as a professional', ctaHref: '/join',
+  },
+  '/professionals/pmcs': {
+    eyebrow: 'Professional network · PMCs',
+    title: 'Bring structure and independent oversight to redevelopment.',
+    intro: 'Connect with project management consultants experienced in feasibility, tendering, evaluation, execution monitoring and society communication.',
+    highlights: [
+      { title: 'Feasibility & readiness', detail: 'Assess property information, planning potential, documentation and member priorities.' },
+      { title: 'Tender & selection', detail: 'Prepare scope, invite proposals and compare developers through consistent criteria.' },
+      { title: 'Project oversight', detail: 'Track approvals, milestones, quality, reporting and handover obligations.' },
+    ],
+    ctaLabel: 'Register as a PMC', ctaHref: '/join/pmc',
+  },
+  '/professionals/architects': {
+    eyebrow: 'Professional network · Architects',
+    title: 'Translate redevelopment potential into better communities.',
+    intro: 'Find architects who combine planning knowledge, design quality and practical coordination for Mumbai redevelopment projects.',
+    highlights: [
+      { title: 'Potential studies', detail: 'Interpret site context, development controls and realistic built-form opportunity.' },
+      { title: 'Planning & design', detail: 'Balance member needs, sale potential, amenities, circulation and buildability.' },
+      { title: 'Approvals coordination', detail: 'Support the technical documentation and authority process needed to progress.' },
+    ],
+    ctaLabel: 'Register as an architect', ctaHref: '/join/architect',
+  },
+  '/professionals/legal': {
+    eyebrow: 'Professional network · Legal',
+    title: 'Protect the society before, during and after appointment.',
+    intro: 'Connect with legal professionals experienced in society title, conveyance, tender safeguards, development agreements and member rights.',
+    highlights: [
+      { title: 'Title & authority', detail: 'Review ownership, conveyance, society records and the legal ability to proceed.' },
+      { title: 'Appointment safeguards', detail: 'Strengthen tender conditions, selection records, guarantees and development terms.' },
+      { title: 'Member protection', detail: 'Clarify rent, corpus, area, timelines, defaults, insurance and handover obligations.' },
+    ],
+    ctaLabel: 'Contact RENOVA', ctaHref: '/contact',
+  },
+  '/professionals/others': {
+    eyebrow: 'Professional network · Specialists',
+    title: 'Complete the redevelopment team with specialist expertise.',
+    intro: 'Find the technical, financial and coordination support needed for clearer decisions and stronger project delivery.',
+    highlights: [
+      { title: 'Structural & technical', detail: 'Audits, surveys, engineering review, quality control and specialist certification.' },
+      { title: 'Financial & valuation', detail: 'Project economics, proposal comparison, taxation, valuation and member guidance.' },
+      { title: 'Liaison & coordination', detail: 'Documentation, authority follow-up and specialist support across the project lifecycle.' },
+    ],
+    ctaLabel: 'Introduce your practice', ctaHref: '/contact',
+  },
   '/join': {
     eyebrow: 'Join RENOVA',
     title: 'Choose how you want to participate.',
@@ -988,7 +1052,7 @@ const publicPageMap: Record<string, PublicPageData> = {
       { title: 'Execution strength', detail: 'Assess approvals capability, funding and construction systems.' },
       { title: 'Member protection', detail: 'Verify guarantees, insurance, default provisions and reporting.' },
     ],
-    ctaLabel: 'Find verified developers', ctaHref: '/professionals?role=Developer',
+    ctaLabel: 'Find verified developers', ctaHref: '/developers',
   },
   '/knowledge-centre/faqs': {
     eyebrow: 'Frequently asked questions',
