@@ -700,10 +700,14 @@ function MarketingHome() {
 
       <main>
         <section className="stitch-hero" aria-labelledby="renova-hero-title">
-          <div className="stitch-hero-image" role="img" aria-label="A contemporary residential redevelopment tower in Mumbai" />
+          <div className="stitch-hero-image" role="img" aria-label="A 44-storey Mumbai residential tower transforming from architectural blueprint into completed reality" />
           <div className="stitch-hero-overlay" />
           <div className="stitch-hero-frame" aria-hidden="true" />
           <div className="stitch-hero-meta" aria-hidden="true"><span>01 / Mumbai</span><span>19.0760° N&nbsp;&nbsp;72.8777° E</span></div>
+          <div className="stitch-hero-transformation" aria-hidden="true">
+            <span>Existing</span><i>↓</i><span>Reimagined</span><i>↓</i><span>Renewed</span>
+            <small>The same property.<br />A new possibility.</small>
+          </div>
 
           <div className="stitch-hero-copy">
             <p className="stitch-eyebrow">Redevelopment, reimagined.</p>
