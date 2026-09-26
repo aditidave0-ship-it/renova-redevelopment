@@ -60,7 +60,7 @@ import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-bound
 import NotFound from '@/pages/not-found';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { getOrganization, organizationCategories, organizations, type Organization } from '@/data/organizations';
+import { getOrganization, organizationCategories, organizationDataVersion, organizations, type Organization } from '@/data/organizations';
 import './index.css';
 import './marketing.css';
 import './requirement.css';
@@ -1254,6 +1254,7 @@ function EcosystemDirectory() {
           </div>
 
           <div className="ecosystem-results-bar"><div><strong>{filtered.length}</strong><span>{filtered.length === 1 ? 'organization' : 'organizations'} found</span></div>{hasFilters && <button type="button" onClick={reset}><RotateCcw size={14} /> Reset filters</button>}</div>
+          <div className="ecosystem-source-note"><ShieldCheck size={17} /><p><strong>Neutral, source-backed directory</strong><span>Profiles are compiled from official public sources and remain PUBLIC PROFILE until independently verified by RENOVA. Database reviewed {organizationDataVersion}.</span></p></div>
           {filtered.length ? <div className="ecosystem-card-grid">
             {filtered.map((organization) => <article className="ecosystem-card" key={organization.slug}>
               <div className="ecosystem-card-top"><OrganizationMonogram organization={organization} /><span className={cn('ecosystem-status', organization.profileStatus === 'verified' && 'verified')}>{organization.profileStatus === 'verified' ? <><BadgeCheck size={13} /> RENOVA VERIFIED</> : 'PUBLIC PROFILE'}</span></div>
@@ -1300,7 +1301,8 @@ function OrganizationProfilePage() {
             <article><p>06 · Company information</p><h2>Company information</h2><div>{organization.companyInformation || 'Information not yet provided'}</div></article>
           </div>
           <aside className="organization-profile-aside">
-            <div><p>Contact / website</p><a href={organization.website} target="_blank" rel="noreferrer">Visit official website <ExternalLink size={15} /></a><a href={organization.sourceUrl} target="_blank" rel="noreferrer">View public source <ExternalLink size={15} /></a></div>
+            <div><p>Contact / website</p><a href={organization.website} target="_blank" rel="noreferrer">Visit official website <ExternalLink size={15} /></a></div>
+            <div className="organization-source-card"><p>Public sources</p>{organization.sources.map((source) => <a href={source.url} target="_blank" rel="noreferrer" key={source.url}><span>{source.title}<small>Official website · reviewed {source.reviewedAt}</small></span><ExternalLink size={15} /></a>)}</div>
             <div className="organization-claim-card"><ShieldCheck size={22} /><h2>Is this your company?</h2><p>Claim this profile to submit accurate company information and begin RENOVA verification.</p><Link href="/contact">Claim this profile <ArrowUpRight size={15} /></Link></div>
             <Link href="/contact" className="organization-list-link">List Your Organization on RENOVA <ArrowUpRight size={15} /></Link>
           </aside>
