@@ -258,7 +258,7 @@ function ComparisonPage({ role }: { role: PlatformRole }) {
 }
 
 function roleFromUrl(location: string): PlatformRole {
-  const queryRole = new URLSearchParams(location.split('?')[1] || '').get('role');
+  const queryRole = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('role');
   if (queryRole === 'developer' || queryRole === 'pmc' || queryRole === 'society') return queryRole;
   if (location.includes('/developer')) return 'developer';
   if (location.includes('/pmc')) return 'pmc';
