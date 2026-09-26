@@ -13,6 +13,47 @@ html { scroll-behavior: smooth; }
   visibility: visible;
   transition: opacity .9s cubic-bezier(.65,0,.35,1), visibility .9s;
 }
+
+/* Platform definition — connects the public discovery layer to RENOVA's workflow product. */
+.stitch-platform-definition {
+  width: min(100% - 36px, 1180px);
+  margin: 0 auto;
+  padding: 78px 0 70px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px 70px;
+  color: var(--renova-white, #f5fbff);
+  border-bottom: 1px solid rgba(162,215,244,.16);
+}
+.stitch-platform-definition > div:first-child > p {
+  margin: 0 0 13px;
+  color: var(--renova-sky, #61d9ff);
+  font: 500 .62rem 'DM Mono', monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.stitch-platform-definition h2 {
+  margin: 0;
+  font: 600 clamp(2.1rem, 4vw, 3.8rem)/1.02 'Playfair Display', serif;
+  letter-spacing: -.045em;
+}
+.stitch-platform-definition-copy { align-self: end; }
+.stitch-platform-definition-copy > p { margin: 0 0 22px; max-width: 560px; color: rgba(220,238,249,.72); line-height: 1.72; }
+.stitch-platform-definition-copy > a { display: inline-flex; align-items: center; gap: 7px; color: #fff; font-size: .76rem; font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(97,217,255,.62); padding-bottom: 6px; }
+.stitch-platform-flow { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(9, 1fr); border: 1px solid rgba(162,215,244,.16); background: rgba(8,35,59,.55); }
+.stitch-platform-flow span { min-width: 0; padding: 16px 10px; display: flex; flex-direction: column; gap: 5px; border-right: 1px solid rgba(162,215,244,.13); }
+.stitch-platform-flow span:last-child { border-right: 0; }
+.stitch-platform-flow small { color: rgba(136,184,211,.7); font: 500 .5rem 'DM Mono', monospace; }
+.stitch-platform-flow strong { color: rgba(241,249,255,.9); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .stitch-platform-definition { padding: 58px 0; grid-template-columns: 1fr; gap: 24px; }
+  .stitch-platform-definition-copy { align-self: auto; }
+  .stitch-platform-flow { grid-template-columns: repeat(3, 1fr); }
+  .stitch-platform-flow span:nth-child(3n) { border-right: 0; }
+  .stitch-platform-flow span { border-bottom: 1px solid rgba(162,215,244,.13); }
+  .stitch-platform-flow span:nth-last-child(-n + 3) { border-bottom: 0; }
+}
 .renova-film-intro.is-exiting { opacity: 0; visibility: hidden; }
 .renova-film-video { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center; background: #020812; }
 .renova-film-skip {
