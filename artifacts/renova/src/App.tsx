@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity as ActivityIcon,
@@ -66,6 +66,7 @@ import './marketing.css';
 import './requirement.css';
 
 const queryClient = new QueryClient();
+const PlatformRouter = lazy(() => import('@/platform/PlatformApp').then((module) => ({ default: module.PlatformRouter })));
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
@@ -557,6 +558,7 @@ const publicNav = [
     { href: '/ecosystem?category=Architects', label: 'Architects' },
     { href: '/ecosystem?category=Legal', label: 'Legal & Specialists' },
   ] },
+  { href: '/platform', label: 'Platform' },
   { href: '/societies', label: 'For Societies', items: [
     { href: '/societies', label: 'Why RENOVA' },
     { href: '/societies/how-it-works', label: 'How It Works' },
@@ -722,6 +724,20 @@ function MarketingHome() {
           <div className="stitch-hero-word" aria-hidden="true">RENOVA</div>
           <div className="stitch-hero-index" aria-label="RENOVA connects the redevelopment ecosystem">
             <span>For societies</span><span>For developers</span><span>For professionals</span><span>Explore RENOVA <ArrowUpRight size={14} /></span>
+          </div>
+        </section>
+
+        <section className="stitch-platform-definition" aria-labelledby="platform-definition-title">
+          <div>
+            <p>More than a directory</p>
+            <h2 id="platform-definition-title">The digital infrastructure<br />for redevelopment.</h2>
+          </div>
+          <div className="stitch-platform-definition-copy">
+            <p>RENOVA helps societies, developers and PMCs move from discovery to a shared, permission-controlled project workspace—without losing proposals, documents or decisions across fragmented channels.</p>
+            <Link href="/platform">Explore the RENOVA platform <ArrowUpRight size={15} /></Link>
+          </div>
+          <div className="stitch-platform-flow" aria-label="RENOVA redevelopment workflow">
+            {['Discover', 'Verify', 'Connect', 'Opportunity', 'Proposal', 'Compare', 'Select', 'Collaborate', 'Track'].map((item, index) => <span key={item}><small>{String(index + 1).padStart(2, '0')}</small><strong>{item}</strong></span>)}
           </div>
         </section>
 
@@ -1446,6 +1462,7 @@ function Router() {
   const [location] = useLocation();
   const pathname = location.split('?')[0];
   if (pathname === '/') return <MarketingHome />;
+  if (pathname === '/platform' || pathname.startsWith('/platform/') || pathname.startsWith('/dashboard/')) return <Suspense fallback={<LoadingPage label="Preparing the RENOVA platform" />}><PlatformRouter /></Suspense>;
   if (pathname === '/assessment') return <Assessment />;
   if (pathname.startsWith('/projects')) return <ProjectsDirectory />;
   if (pathname.startsWith('/ecosystem/')) return <OrganizationProfilePage />;
