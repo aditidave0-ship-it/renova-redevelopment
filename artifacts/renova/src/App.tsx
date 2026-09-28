@@ -649,13 +649,14 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const isSmallScreen = window.matchMedia('(max-width: 760px)').matches;
     fallbackTimerRef.current = window.setTimeout(() => {
       const video = videoRef.current;
       if (!video || video.readyState < 2 || video.paused) {
         setShowFallback(true);
-        window.setTimeout(finishIntro, 700);
+        window.setTimeout(finishIntro, isSmallScreen ? 300 : 700);
       }
-    }, 1800);
+    }, isSmallScreen ? 950 : 1800);
     const video = videoRef.current;
     if (video) {
       video.play().catch(() => {
