@@ -651,11 +651,17 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
     document.body.style.overflow = 'hidden';
     fallbackTimerRef.current = window.setTimeout(() => {
       const video = videoRef.current;
-      if (!video || video.readyState < 2 || video.paused) setShowFallback(true);
-    }, 2500);
+      if (!video || video.readyState < 2 || video.paused) {
+        setShowFallback(true);
+        window.setTimeout(finishIntro, 700);
+      }
+    }, 1800);
     const video = videoRef.current;
     if (video) {
-      video.play().catch(() => setShowFallback(true));
+      video.play().catch(() => {
+        setShowFallback(true);
+        window.setTimeout(finishIntro, 350);
+      });
     }
     return () => {
       document.body.style.overflow = previousOverflow;
