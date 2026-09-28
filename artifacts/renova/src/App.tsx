@@ -635,7 +635,10 @@ const trustBenefits = [
 
 function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
   const exitTimerRef = useRef<number | null>(null);
+  const fallbackTimerRef = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isExiting, setIsExiting] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   const finishIntro = () => {
     if (isExiting) return;
@@ -646,9 +649,14 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    fallbackTimerRef.current = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < 2 || video.paused) setShowFallback(true);
+    }, 2500);
     return () => {
       document.body.style.overflow = previousOverflow;
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
+      if (fallbackTimerRef.current) window.clearTimeout(fallbackTimerRef.current);
     };
   }, []);
 
@@ -660,19 +668,29 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
       aria-modal="true"
     >
       <video
+        ref={videoRef}
         className="renova-film-video"
         autoPlay
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
+        onPlay={() => setShowFallback(false)}
         onEnded={finishIntro}
-        onError={finishIntro}
+        onError={() => setShowFallback(true)}
       >
-          <source
-            src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
-            type="video/mp4"
-          />
-        </video>
+        <source
+          src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
+          type="video/mp4"
+        />
+      </video>
+      {showFallback && (
+        <div className="renova-film-fallback" role="status">
+          <span>RENOVA</span>
+          <strong>The same property. A new possibility.</strong>
+          <p>The intro film is taking longer to load on this connection.</p>
+          <button type="button" className="renova-film-enter" onClick={finishIntro}>Enter RENOVA <ArrowUpRight size={14} /></button>
+        </div>
+      )}
       <button type="button" className="renova-film-skip" onClick={finishIntro}>Skip Intro <ArrowUpRight size={14} /></button>
     </section>
   );
