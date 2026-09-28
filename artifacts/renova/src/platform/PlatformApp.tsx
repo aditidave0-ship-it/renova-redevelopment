@@ -46,6 +46,7 @@ import {
   type PlatformRole,
 } from '@/data/platform-demo';
 import './platform.css';
+import { OpportunityBuilder, OpportunityDrafts } from './OpportunityBuilder';
 
 const roleIcons = { society: Building2, developer: BriefcaseBusiness, pmc: ClipboardCheck } as const;
 
@@ -57,7 +58,7 @@ const roleDetails: Record<PlatformRole, { heading: string; detail: string; actio
 
 const roleNavigation: Record<PlatformRole, Array<{ label: string; icon: typeof Home }>> = {
   society: [
-    { label: 'Overview', icon: LayoutDashboard }, { label: 'My society', icon: Building2 }, { label: 'Journey', icon: Compass },
+    { label: 'Overview', icon: LayoutDashboard }, { label: 'Opportunity drafts', icon: FileText }, { label: 'My society', icon: Building2 }, { label: 'Journey', icon: Compass },
     { label: 'Discover', icon: Search }, { label: 'Proposals', icon: FileCheck2 }, { label: 'Compare', icon: SlidersHorizontal },
     { label: 'Documents', icon: FolderLock }, { label: 'Messages', icon: MessageSquareText }, { label: 'Activity', icon: Activity },
   ],
@@ -92,6 +93,7 @@ function PlatformGateway() {
           <p>RENOVA platform</p>
           <h1>The digital infrastructure<br />for <em>redevelopment.</em></h1>
           <span>Discover opportunities. Connect stakeholders. Compare proposals. Manage the journey.</span>
+          <div className="brief-gateway-action"><Link href="/platform/opportunities" className="platform-primary-button">Prepare a society opportunity <ArrowRight size={15} /></Link><p>Save a draft on your browser and download your brief.</p></div>
           <div className="platform-flow" aria-label="RENOVA platform workflow">
             {['Discover', 'Verify', 'Connect', 'Opportunity', 'Proposal', 'Compare', 'Select', 'Collaborate', 'Track'].map((item, index) => <div key={item}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item}</strong>{index < 8 ? <ArrowRight size={14} /> : null}</div>)}
           </div>
@@ -135,7 +137,7 @@ function PlatformShell({ role, children, active = 'Overview' }: { role: Platform
         <label className="platform-role-switcher"><span className={`platform-avatar role-${role}`}>{copy.initials}</span><span><small>Viewing as</small><strong>{copy.organization}</strong></span><ChevronDown size={15} /><select value={role} onChange={(event) => switchRole(event.target.value as PlatformRole)} aria-label="Switch demo role"><option value="society">Society</option><option value="developer">Developer</option><option value="pmc">PMC</option></select></label>
         <p className="platform-nav-caption">{copy.label}</p>
         <nav aria-label={`${copy.label} navigation`}>
-          {roleNavigation[role].map(({ label, icon: Icon }) => <button type="button" className={active === label ? 'active' : ''} key={label}><Icon size={17} /><span>{label}</span>{label === 'Messages' ? <i>2</i> : null}</button>)}
+          {roleNavigation[role].map(({ label, icon: Icon }) => <button type="button" onClick={label === 'Opportunity drafts' ? () => setLocation('/platform/opportunities') : undefined} className={active === label ? 'active' : ''} key={label}><Icon size={17} /><span>{label}</span>{label === 'Messages' ? <i>2</i> : null}</button>)}
         </nav>
         <div className="platform-sidebar-project"><span><Building2 size={17} /></span><div><small>Active project</small><strong>ABC CHS Redevelopment</strong></div><ChevronRight size={15} /></div>
         <div className="platform-sidebar-bottom"><Link href="/platform"><Compass size={16} /> Switch preview</Link><Link href="/"><Home size={16} /> RENOVA website</Link></div>
@@ -161,6 +163,7 @@ function SocietyDashboard() {
   const currentIndex = journeyStages.findIndex((stage) => stage.id === demoProject.stage);
   return <PlatformShell role="society">
     <DashboardHeading role="society" title="Good evening, ABC CHS committee." detail="Your opportunity is active. Two structured proposals are ready for factual comparison." action={<ProjectLink role="society" />} />
+    <div className="brief-society-action"><Link href="/platform/opportunities/new" className="platform-primary-button">Create your society brief <ArrowRight size={15} /></Link><Link href="/platform/opportunities" className="platform-secondary-button">My saved drafts</Link></div>
     <section className="platform-metrics">
       <article className="platform-metric-primary"><span>Current stage</span><strong>06 <small>/ 08</small></strong><p>Proposal comparison</p><i style={{ '--progress': '75%' } as React.CSSProperties} /></article>
       <article><span>Developer proposals</span><strong>2</strong><p><CheckCircle2 size={14} /> Both submitted</p></article>
@@ -187,7 +190,7 @@ function DeveloperDashboard() {
     <section className="platform-panel platform-marketplace"><div className="platform-panel-heading"><div><p>Opportunity marketplace</p><h2>Society opportunities matched to your preferences.</h2></div><Link href="/projects/current">Public opportunity directory <ArrowUpRight size={14} /></Link></div><div className="platform-market-toolbar"><label><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search location, society or status" /></label><button type="button"><SlidersHorizontal size={16} /> Filters</button></div><div className="platform-opportunity-list">{opportunities.map((item) => <article key={item.id}><span className="platform-opportunity-mark"><Building2 size={20} /></span><div><span className="platform-tag blue">{item.status}</span><h3>{item.name}</h3><p><MapPin size={13} /> {item.location} · {item.homes} · {item.type}</p></div><div className="platform-opportunity-fit"><small>Preference match</small><strong>{item.fit}</strong></div><button type="button" className={interested.includes(item.id) ? 'is-interested' : ''} onClick={() => toggleInterest(item.id)}>{interested.includes(item.id) ? <><Check size={14} /> Interest recorded</> : <>Express interest <ArrowUpRight size={14} /></>}</button></article>)}</div></section>
     <div className="platform-dashboard-grid">
       <section className="platform-panel platform-active-project"><div className="platform-panel-heading"><div><p>Connected opportunity</p><h2>{demoProject.name}</h2></div><span className="platform-tag amber">Clarification requested</span></div><p>Your organization can view the approved opportunity details, its own proposal and shared project communications.</p><ProjectLink role="developer" label="Open permitted project view" /></section>
-      <section className="platform-panel platform-permission-card"><LockKeyhole size={24} /><h2>Privacy by role, not by hiding menus.</h2><p>Developer access is scoped to society-approved opportunity information, the organization’s own proposal and shared activity.</p><span>Other developers’ proposals and internal committee notes remain unavailable.</span></section>
+      <section className="platform-panel platform-permission-card"><LockKeyhole size={24} /><h2>Preview of role-specific access.</h2><p>Developer access is scoped to society-approved opportunity information, the organization’s own proposal and shared activity.</p><span>Other developers’ proposals and internal committee notes remain unavailable.</span></section>
     </div>
   </PlatformShell>;
 }
@@ -219,7 +222,7 @@ function SharedProjectWorkspace({ role }: { role: PlatformRole }) {
       <section className="platform-panel platform-project-brief"><div className="platform-panel-heading"><div><p>Opportunity brief</p><h2>Society-approved project information</h2></div><span className="platform-tag blue">Shared with permission</span></div><p>{demoProject.summary}</p><div className="platform-facts">{demoProject.societyFacts.map((fact) => <div key={fact.label}><span>{fact.label}</span><strong>{fact.value}</strong></div>)}</div></section>
       <section className="platform-panel platform-activity"><div className="platform-panel-heading"><div><p>Recent activity</p><h2>Project record</h2></div><button type="button" onClick={() => setTab('Activity')}>View all <ArrowUpRight size={13} /></button></div>{visibleActivity.slice(0, 3).map((item) => <article key={item.title + item.time}><span><Activity size={16} /></span><div><strong>{item.title}</strong><p>{item.detail}</p><small>{item.actor} · {item.time}</small></div></article>)}</section>
     </div><aside>
-      <section className="platform-panel platform-access-card"><LockKeyhole size={22} /><p>Your access lens</p><h2>{roleCopy[role].label}</h2><span>{role === 'society' ? 'Full society view, proposal comparison and committee records.' : role === 'developer' ? 'Approved opportunity data, your proposal and shared project communication.' : 'Technical review, assigned documents and society-approved proposals.'}</span><small>Permissions are represented in the data model and enforced before records are rendered.</small></section>
+      <section className="platform-panel platform-access-card"><LockKeyhole size={22} /><p>Your access lens</p><h2>{roleCopy[role].label}</h2><span>{role === 'society' ? 'Full society view, proposal comparison and committee records.' : role === 'developer' ? 'Approved opportunity data, your proposal and shared project communication.' : 'Technical review, assigned documents and society-approved proposals.'}</span><small>Demo role filters illustrate future access rules. Secure account access is not enabled in this preview.</small></section>
       <section className="platform-panel platform-stakeholder-preview"><div className="platform-panel-heading"><div><p>Participants</p><h2>Project table</h2></div><button type="button" onClick={() => setTab('Stakeholders')}>All</button></div>{demoProject.stakeholders.slice(0, 4).map((item) => <div key={item.id}><span>{item.name.slice(0, 2).toUpperCase()}</span><p><strong>{item.name}</strong><small>{item.role}</small></p><i className={item.status.toLowerCase()}>{item.status}</i></div>)}</section>
     </aside></div> : null}
     {tab === 'Stakeholders' ? <WorkspaceStakeholders role={role} /> : null}
@@ -269,6 +272,9 @@ export function PlatformRouter() {
   const [location] = useLocation();
   const role = roleFromUrl(location);
   const pathname = location.split('?')[0];
+  if (pathname === '/platform/opportunities') return <OpportunityDrafts />;
+  if (pathname === '/platform/opportunities/new') return <OpportunityBuilder key="new" />;
+  if (pathname.startsWith('/platform/opportunities/')) return <OpportunityBuilder key={pathname} id={pathname.split('/')[3]} />;
   if (pathname === '/platform') return <PlatformGateway />;
   if (pathname.startsWith('/platform/project/')) return <SharedProjectWorkspace role={role} />;
   if (pathname === '/platform/compare') return <ComparisonPage role={role} />;
