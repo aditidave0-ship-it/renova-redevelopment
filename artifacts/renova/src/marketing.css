@@ -93,7 +93,7 @@ html { scroll-behavior: smooth; }
 .renova-film-skip {
   position: absolute;
   right: clamp(20px, 4vw, 56px);
-  bottom: clamp(20px, 4vw, 46px);
+  bottom: max(clamp(20px, 4vw, 46px), env(safe-area-inset-bottom));
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -107,6 +107,8 @@ html { scroll-behavior: smooth; }
   font: 600 .65rem var(--app-font-mono);
   letter-spacing: .09em;
   text-transform: uppercase;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: color .2s ease, border-color .2s ease;
 }
 .renova-film-skip:hover { color: #fff; border-color: #fff; }

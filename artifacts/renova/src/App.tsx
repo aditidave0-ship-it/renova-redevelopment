@@ -653,6 +653,10 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
       const video = videoRef.current;
       if (!video || video.readyState < 2 || video.paused) setShowFallback(true);
     }, 2500);
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => setShowFallback(true));
+    }
     return () => {
       document.body.style.overflow = previousOverflow;
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
