@@ -41,7 +41,10 @@ app.use(cookieParser());
 app.use(express.json({ limit: "256kb", strict: true }));
 app.use(express.urlencoded({ extended: true, limit: "256kb" }));
 
-app.use("/api", router);
+app.use("/api", (_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+}, router);
 
 const notFound: RequestHandler = (req, res) => {
   res.status(404).json({ error: "Not found", path: req.path });
