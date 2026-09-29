@@ -48,3 +48,9 @@ pnpm run dev
 Authentication uses server-side sessions in an HTTP-only cookie, scrypt password hashing, and role authorization for `SOCIETY`, `DEVELOPER`, `PMC`, `PROFESSIONAL` and `ADMIN`. Public opportunity responses expose only published opportunity fields; society and organization data is never returned merely because an opportunity exists.
 
 The current legacy dashboard endpoints remain available while the frontend is connected incrementally to the persistent API.
+
+### Live account workspace
+
+The first real frontend flow is available at `/platform/live`: registration/sign in, society opportunity posting, published discovery for developers and PMCs, interest submission, and a society interest inbox. It uses same-origin `/api` requests and HTTP-only session cookies. The demo dashboard remains labeled as a preview.
+
+To expose the account workspace link in the platform gateway, configure `VITE_RENOVA_LIVE_WORKSPACE=true` for the frontend build **after** the production database is provisioned and `/api/*` routes on the RENOVA origin reach `api-server`. The frontend's current static Vercel rewrite serves `index.html` for `/api/*`; configure a same-origin API proxy/rewrite before enabling the link. Run `pnpm --filter @workspace/db push` against the production database before accepting registrations. Until then, the link remains hidden and the direct workspace route reports when the API is unavailable.

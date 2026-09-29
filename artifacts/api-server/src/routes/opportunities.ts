@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { z } from "@workspace/api-zod";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb, requireAuth, requireRole } from "../lib/session";
 import { opportunityInterests, opportunities, organizations, societies } from "@workspace/db";
 
@@ -41,6 +41,22 @@ router.post("/opportunities", requireAuth(), requireRole("SOCIETY"), async (requ
       status: input.publish ? "PUBLISHED" : "DRAFT", publishedAt: input.publish ? new Date() : null,
     }).returning();
     return response.status(201).json({ opportunity });
+  } catch (error) { return next(error); }
+});
+
+router.get("/societies/me/opportunities", requireAuth(), requireRole("SOCIETY"), async (request, response, next) => {
+  try {
+    const database = getDb();
+    const rows = await database.select({
+      id: opportunities.id, title: opportunities.title, location: opportunities.location,
+      description: opportunities.description, memberCount: opportunities.memberCount,
+      buildingAge: opportunities.buildingAge, siteArea: opportunities.siteArea,
+      status: opportunities.status, publishedAt: opportunities.publishedAt,
+    }).from(opportunities)
+      .innerJoin(societies, eq(societies.id, opportunities.societyId))
+      .where(eq(societies.organizationId, request.auth!.organizationId!))
+      .orderBy(desc(opportunities.createdAt));
+    return response.json({ opportunities: rows });
   } catch (error) { return next(error); }
 });
 
