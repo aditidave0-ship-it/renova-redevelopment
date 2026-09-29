@@ -67,6 +67,7 @@ import './requirement.css';
 
 const queryClient = new QueryClient();
 const PlatformRouter = lazy(() => import('@/platform/PlatformApp').then((module) => ({ default: module.PlatformRouter })));
+const LiveWorkspace = lazy(() => import('@/platform/LiveWorkspace').then((module) => ({ default: module.LiveWorkspace })));
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
@@ -1491,6 +1492,7 @@ function Router() {
   const [location] = useLocation();
   const pathname = location.split('?')[0];
   if (pathname === '/') return <MarketingHome />;
+  if (pathname === '/platform/live') return <Suspense fallback={<LoadingPage label="Opening your RENOVA workspace" />}><LiveWorkspace /></Suspense>;
   if (pathname === '/platform' || pathname.startsWith('/platform/') || pathname.startsWith('/dashboard/')) return <Suspense fallback={<LoadingPage label="Preparing the RENOVA platform" />}><PlatformRouter /></Suspense>;
   if (pathname === '/assessment') return <Assessment />;
   if (pathname.startsWith('/projects')) return <ProjectsDirectory />;

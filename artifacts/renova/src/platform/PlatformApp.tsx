@@ -49,6 +49,7 @@ import './platform.css';
 import { OpportunityBuilder, OpportunityDrafts } from './OpportunityBuilder';
 
 const roleIcons = { society: Building2, developer: BriefcaseBusiness, pmc: ClipboardCheck } as const;
+const liveWorkspaceEnabled = import.meta.env.VITE_RENOVA_LIVE_WORKSPACE === 'true';
 
 const roleDetails: Record<PlatformRole, { heading: string; detail: string; action: string }> = {
   society: { heading: 'Society & property owners', detail: 'Create a structured opportunity, discover specialists, compare factual proposal terms and manage the journey.', action: 'Preview society dashboard' },
@@ -94,6 +95,7 @@ function PlatformGateway() {
           <h1>The digital infrastructure<br />for <em>redevelopment.</em></h1>
           <span>Discover opportunities. Connect stakeholders. Compare proposals. Manage the journey.</span>
           <div className="brief-gateway-action"><Link href="/platform/opportunities" className="platform-primary-button">Prepare a society opportunity <ArrowRight size={15} /></Link><p>Save a draft on your browser and download your brief.</p></div>
+          {liveWorkspaceEnabled && <p><Link href="/platform/live" className="platform-secondary-button">Open account workspace <ArrowUpRight size={15} /></Link></p>}
           <div className="platform-flow" aria-label="RENOVA platform workflow">
             {['Discover', 'Verify', 'Connect', 'Opportunity', 'Proposal', 'Compare', 'Select', 'Collaborate', 'Track'].map((item, index) => <div key={item}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item}</strong>{index < 8 ? <ArrowRight size={14} /> : null}</div>)}
           </div>

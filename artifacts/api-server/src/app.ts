@@ -34,7 +34,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
   .filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins.length ? allowedOrigins : true,
+  origin: allowedOrigins.length ? allowedOrigins : false,
   credentials: true,
 }));
 app.use(cookieParser());
@@ -61,6 +61,8 @@ const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
       ? "Validation failed"
       : responseStatus === 413
         ? "Request body is too large"
+        : responseStatus === 503 && error?.message === "DATABASE_URL is not configured"
+          ? "Database is not configured"
         : responseStatus >= 500
           ? "Internal server error"
           : error?.message || "Invalid request",
