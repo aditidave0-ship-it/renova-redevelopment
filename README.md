@@ -41,9 +41,11 @@ Set `DATABASE_URL` before starting the API. The API intentionally remains bootab
 ```bash
 export DATABASE_URL='postgresql://user:password@host:5432/renova'
 export CORS_ORIGINS='http://localhost:5173,https://renova-lovat-mu.vercel.app'
-pnpm --filter @workspace/db push
+pnpm --filter @workspace/db migrate
 pnpm run dev
 ```
+
+The versioned migration is stored in `lib/db/drizzle`. Run `pnpm --filter @workspace/db generate` when the schema changes, review the generated SQL, and run `migrate` against the selected database. `/api/healthz` checks that the process is alive; `/api/readyz` checks the PostgreSQL connection and returns `503` until it is usable.
 
 Authentication uses server-side sessions in an HTTP-only cookie, scrypt password hashing, and role authorization for `SOCIETY`, `DEVELOPER`, `PMC`, `PROFESSIONAL` and `ADMIN`. Public opportunity responses expose only published opportunity fields; society and organization data is never returned merely because an opportunity exists.
 
@@ -53,4 +55,4 @@ The current legacy dashboard endpoints remain available while the frontend is co
 
 The first real frontend flow is available at `/platform/live`: registration/sign in, society opportunity posting, published discovery for developers and PMCs, interest submission, and a society interest inbox. It uses same-origin `/api` requests and HTTP-only session cookies. The demo dashboard remains labeled as a preview.
 
-To expose the account workspace link in the platform gateway, configure `VITE_RENOVA_LIVE_WORKSPACE=true` for the frontend build **after** the production database is provisioned and `/api/*` routes on the RENOVA origin reach `api-server`. The frontend's current static Vercel rewrite serves `index.html` for `/api/*`; configure a same-origin API proxy/rewrite before enabling the link. Run `pnpm --filter @workspace/db push` against the production database before accepting registrations. Until then, the link remains hidden and the direct workspace route reports when the API is unavailable.
+To expose the account workspace link in the platform gateway, configure `VITE_RENOVA_LIVE_WORKSPACE=true` for the frontend build **after** the production database is provisioned and `/api/*` routes on the RENOVA origin reach `api-server`. The frontend's current static Vercel rewrite serves `index.html` for `/api/*`; configure a same-origin API proxy/rewrite before enabling the link. Run `pnpm --filter @workspace/db migrate` against the production database before accepting registrations. Until then, the link remains hidden and the direct workspace route reports when the API is unavailable.
