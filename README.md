@@ -28,5 +28,23 @@ Codespaces will offer to open the forwarded frontend port. Open port `5173` to u
 - `lib/api-spec` — OpenAPI specification
 - `lib/api-client-react` — generated React API client
 - `lib/api-zod` — generated Zod validation schemas
+- `lib/db` — Drizzle/PostgreSQL schema for accounts, organizations, societies, opportunities, interests and sessions
 
-The current product data is seeded in memory for the first working product slice.
+## Backend foundation
+
+The first persistent RENOVA workflow is now implemented behind the existing UI:
+
+`REGISTER → LOGIN → SOCIETY CREATES OPPORTUNITY → DEVELOPER/PMC DISCOVERS → EXPRESS INTEREST → SOCIETY REVIEWS INTEREST`
+
+Set `DATABASE_URL` before starting the API. The API intentionally remains bootable without it for frontend-only previews, but database-backed routes return a clear `503` configuration response until a PostgreSQL database is provisioned.
+
+```bash
+export DATABASE_URL='postgresql://user:password@host:5432/renova'
+export CORS_ORIGINS='http://localhost:5173,https://renova-lovat-mu.vercel.app'
+pnpm --filter @workspace/db push
+pnpm run dev
+```
+
+Authentication uses server-side sessions in an HTTP-only cookie, scrypt password hashing, and role authorization for `SOCIETY`, `DEVELOPER`, `PMC`, `PROFESSIONAL` and `ADMIN`. Public opportunity responses expose only published opportunity fields; society and organization data is never returned merely because an opportunity exists.
+
+The current legacy dashboard endpoints remain available while the frontend is connected incrementally to the persistent API.
