@@ -11,6 +11,11 @@ globalThis.require = createRequire(import.meta.url);
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildAll() {
+  if (process.env.VERCEL_ENV === "production") {
+    const { migrateProduction } = await import("../../lib/db/scripts/migrate-production.mjs");
+    await migrateProduction();
+  }
+
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
