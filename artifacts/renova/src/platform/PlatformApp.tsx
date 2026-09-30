@@ -46,6 +46,7 @@ import {
   type PlatformRole,
 } from '@/data/platform-demo';
 import './platform.css';
+import './dashboard-theme.css';
 import { OpportunityBuilder, OpportunityDrafts } from './OpportunityBuilder';
 
 const roleIcons = { society: Building2, developer: BriefcaseBusiness, pmc: ClipboardCheck } as const;
