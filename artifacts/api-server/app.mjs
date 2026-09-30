@@ -1,4 +1,9 @@
-// Vercel's Express preset picks this root entrypoint. The build creates the
-// bundled application, so the function does not load unbundled TypeScript
-// modules with directory imports under Node's ESM resolver.
-export { default } from "./dist/app.mjs";
+// Vercel detects Express from this entrypoint. Mount the bundled application
+// produced by the build instead of loading unbundled TypeScript modules.
+import express from "express";
+import renovaApp from "./dist/app.mjs";
+
+const app = express();
+app.use(renovaApp);
+
+export default app;
