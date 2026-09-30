@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { timingSafeEqual } from "node:crypto";
 import { z } from "@workspace/api-zod";
 import { and, eq } from "drizzle-orm";
 import { getDb, clearSession, createSession, hashPassword, readSession, verifyPassword } from "../lib/session";
@@ -21,8 +22,20 @@ function publicUser(user: { id: string; email: string; displayName: string; role
   return { id: user.id, email: user.email, displayName: user.displayName, role: user.role, organizationId };
 }
 
+function hasRegistrationTestAccess(request: { get(name: string): string | undefined }): boolean {
+  const expected = process.env.RENOVA_REGISTRATION_TEST_TOKEN;
+  const provided = request.get("x-renova-registration-test");
+  if (!expected || !provided) return false;
+  const left = Buffer.from(expected);
+  const right = Buffer.from(provided);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
 router.post("/auth/register", async (request, response, next) => {
   try {
+    if (process.env.RENOVA_REGISTRATION_OPEN !== "true" && !hasRegistrationTestAccess(request)) {
+      return response.status(503).json({ error: "Registration is not open yet" });
+    }
     const input = registrationSchema.parse(request.body);
     const database = getDb();
     const existing = await database.select({ id: users.id }).from(users).where(eq(users.email, input.email.toLowerCase())).limit(1);

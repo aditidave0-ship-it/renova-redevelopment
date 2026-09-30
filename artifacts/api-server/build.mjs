@@ -11,13 +11,18 @@ globalThis.require = createRequire(import.meta.url);
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildAll() {
+  if (process.env.VERCEL_ENV === "production") {
+    const { migrateProduction } = await import("../../lib/db/scripts/migrate-production.mjs");
+    await migrateProduction();
+  }
+
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
   await esbuild({
     entryPoints: {
-      app: path.resolve(artifactDir, "src/app.ts"),
-      index: path.resolve(artifactDir, "src/index.ts"),
+      app: path.resolve(artifactDir, "src/renova-app.ts"),
+      index: path.resolve(artifactDir, "src/local-server.ts"),
     },
     platform: "node",
     bundle: true,
