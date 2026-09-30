@@ -1,4 +1,4 @@
-import app from "./app";
+import app from "./renova-app";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"] ??

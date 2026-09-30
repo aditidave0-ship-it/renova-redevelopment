@@ -16,8 +16,8 @@ async function buildAll() {
 
   await esbuild({
     entryPoints: {
-      app: path.resolve(artifactDir, "src/app.ts"),
-      index: path.resolve(artifactDir, "src/index.ts"),
+      app: path.resolve(artifactDir, "src/renova-app.ts"),
+      index: path.resolve(artifactDir, "src/local-server.ts"),
     },
     platform: "node",
     bundle: true,
