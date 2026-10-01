@@ -153,7 +153,13 @@ export const ListRegulationsResponseItem = zod.object({
   "summary": zod.string(),
   "authority": zod.string(),
   "updatedAt": zod.string(),
-  "status": zod.string()
+  "status": zod.string(),
+  "instrumentNumber": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "effectiveDate": zod.string().optional(),
+  "affectedArea": zod.string().optional(),
+  "stakeholderImpact": zod.string().optional(),
+  "sourceUrl": zod.string().optional()
 })
 export const ListRegulationsResponse = zod.array(ListRegulationsResponseItem)
 
