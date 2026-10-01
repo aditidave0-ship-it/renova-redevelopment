@@ -1,7 +1,7 @@
 /* The public website remains cinematic; these tokens belong to application pages. */
-.platform-shell,
-.live-workspace,
-.brief-page {
+:root .platform-shell,
+:root .live-workspace,
+:root .brief-page {
   --workspace-bg: #f6f8fb;
   --workspace-surface: #fff;
   --workspace-ink: #0b1728;
@@ -160,3 +160,15 @@
 .brief-page .brief-form :is(input, select, textarea) { border-color: #9eafc1; }
 .brief-page .brief-gateway-action p { color: var(--workspace-secondary); }
 .brief-page :is(button, a, input, select, textarea):focus-visible { outline-color: var(--workspace-focus); }
+
+/* Keep the application palette stable across lazy-loaded stylesheet order. */
+.platform-shell .platform-metrics .platform-metric-primary :is(span, p, small) { color: #d4e7f5; }
+.platform-shell :is(small, .platform-nav-caption, .platform-demo-badge,
+  .platform-panel-heading p, .platform-dashboard-heading p, .platform-sidebar-project strong,
+  .platform-role-switcher strong, .platform-status, .platform-tag,
+  .platform-topbar, .platform-project-tabs button, .platform-table-head) { font-size: 12px; }
+.platform-shell .platform-brand small { color: #c6d8e7; font-size: 11px; }
+.platform-shell .platform-metrics article > span { font-size: 12px; }
+.platform-shell .platform-project-tabs button span { font-size: 11px; }
+.platform-shell .platform-shell-placeholder { color: var(--workspace-secondary); }
+.live-workspace .live-panel { box-shadow: 0 12px 32px rgba(20, 43, 66, .07); }
