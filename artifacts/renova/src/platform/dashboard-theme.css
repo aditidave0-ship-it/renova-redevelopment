@@ -170,5 +170,12 @@
 .platform-shell .platform-brand small { color: #c6d8e7; font-size: 11px; }
 .platform-shell .platform-metrics article > span { font-size: 12px; }
 .platform-shell .platform-project-tabs button span { font-size: 11px; }
-.platform-shell .platform-shell-placeholder { color: var(--workspace-secondary); }
+
+.platform-shell :is(.platform-review-progress > div, .platform-avatar,
+  .platform-topbar > div > span, .platform-next-actions button > span,
+  .platform-opportunity-list article > button, .platform-activity strong,
+  .platform-stakeholder-preview strong, .platform-stakeholder-preview i,
+  .platform-project-header p, .platform-project-header > div:first-child > a) { font-size: 12px; }
+.platform-shell .platform-topbar > div > span:not(.platform-avatar):not(.platform-demo-badge) { color: #475569; }
+
 .live-workspace .live-panel { box-shadow: 0 12px 32px rgba(20, 43, 66, .07); }
