@@ -208,3 +208,9 @@ components:
         authority: { type: string }
         updatedAt: { type: string }
         status: { type: string }
+        instrumentNumber: { type: string }
+        publicationDate: { type: string }
+        effectiveDate: { type: string }
+        affectedArea: { type: string }
+        stakeholderImpact: { type: string }
+        sourceUrl: { type: string }
