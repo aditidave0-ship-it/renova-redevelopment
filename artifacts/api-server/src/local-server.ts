@@ -1,14 +1,7 @@
 import app from "./renova-app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"] ??
-  (process.env.NODE_ENV === "development" ? "5000" : undefined);
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+const rawPort = process.env["PORT"] ?? "5000";
 
 const port = Number(rawPort);
 

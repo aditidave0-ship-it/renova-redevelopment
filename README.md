@@ -30,6 +30,8 @@ Codespaces will offer to open the forwarded frontend port. Open port `5173` to u
 - `lib/api-zod` — generated Zod validation schemas
 - `lib/db` — Drizzle/PostgreSQL schema for accounts, organizations, societies, opportunities, interests and sessions
 
+The coordinated web and mobile delivery sequence is documented in [`docs/WEB_MOBILE_ROADMAP.md`](docs/WEB_MOBILE_ROADMAP.md).
+
 ## Backend foundation
 
 The first persistent RENOVA workflow is now implemented behind the existing UI:
@@ -41,6 +43,15 @@ Set `DATABASE_URL` before starting the API. The API intentionally remains bootab
 ```bash
 export DATABASE_URL='postgresql://user:password@host:5432/renova'
 export CORS_ORIGINS='http://localhost:5173,https://renova-lovat-mu.vercel.app'
+pnpm --filter @workspace/db migrate
+pnpm run dev
+```
+
+PowerShell:
+
+```powershell
+$env:DATABASE_URL='postgresql://user:password@host:5432/renova'
+$env:CORS_ORIGINS='http://localhost:5173,https://renova-lovat-mu.vercel.app'
 pnpm --filter @workspace/db migrate
 pnpm run dev
 ```
