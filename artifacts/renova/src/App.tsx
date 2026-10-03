@@ -616,7 +616,7 @@ function PublicNavigation({ menuOpen, onNavigate }: { menuOpen: boolean; onNavig
 
 const stakeholderCards = [
   { title: 'Find a Developer', detail: 'Explore public developer profiles and their documented services.', icon: Building2, href: '/ecosystem?category=Developers' },
-  { title: 'Explore Societies', detail: 'Discover genuine redevelopment opportunities across Mumbai.', icon: Landmark, href: '#opportunities' },
+  { title: 'Explore Societies', detail: 'See how structured redevelopment opportunities can appear on RENOVA.', icon: Landmark, href: '#opportunities' },
   { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/ecosystem?category=PMC' },
   { title: 'Find an Architect', detail: 'Explore architecture practices across the ecosystem.', icon: Compass, href: '/ecosystem?category=Architects' },
 ];
@@ -726,7 +726,7 @@ function MarketingHome() {
           <Logo />
           <button className="stitch-notification" onClick={() => setUpdatesOpen((open) => !open)} aria-expanded={updatesOpen} aria-label="RENOVA updates"><Bell size={19} /><span className="stitch-notification-dot" /></button>
           <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
-          {updatesOpen && <div className="stitch-update-popover"><div><span>RENOVA pulse</span><button type="button" onClick={() => setUpdatesOpen(false)} aria-label="Close updates"><X size={16} /></button></div><article><BadgeCheck size={17} /><p><strong>Verified network growing</strong><span>New PMCs and architects are being reviewed for Mumbai societies.</span></p></article><article><Building2 size={17} /><p><strong>4 opportunities open</strong><span>Explore active society requirements across the city.</span></p></article><Link href="/assessment" onClick={() => setUpdatesOpen(false)}>Post your requirement <ArrowUpRight size={14} /></Link></div>}
+          {updatesOpen && <div className="stitch-update-popover"><div><span>RENOVA pulse</span><button type="button" onClick={() => setUpdatesOpen(false)} aria-label="Close updates"><X size={16} /></button></div><article><BadgeCheck size={17} /><p><strong>Verified network growing</strong><span>New PMCs and architects are being reviewed for Mumbai societies.</span></p></article><article><Building2 size={17} /><p><strong>Opportunity preview available</strong><span>Explore demonstration listings showing how society requirements can be structured.</span></p></article><Link href="/assessment" onClick={() => setUpdatesOpen(false)}>Post your requirement <ArrowUpRight size={14} /></Link></div>}
         </div>
       </header>
 
@@ -789,9 +789,10 @@ function MarketingHome() {
 
         <section className="stitch-section stitch-opportunities" id="opportunities">
           <div className="stitch-section-heading">
-            <div><p>Live possibilities</p><h2>Current redevelopment opportunities</h2></div>
+            <div><p>Product preview · demo data</p><h2>Illustrative redevelopment opportunities</h2></div>
             <Link href="/assessment">Post an opportunity <ArrowUpRight size={14} /></Link>
           </div>
+          <p className="stitch-opportunity-disclaimer">These sample listings demonstrate the RENOVA experience. They do not represent real societies, verified projects, commercial offers or investment opportunities.</p>
           <div className="stitch-opportunity-grid">
             {featuredOpportunities.map((item) => (
               <article className="stitch-opportunity-card" key={item.name}>
@@ -804,7 +805,7 @@ function MarketingHome() {
                   <span>Homes<strong>{item.homes}</strong></span>
                   <span>Site area<strong>{item.area}</strong></span>
                 </div>
-                <button type="button" className="stitch-details-button" onClick={() => setActiveOpportunityName(item.name)}>View opportunity · {item.scale} <ArrowUpRight size={14} /></button>
+                <button type="button" className="stitch-details-button" onClick={() => setActiveOpportunityName(item.name)}>View demo opportunity · {item.scale} <ArrowUpRight size={14} /></button>
               </article>
             ))}
           </div>
@@ -859,8 +860,8 @@ function MarketingHome() {
         <a href="#opportunities"><Handshake size={20} /><span>Opportunities</span></a>
         <Link href="/assessment"><Plus size={22} /><span>Post</span></Link>
       </nav>
-      <ExperienceDrawer open={Boolean(activeOpportunity)} onClose={() => setActiveOpportunityName(null)} eyebrow="Verified redevelopment opportunity" title={activeOpportunity?.name || 'Opportunity'}>
-        {activeOpportunity && <div className="opportunity-detail"><div className="opportunity-detail-top"><span className="stitch-status">{activeOpportunity.status}</span><p><MapPin size={15} /> {activeOpportunity.location}</p></div><p className="regulation-detail-lead">{activeOpportunity.detail}</p><div className="opportunity-metrics"><div><span>Building age</span><strong>{activeOpportunity.age}</strong></div><div><span>Member homes</span><strong>{activeOpportunity.homes}</strong></div><div><span>Site area</span><strong>{activeOpportunity.area}</strong></div><div><span>Indicative scale</span><strong>{activeOpportunity.scale}</strong></div></div><div><p className="drawer-label">Current requirement</p><ul><li>Initial fit assessment and stakeholder verification</li><li>Professional support appropriate to the society’s stage</li><li>Transparent next-step discussion through RENOVA</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>Detailed society documents and contact information are shared only after an approved introduction.</p></div><Link href="/assessment" className="button button-dark button-full">Express interest through RENOVA <ArrowUpRight size={15} /></Link></div>}
+      <ExperienceDrawer open={Boolean(activeOpportunity)} onClose={() => setActiveOpportunityName(null)} eyebrow="Product preview · demo data" title={activeOpportunity?.name || 'Opportunity'}>
+        {activeOpportunity && <div className="opportunity-detail"><div className="opportunity-detail-top"><span className="stitch-status">{activeOpportunity.status}</span><p><MapPin size={15} /> {activeOpportunity.location}</p></div><p className="regulation-detail-lead">{activeOpportunity.detail}</p><div className="opportunity-metrics"><div><span>Building age</span><strong>{activeOpportunity.age}</strong></div><div><span>Member homes</span><strong>{activeOpportunity.homes}</strong></div><div><span>Site area</span><strong>{activeOpportunity.area}</strong></div><div><span>Illustrative scale</span><strong>{activeOpportunity.scale}</strong></div></div><div><p className="drawer-label">Example requirement</p><ul><li>Initial fit assessment and stakeholder verification</li><li>Professional support appropriate to the society’s stage</li><li>Transparent next-step discussion through RENOVA</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>This is demonstration data, not a real society, verified project, commercial offer or investment opportunity.</p></div><Link href="/assessment" className="button button-dark button-full">Prepare a real opportunity brief <ArrowUpRight size={15} /></Link></div>}
       </ExperienceDrawer>
     </div>
   );

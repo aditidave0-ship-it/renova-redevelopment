@@ -282,6 +282,7 @@ html { scroll-behavior: smooth; }
 
 .stitch-opportunities { background: #fff; border-top: 1px solid var(--stitch-line); border-bottom: 1px solid var(--stitch-line); }
 .stitch-opportunity-grid { display: grid; gap: 12px; }
+.stitch-opportunity-disclaimer { max-width: 760px; margin: -18px 0 28px; color: var(--stitch-muted); font-size: .78rem; line-height: 1.6; }
 .stitch-opportunity-card { min-height: 330px; padding: 22px; position: relative; display: flex; flex-direction: column; border: 1px solid var(--stitch-line); background: #f9fafb; }
 .stitch-status { width: fit-content; padding: 5px 8px; color: var(--stitch-copper); background: #f5e8dc; font: 700 .58rem var(--app-font-mono); letter-spacing: .07em; text-transform: uppercase; }
 .stitch-opportunity-card h3 { margin: 22px 0 9px; font-size: 1.35rem; letter-spacing: -.03em; }

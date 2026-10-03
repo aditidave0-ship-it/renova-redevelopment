@@ -1,6 +1,6 @@
 # RENOVA Redevelopment Platform
 
-RENOVA is a redevelopment operating platform for Mumbai housing societies. It guides committees through property assessment, readiness checks, regulatory pathways, professional matching, and project planning.
+RENOVA is a redevelopment ecosystem platform connecting societies, developers, PMCs and other redevelopment professionals. It provides shared, permission-controlled workflows for discovering opportunities, forming the right connections, comparing structured information and managing redevelopment projects.
 
 ## Start in GitHub Codespaces
 
