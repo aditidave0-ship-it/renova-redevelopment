@@ -14,4 +14,10 @@ export interface Regulation {
   authority: string;
   updatedAt: string;
   status: string;
+  instrumentNumber?: string;
+  publicationDate?: string;
+  effectiveDate?: string;
+  affectedArea?: string;
+  stakeholderImpact?: string;
+  sourceUrl?: string;
 }

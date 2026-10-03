@@ -55,6 +55,21 @@ const professionals = [
 ];
 
 const regulations = [
+  {
+    id: "maharera-order-66-2026",
+    code: "Order 66/2026",
+    title: "Four-month force-majeure extension for eligible project registrations",
+    summary: "MahaRERA has extended eligible project-registration completion dates by four months where the registered, revised or already extended completion date falls on or after 28 February 2026. Projects registered on or after 1 August 2026 are excluded.",
+    authority: "MahaRERA",
+    updatedAt: "7 Aug 2026",
+    status: "Current",
+    instrumentNumber: "MahaRERA/Secy/388/2026 · Order No. 66/2026",
+    publicationDate: "7 Aug 2026",
+    effectiveDate: "7 Aug 2026",
+    affectedArea: "Maharashtra · eligible MahaRERA-registered real estate projects",
+    stakeholderImpact: "Promoters should verify the revised registration-validity date in MahaRERA records. Societies and allottees should re-check the project's registered completion date and seek advice before treating the regulatory extension as a change to contractual possession commitments.",
+    sourceUrl: "https://www.maharera.maharashtra.gov.in/sites/default/files/notice_board_files/ORDER_66_26.pdf",
+  },
   { id: "reg-33-5", code: "33(5)", title: "Redevelopment of MHADA colonies", summary: "Provisions relevant to redevelopment of buildings and layouts under MHADA jurisdiction.", authority: "MHADA / BMC", updatedAt: "16 Aug 2026", status: "Current" },
   { id: "reg-33-7", code: "33(7)", title: "Redevelopment of cessed buildings", summary: "A potential pathway for redevelopment of eligible cessed buildings in Mumbai.", authority: "BMC DCPR 2034", updatedAt: "16 Aug 2026", status: "Current" },
   { id: "reg-33-9", code: "33(9)", title: "Cluster redevelopment", summary: "Framework for redevelopment of multiple buildings or societies as a cluster.", authority: "BMC DCPR 2034", updatedAt: "16 Aug 2026", status: "Current" },
