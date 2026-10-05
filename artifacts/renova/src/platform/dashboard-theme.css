@@ -65,7 +65,7 @@
 .platform-shell :is(.platform-metrics article > span, .platform-metrics article > p, .platform-facts span,
   .platform-next-actions small, .platform-opportunity-list p, .platform-opportunity-fit small,
   .platform-activity p, .platform-activity small, .platform-full-activity p, .platform-full-activity small,
-  .platform-stakeholder-preview small, .platform-role-boundary small, .platform-comparison-table > div:not(:first-child) > span) {
+  .platform-stakeholder-preview small, .platform-role-boundary small) {
   color: var(--workspace-muted);
 }
 .platform-shell :is(.platform-metrics article > span, .platform-metrics article > p,
@@ -179,3 +179,10 @@
 .platform-shell .platform-topbar > div > span:not(.platform-avatar):not(.platform-demo-badge) { color: #475569; }
 
 .live-workspace .live-panel { box-shadow: 0 12px 32px rgba(20, 43, 66, .07); }
+
+/* Keep table specificity out of shared metric text rules. */
+.platform-shell .platform-comparison-table > div:not(:first-child) > span { color: var(--workspace-muted); }
+
+/* Preserve readable columns and allow touch/keyboard scrolling on narrow screens. */
+.platform-shell .platform-compare-preview { overflow-x: auto; }
+.platform-shell .platform-compare-preview:focus-visible { outline: 3px solid var(--workspace-focus); outline-offset: 3px; }
