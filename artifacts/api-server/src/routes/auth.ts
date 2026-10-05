@@ -31,9 +31,16 @@ function hasRegistrationTestAccess(request: { get(name: string): string | undefi
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
+function isPublicRegistrationOpen(): boolean {
+  return process.env.RENOVA_REGISTRATION_OPEN === "true"
+    && process.env.RENOVA_BETA_RELEASE_APPROVED === "true";
+}
+
 router.post("/auth/register", async (request, response, next) => {
   try {
-    if (process.env.RENOVA_REGISTRATION_OPEN !== "true" && !hasRegistrationTestAccess(request)) {
+    // Public registration fails closed until the complete beta-readiness checklist is approved.
+    // The private test-token path remains available for controlled acceptance testing.
+    if (!isPublicRegistrationOpen() && !hasRegistrationTestAccess(request)) {
       return response.status(503).json({ error: "Registration is not open yet" });
     }
     const input = registrationSchema.parse(request.body);
