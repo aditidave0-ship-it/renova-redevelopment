@@ -96,7 +96,7 @@ function ensureEmailDeliveryConfigured(): void {
     const error = new Error(
       "Email delivery is waiting for sender configuration",
     );
-    Object.assign(error, { status: 503 });
+    Object.assign(error, { status: 503, code: "EMAIL_DELIVERY_UNAVAILABLE" });
     throw error;
   }
 }

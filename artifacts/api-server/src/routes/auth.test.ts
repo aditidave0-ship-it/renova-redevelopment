@@ -41,6 +41,13 @@ test("public registration stays closed without both release flags", async () => 
     });
     assert.equal(response.status, 503);
     assert.deepEqual(await response.json(), { error: "Registration is not open yet" });
+    const forgotResponse = await fetch(`http://127.0.0.1:${address.port}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "release-check@example.invalid" }),
+    });
+    assert.equal(forgotResponse.status, 503);
+    assert.deepEqual(await forgotResponse.json(), { error: "Email delivery is not configured yet" });
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     if (previousOpen === undefined) delete process.env.RENOVA_REGISTRATION_OPEN; else process.env.RENOVA_REGISTRATION_OPEN = previousOpen;

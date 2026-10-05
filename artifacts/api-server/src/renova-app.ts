@@ -53,6 +53,9 @@ const notFound: RequestHandler = (req, res) => {
 const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   const status = typeof error?.status === "number" ? error.status : 500;
   const isValidationError = error?.name === "ZodError";
+  const isEmailUnavailable =
+    error?.code === "EMAIL_DELIVERY_UNAVAILABLE" ||
+    error?.code === "EMAIL_DELIVERY_FAILED";
   const responseStatus = isValidationError ? 400 : status;
 
   if (responseStatus >= 500) {
@@ -62,6 +65,8 @@ const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   res.status(responseStatus).json({
     error: isValidationError
       ? "Validation failed"
+      : isEmailUnavailable
+        ? "Email delivery is not configured yet"
       : responseStatus === 413
         ? "Request body is too large"
         : responseStatus === 503 && error?.message === "DATABASE_URL is not configured"
