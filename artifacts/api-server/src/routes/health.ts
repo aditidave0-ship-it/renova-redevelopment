@@ -12,7 +12,12 @@ router.get("/healthz", (_req, res) => {
 
 router.get("/readyz", async (_req, res) => {
   try {
-    await requireDb().execute(sql`select 1`);
+    const database = requireDb();
+    await Promise.all([
+      database.execute(sql`select email_verified_at from users limit 0`),
+      database.execute(sql`select id from auth_tokens limit 0`),
+      database.execute(sql`select id from enquiries limit 0`),
+    ]);
     res.json({ status: "ready" });
   } catch {
     res.status(503).json({ status: "unavailable", error: "Database is not ready" });
