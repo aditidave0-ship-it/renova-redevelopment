@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { ArrowLeft, ArrowRight, Building2, Check, Download, FileText, Plus, Save, Trash2 } from 'lucide-react';
 import { briefText, emptyBrief, fieldLabels, readDrafts, removeDraft, saveDraft, services, stages, validateBrief, type BriefErrors, type OpportunityBrief, type OpportunityDraft } from '@/data/opportunity-drafts';
 import './opportunity.css';
+import './dashboard-theme.css';
 
 function loadDrafts() {
   try { return { drafts: readDrafts(window.localStorage), error: '' }; }

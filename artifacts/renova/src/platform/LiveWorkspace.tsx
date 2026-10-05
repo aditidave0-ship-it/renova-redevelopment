@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Building2, CheckCircle2, LoaderCircle, LogOut, MapPin, Send, ShieldCheck } from 'lucide-react';
 import { Link } from 'wouter';
 import './live-workspace.css';
+import './dashboard-theme.css';
 
 type Role = 'SOCIETY' | 'DEVELOPER' | 'PMC' | 'PROFESSIONAL';
 type Account = { id: string; email: string; displayName: string; role: Role; organizationId: string | null };

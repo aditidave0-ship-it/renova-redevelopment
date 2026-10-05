@@ -1,0 +1,188 @@
+/* The public website remains cinematic; these tokens belong to application pages. */
+:root .platform-shell,
+:root .live-workspace,
+:root .brief-page {
+  --workspace-bg: #f6f8fb;
+  --workspace-surface: #fff;
+  --workspace-ink: #0b1728;
+  --workspace-secondary: #475569;
+  --workspace-muted: #56677c;
+  --workspace-navy: #07182a;
+  --workspace-blue: #155caa;
+  --workspace-border: #d8e1ea;
+  --workspace-focus: #1677c8;
+  color: var(--workspace-ink);
+  background: var(--workspace-bg);
+}
+
+.platform-shell {
+  --p-navy: var(--workspace-navy);
+  --p-blue: var(--workspace-blue);
+  --p-ink: var(--workspace-ink);
+  --p-muted: var(--workspace-secondary);
+  --p-line: var(--workspace-border);
+  --p-bg: var(--workspace-bg);
+  --p-card: var(--workspace-surface);
+}
+
+/* The global marketing h1 rule specifies its own colour, so inheritance cannot fix it. */
+.platform-shell :is(h1, h2, h3, h4),
+.live-workspace :is(h1, h2, h3, h4) {
+  color: var(--workspace-ink);
+}
+
+.platform-shell :is(.platform-metric-primary, .platform-access-card) :is(h1, h2, h3, h4),
+.platform-shell .platform-comparison-table > div:first-child :is(strong, small) {
+  color: #fff;
+}
+
+.platform-shell .platform-dashboard-heading h1,
+.platform-shell .platform-project-header h1 {
+  color: var(--workspace-ink);
+}
+
+.platform-shell > aside { background: var(--workspace-navy); color: #f5f8fc; }
+.platform-shell aside nav button,
+.platform-shell .platform-sidebar-bottom a,
+.platform-shell .platform-sidebar-project small,
+.platform-shell .platform-role-switcher small,
+.platform-shell .platform-nav-caption { color: #c6d8e7; }
+.platform-shell aside nav button.active,
+.platform-shell aside nav button:hover { color: #fff; background: #123c60; }
+.platform-shell .platform-sidebar-project strong { color: #fff; }
+
+.platform-shell .platform-metrics article,
+.platform-shell .platform-panel { background: var(--workspace-surface); border-color: var(--workspace-border); }
+.platform-shell .platform-metrics .platform-metric-primary,
+.platform-shell .platform-access-card { background: #0b2a44; color: #fff; border-color: #0b2a44; }
+.platform-shell .platform-metric-primary :is(span, p, small),
+.platform-shell .platform-access-card :is(span, small) { color: #d4e7f5; }
+.platform-shell .platform-panel-heading p,
+.platform-shell .platform-dashboard-heading p { color: #145c9a; }
+.platform-shell :is(.platform-dashboard-heading, .platform-project-header) > div > span:not(.platform-demo-badge),
+.platform-shell :is(.platform-opportunity-summary, .platform-active-project, .platform-project-brief, .platform-developer-proposal) > p,
+.platform-shell .platform-comparison-intro { color: var(--workspace-secondary); }
+.platform-shell :is(.platform-metrics article > span, .platform-metrics article > p, .platform-facts span,
+  .platform-next-actions small, .platform-opportunity-list p, .platform-opportunity-fit small,
+  .platform-activity p, .platform-activity small, .platform-full-activity p, .platform-full-activity small,
+  .platform-stakeholder-preview small, .platform-role-boundary small) {
+  color: var(--workspace-muted);
+}
+.platform-shell :is(.platform-metrics article > span, .platform-metrics article > p,
+  .platform-facts span, .platform-next-actions small, .platform-opportunity-list p,
+  .platform-activity p, .platform-full-activity p, .platform-stakeholder-preview small,
+  .platform-role-boundary small, .platform-table > div) { font-size: 12px; }
+.platform-shell :is(.platform-activity small, .platform-full-activity small,
+  .platform-opportunity-fit small, .platform-compare-mini > div:first-child,
+  .platform-table-head, .platform-tag) { font-size: 11px; }
+.platform-shell .platform-journey > div > strong,
+.platform-shell .platform-project-journey span small { color: var(--workspace-secondary); font-size: 11px; }
+.platform-shell .platform-comparison-table > div:first-child { background: #0b2a44; color: #fff; }
+.platform-shell :is(.platform-table-head, .platform-compare-mini > div:first-child) {
+  color: var(--workspace-ink);
+  background: #edf3f8;
+}
+.platform-shell .platform-disclaimer { color: var(--workspace-secondary); font-size: 12px; }
+.platform-shell .platform-status { font-size: 11px; }
+.platform-shell .platform-primary-button { background: var(--workspace-blue); border-color: var(--workspace-blue); color: #fff; }
+.platform-shell .platform-secondary-button { background: #fff; border-color: #9fb4c6; color: #17456b; }
+.platform-shell .platform-demo-badge { color: #174e72; background: #eaf4fa; border-color: #a9cdda; }
+
+.live-workspace .live-header {
+  max-width: none;
+  padding-inline: max(20px, calc((100vw - 1184px) / 2));
+  background: var(--workspace-navy);
+  border-bottom-color: #244158;
+}
+.live-workspace .live-header :is(a, button, .live-logo) { color: #f5f8fc; }
+.live-workspace .live-header > span { color: #d0e3f1; }
+.live-workspace .live-hero > span { color: #175b98; }
+.live-workspace .live-hero h1 { color: var(--workspace-ink); }
+.live-workspace .live-hero p { color: var(--workspace-secondary); }
+.live-workspace .live-panel { background: var(--workspace-surface); color: var(--workspace-ink); border-color: var(--workspace-border); }
+.live-workspace .live-panel-intro > span { color: #145c9a; }
+.live-workspace .live-panel-intro p,
+.live-workspace .live-muted,
+.live-workspace .live-list-card p,
+.live-workspace .live-note { color: var(--workspace-secondary); }
+.live-workspace .live-list-card { background: #fbfdff; border-color: var(--workspace-border); }
+.live-workspace .live-list-card > span { color: var(--workspace-secondary); }
+.live-workspace .live-field { color: #213c56; }
+.live-workspace .live-field :is(input, select, textarea) { background: #fff; color: var(--workspace-ink); border-color: #9eafc1; }
+.live-workspace .live-field :is(input, textarea)::placeholder { color: #64748b; }
+.live-workspace .live-primary { background: var(--workspace-blue); color: #fff; }
+.live-workspace .live-primary:hover { background: #104b8b; }
+.live-workspace .live-tabs button { color: #475569; }
+.live-workspace .live-tabs button.active { color: #114c83; }
+.live-workspace footer { color: var(--workspace-secondary); border-top-color: var(--workspace-border); }
+
+.platform-shell :is(a, button, input, select, textarea):focus-visible,
+.live-workspace :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--workspace-focus);
+  outline-offset: 3px;
+}
+.platform-shell aside :is(a, button, select):focus-visible,
+.live-workspace .live-header :is(a, button):focus-visible { outline-color: #8fd9ff; }
+
+@media (max-width: 780px) {
+  .platform-shell .platform-main { min-width: 0; }
+  .platform-shell :is(.platform-panel, .platform-metrics article) { min-width: 0; }
+  .live-workspace .live-header { padding-inline: 20px; }
+  .live-workspace .live-hero h1 { overflow-wrap: anywhere; }
+}
+
+/* Browser-local opportunity preparation is an application tool, not a marketing hero. */
+.brief-page.platform-gateway { background: var(--workspace-bg); color: var(--workspace-ink); }
+.brief-page .brief-header { max-width: none; background: var(--workspace-navy); border-bottom-color: #244158; }
+.brief-page .brief-header .platform-brand,
+.brief-page .brief-header > a:last-child { color: #f5f8fc; }
+.brief-page .brief-back { color: #205b88; }
+.brief-page .brief-title h1,
+.brief-page .brief-empty h2 { color: var(--workspace-ink); }
+.brief-page .brief-title p { color: #145c9a; }
+.brief-page .brief-title span { color: var(--workspace-secondary); }
+.brief-page .brief-storage { color: #284a64; background: #eaf3fa; border-color: #c8dce9; }
+.brief-page .brief-storage strong { color: var(--workspace-ink); }
+.brief-page .brief-steps { background: #fff; border-color: var(--workspace-border); }
+.brief-page .brief-steps li { color: var(--workspace-secondary); }
+.brief-page .brief-steps li.current { background: #e8f3fb; color: #124f86; border-bottom-color: var(--workspace-blue); }
+.brief-page .brief-steps li.complete { color: #176449; }
+.brief-page .brief-form,
+.brief-page .brief-draft-card,
+.brief-page .brief-empty,
+.brief-page .brief-next { background: #fff; color: var(--workspace-ink); border: 1px solid var(--workspace-border); }
+.brief-page .brief-empty > svg { color: #1677c8; }
+.brief-page .brief-empty p,
+.brief-page .brief-next p { color: var(--workspace-secondary); }
+.brief-page .brief-empty a,
+.brief-page .brief-next a { color: #125a99; }
+.brief-page .brief-local-label { border-color: #9bb5c8; }
+.brief-page .brief-form :is(input, select, textarea) { border-color: #9eafc1; }
+.brief-page .brief-gateway-action p { color: var(--workspace-secondary); }
+.brief-page :is(button, a, input, select, textarea):focus-visible { outline-color: var(--workspace-focus); }
+
+/* Keep the application palette stable across lazy-loaded stylesheet order. */
+.platform-shell .platform-metrics .platform-metric-primary :is(span, p, small) { color: #d4e7f5; }
+.platform-shell :is(small, .platform-nav-caption, .platform-demo-badge,
+  .platform-panel-heading p, .platform-dashboard-heading p, .platform-sidebar-project strong,
+  .platform-role-switcher strong, .platform-status, .platform-tag,
+  .platform-topbar, .platform-project-tabs button, .platform-table-head) { font-size: 12px; }
+.platform-shell .platform-brand small { color: #c6d8e7; font-size: 11px; }
+.platform-shell .platform-metrics article > span { font-size: 12px; }
+.platform-shell .platform-project-tabs button span { font-size: 11px; }
+
+.platform-shell :is(.platform-review-progress > div, .platform-avatar,
+  .platform-topbar > div > span, .platform-next-actions button > span,
+  .platform-opportunity-list article > button, .platform-activity strong,
+  .platform-stakeholder-preview strong, .platform-stakeholder-preview i,
+  .platform-project-header p, .platform-project-header > div:first-child > a) { font-size: 12px; }
+.platform-shell .platform-topbar > div > span:not(.platform-avatar):not(.platform-demo-badge) { color: #475569; }
+
+.live-workspace .live-panel { box-shadow: 0 12px 32px rgba(20, 43, 66, .07); }
+
+/* Keep table specificity out of shared metric text rules. */
+.platform-shell .platform-comparison-table > div:not(:first-child) > span { color: var(--workspace-muted); }
+
+/* Preserve readable columns and allow touch/keyboard scrolling on narrow screens. */
+.platform-shell .platform-compare-preview { overflow-x: auto; }
+.platform-shell .platform-compare-preview:focus-visible { outline: 3px solid var(--workspace-focus); outline-offset: 3px; }
