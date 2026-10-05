@@ -6,6 +6,8 @@ import { getDb, clearSession, createSession, hashPassword, readSession, verifyPa
 import { requireDb } from "@workspace/db";
 import { organizationMembers, organizations, societies, users } from "@workspace/db";
 
+import { isPublicRegistrationOpen } from "../lib/registration-release";
+
 const router: IRouter = Router();
 const roleSchema = z.enum(["SOCIETY", "DEVELOPER", "PMC", "PROFESSIONAL"]);
 const registrationSchema = z.object({
@@ -33,7 +35,7 @@ function hasRegistrationTestAccess(request: { get(name: string): string | undefi
 
 router.post("/auth/register", async (request, response, next) => {
   try {
-    if (process.env.RENOVA_REGISTRATION_OPEN !== "true" && !hasRegistrationTestAccess(request)) {
+    if (!isPublicRegistrationOpen(process.env) && !hasRegistrationTestAccess(request)) {
       return response.status(503).json({ error: "Registration is not open yet" });
     }
     const input = registrationSchema.parse(request.body);
