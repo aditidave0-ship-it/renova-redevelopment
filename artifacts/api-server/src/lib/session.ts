@@ -1,7 +1,19 @@
-import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import {
+  createHash,
+  randomBytes,
+  scryptSync,
+  timingSafeEqual,
+} from "node:crypto";
 import type { Request, Response, RequestHandler } from "express";
 import { and, eq, gt } from "drizzle-orm";
-import { requireDb, authSessions, organizationMembers, organizations, users, type AppDb } from "@workspace/db";
+import {
+  requireDb,
+  authSessions,
+  organizationMembers,
+  organizations,
+  users,
+  type AppDb,
+} from "@workspace/db";
 
 export const SESSION_COOKIE = "renova_session";
 const SESSION_DAYS = 14;
@@ -32,10 +44,16 @@ function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(database: AppDb, userId: string, response: Response): Promise<void> {
+export async function createSession(
+  database: AppDb,
+  userId: string,
+  response: Response,
+): Promise<void> {
   const rawToken = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await database.insert(authSessions).values({ userId, tokenHash: hashToken(rawToken), expiresAt });
+  await database
+    .insert(authSessions)
+    .values({ userId, tokenHash: hashToken(rawToken), expiresAt });
   response.cookie(SESSION_COOKIE, rawToken, {
     httpOnly: true,
     sameSite: "lax",
@@ -45,16 +63,28 @@ export async function createSession(database: AppDb, userId: string, response: R
   });
 }
 
-export async function clearSession(request: Request, response: Response): Promise<void> {
+export async function clearSession(
+  request: Request,
+  response: Response,
+): Promise<void> {
   const rawToken = request.cookies?.[SESSION_COOKIE];
   if (rawToken) {
     const database = requireDb();
-    await database.delete(authSessions).where(eq(authSessions.tokenHash, hashToken(rawToken)));
+    await database
+      .delete(authSessions)
+      .where(eq(authSessions.tokenHash, hashToken(rawToken)));
   }
-  response.clearCookie(SESSION_COOKIE, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
+  response.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
 }
 
-export async function readSession(request: Request): Promise<AuthContext | null> {
+export async function readSession(
+  request: Request,
+): Promise<AuthContext | null> {
   const rawToken = request.cookies?.[SESSION_COOKIE];
   if (!rawToken) return null;
   const database = requireDb();
@@ -69,8 +99,18 @@ export async function readSession(request: Request): Promise<AuthContext | null>
     .from(authSessions)
     .innerJoin(users, eq(users.id, authSessions.userId))
     .leftJoin(organizationMembers, eq(organizationMembers.userId, users.id))
-    .leftJoin(organizations, eq(organizations.id, organizationMembers.organizationId))
-    .where(and(eq(authSessions.tokenHash, hashToken(rawToken)), gt(authSessions.expiresAt, new Date()), eq(users.isActive, true)))
+    .leftJoin(
+      organizations,
+      eq(organizations.id, organizationMembers.organizationId),
+    )
+    .where(
+      and(
+        eq(authSessions.tokenHash, hashToken(rawToken)),
+        gt(authSessions.expiresAt, new Date()),
+        eq(users.isActive, true),
+        gt(users.emailVerifiedAt, new Date(0)),
+      ),
+    )
     .limit(1);
   return rows[0] ?? null;
 }
@@ -79,7 +119,8 @@ export function requireAuth(): RequestHandler {
   return async (request, response, next) => {
     try {
       const auth = await readSession(request);
-      if (!auth) return response.status(401).json({ error: "Authentication required" });
+      if (!auth)
+        return response.status(401).json({ error: "Authentication required" });
       request.auth = auth;
       return next();
     } catch (error) {
@@ -90,7 +131,10 @@ export function requireAuth(): RequestHandler {
 
 export function requireRole(...roles: AuthContext["role"][]): RequestHandler {
   return (request, response, next) => {
-    if (!request.auth || !roles.includes(request.auth.role)) return response.status(403).json({ error: "You do not have permission for this action" });
+    if (!request.auth || !roles.includes(request.auth.role))
+      return response
+        .status(403)
+        .json({ error: "You do not have permission for this action" });
     return next();
   };
 }
@@ -101,6 +145,8 @@ export function getDb(): AppDb {
 
 declare global {
   namespace Express {
-    interface Request { auth?: AuthContext; }
+    interface Request {
+      auth?: AuthContext;
+    }
   }
 }

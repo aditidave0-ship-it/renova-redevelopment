@@ -34,9 +34,9 @@ The coordinated web and mobile delivery sequence is documented in [`docs/WEB_MOB
 
 ## Backend foundation
 
-The first persistent RENOVA workflow is now implemented behind the existing UI:
+The first persistent platform workflow is implemented behind the existing UI:
 
-`REGISTER → LOGIN → SOCIETY CREATES OPPORTUNITY → DEVELOPER/PMC DISCOVERS → EXPRESS INTEREST → SOCIETY REVIEWS INTEREST`
+`REGISTER → VERIFY EMAIL → LOGIN → SOCIETY CREATES OPPORTUNITY → DEVELOPER/PMC DISCOVERS → EXPRESS INTEREST → SOCIETY REVIEWS INTEREST`
 
 Set `DATABASE_URL` before starting the API. The API intentionally remains bootable without it for frontend-only previews, but database-backed routes return a clear `503` configuration response until a PostgreSQL database is provisioned.
 
@@ -60,6 +60,10 @@ The versioned migration is stored in `lib/db/drizzle`. Run `pnpm --filter @works
 
 Authentication uses server-side sessions in an HTTP-only cookie, scrypt password hashing, and role authorization for `SOCIETY`, `DEVELOPER`, `PMC`, `PROFESSIONAL` and `ADMIN`. Public opportunity responses expose only published opportunity fields; society and organization data is never returned merely because an opportunity exists.
 
+Email-verification and password-reset tokens are stored only as SHA-256 hashes, expire after 24 hours and 1 hour respectively, and are single-use. Password reset deletes every existing session for the account. Email delivery is provider-abstracted and brand-neutral: configure `RENOVA_PRODUCT_NAME`, `RENOVA_APP_URL`, `RENOVA_EMAIL_FROM`, `RENOVA_EMAIL_PROVIDER=resend`, and `RESEND_API_KEY` only when an approved sender is available. Until then, external delivery intentionally returns `503` and remains **BLOCKED — WAITING FOR FINAL DOMAIN**; never log or commit the provider key.
+
+Public contact and organization enquiries use `POST /api/enquiries`, server-side validation and rate protection, PostgreSQL storage, and an `ADMIN`-only `GET /api/admin/enquiries` view. They are no longer stored in browser `localStorage`.
+
 The current legacy dashboard endpoints remain available while the frontend is connected incrementally to the persistent API.
 
 ### Live account workspace
@@ -68,4 +72,4 @@ The first real frontend flow is available at `/platform/live`: registration/sign
 
 The frontend Vercel configuration routes `/api/*` to the `api-server` production domain before the SPA fallback. Check that `https://renova-lovat-mu.vercel.app/api/healthz` returns JSON and `/api/readyz` reports database readiness after deployment; do not infer API health from a successful frontend build alone. API responses are marked `Cache-Control: no-store` because they include account and opportunity data.
 
-Registration is closed at the API unless both `RENOVA_REGISTRATION_OPEN=true` and `RENOVA_BETA_RELEASE_APPROVED=true` are set on `api-server`. The second flag is the fail-closed release gate: do not set it until registration, production email verification, password reset, enquiry handling, role workflows, persistence, authorization, and desktop/mobile QA have passed. Merely connecting `DATABASE_URL` must not start accepting public accounts. For a private acceptance run, set a high-entropy `RENOVA_REGISTRATION_TEST_TOKEN` only on the API server and supply it as the `x-renova-registration-test` header when creating test accounts. With `RENOVA_BASE_URL=https://renova-lovat-mu.vercel.app` and that test token in the **local test process** environment, run `node scripts/verify-live-workspace.mjs` after the migration. It checks same-origin health/readiness, the closed public registration gate, secure session cookies, login/logout, three roles, discovery/interest, draft privacy and cross-organization isolation. This creates four labeled test accounts, a draft and published opportunity, and two interests; remove those records after acceptance. Separately verify the `/platform/live` user journey on desktop and mobile. Keep `RENOVA_BETA_RELEASE_APPROVED` unset during controlled testing. The direct workspace route reports when the API is unavailable.
+Registration is closed at the API unless both `RENOVA_REGISTRATION_OPEN=true` and `RENOVA_BETA_RELEASE_APPROVED=true` are set on `api-server`. The second flag is the fail-closed release gate: do not set it until registration, production email verification, password reset, enquiry handling, role workflows, persistence, authorization, and desktop/mobile QA have passed. Merely connecting `DATABASE_URL` must not start accepting public accounts. A high-entropy `RENOVA_REGISTRATION_TEST_TOKEN` may bypass only the closed-registration gate for a controlled run; it does **not** bypass email delivery, verification, or account activation. Keep `RENOVA_BETA_RELEASE_APPROVED` unset while the sender domain is undecided. Run `pnpm --filter @workspace/api-server test` for the local authentication primitives, then perform the production browser journey with a real inbox after sender configuration is approved.

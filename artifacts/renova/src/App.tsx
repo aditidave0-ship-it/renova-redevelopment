@@ -1,5 +1,15 @@
-import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  lazy,
+  Suspense,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Activity as ActivityIcon,
   AlertTriangle,
@@ -44,7 +54,7 @@ import {
   UsersRound,
   X,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   getGetProjectQueryKey,
   getListProfessionalsQueryKey,
@@ -54,28 +64,45 @@ import {
   useListProfessionals,
   useListProjects,
   useListRegulations,
-} from '@workspace/api-client-react';
-import { Link, Route, Switch, useLocation, useParams } from 'wouter';
-import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-boundary';
-import NotFound from '@/pages/not-found';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { getOrganization, organizationCategories, organizationDataVersion, organizations, type Organization } from '@/data/organizations';
-import './index.css';
-import './marketing.css';
-import './requirement.css';
+} from "@workspace/api-client-react";
+import { Link, Route, Switch, useLocation, useParams } from "wouter";
+import {
+  ErrorBoundary,
+  type ErrorFallbackProps,
+} from "@/components/error-boundary";
+import NotFound from "@/pages/not-found";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  getOrganization,
+  organizationCategories,
+  organizationDataVersion,
+  organizations,
+  type Organization,
+} from "@/data/organizations";
+import "./index.css";
+import "./marketing.css";
+import "./requirement.css";
 
 const queryClient = new QueryClient();
-const PlatformRouter = lazy(() => import('@/platform/PlatformApp').then((module) => ({ default: module.PlatformRouter })));
-const LiveWorkspace = lazy(() => import('@/platform/LiveWorkspace').then((module) => ({ default: module.LiveWorkspace })));
+const PlatformRouter = lazy(() =>
+  import("@/platform/PlatformApp").then((module) => ({
+    default: module.PlatformRouter,
+  })),
+);
+const LiveWorkspace = lazy(() =>
+  import("@/platform/LiveWorkspace").then((module) => ({
+    default: module.LiveWorkspace,
+  })),
+);
 
 function cn(...values: Array<string | false | null | undefined>) {
-  return values.filter(Boolean).join(' ');
+  return values.filter(Boolean).join(" ");
 }
 
 function readStoredArray<T>(key: string): T[] {
   try {
-    const value = JSON.parse(localStorage.getItem(key) || '[]');
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
     return Array.isArray(value) ? value : [];
   } catch {
     return [];
@@ -84,16 +111,29 @@ function readStoredArray<T>(key: string): T[] {
 
 function Logo() {
   return (
-    <Link href="/" className="brand-lockup" data-testid="link-home" aria-label="RENOVA home">
+    <Link
+      href="/"
+      className="brand-lockup"
+      data-testid="link-home"
+      aria-label="RENOVA home"
+    >
       <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
         <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
-        <path className="brand-r-stem" d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15" />
+        <path
+          className="brand-r-stem"
+          d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15"
+        />
         <path className="brand-r-leg" d="m26 30 11 9" />
         <path className="brand-building" d="M20 38V23l5-3v18" />
       </svg>
       <span className="brand-name" aria-hidden="true">
-        {'RENOVA'.split('').map((letter, index) => (
-          <span key={`${letter}-${index}`} style={{ '--brand-letter': index } as React.CSSProperties}>{letter}</span>
+        {"RENOVA".split("").map((letter, index) => (
+          <span
+            key={`${letter}-${index}`}
+            style={{ "--brand-letter": index } as React.CSSProperties}
+          >
+            {letter}
+          </span>
         ))}
       </span>
     </Link>
@@ -101,100 +141,249 @@ function Logo() {
 }
 
 const navItems = [
-  { href: '/workspace', label: 'Overview', icon: LayoutDashboard },
-  { href: '/assessment', label: 'Post requirement', icon: ClipboardCheck },
-  { href: '/professionals', label: 'Professionals', icon: UsersRound },
-  { href: '/regulations', label: 'Regulation centre', icon: BookOpenText },
+  { href: "/workspace", label: "Overview", icon: LayoutDashboard },
+  { href: "/assessment", label: "Post requirement", icon: ClipboardCheck },
+  { href: "/professionals", label: "Professionals", icon: UsersRound },
+  { href: "/regulations", label: "Regulation centre", icon: BookOpenText },
 ];
 
 function AppShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [utilityPanel, setUtilityPanel] = useState<'help' | 'notifications' | null>(null);
+  const [utilityPanel, setUtilityPanel] = useState<
+    "help" | "notifications" | null
+  >(null);
   const health = useHealthCheck();
   const current = navItems.find((item) => item.href === location);
 
   return (
     <div className="app-shell">
-      <aside className={cn('sidebar', mobileOpen && 'sidebar-open')}>
+      <aside className={cn("sidebar", mobileOpen && "sidebar-open")}>
         <div className="sidebar-top">
           <Logo />
-          <button className="icon-button mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close navigation" data-testid="button-close-navigation"><X size={19} /></button>
+          <button
+            className="icon-button mobile-close"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close navigation"
+            data-testid="button-close-navigation"
+          >
+            <X size={19} />
+          </button>
         </div>
         <div className="workspace-switcher">
           <span className="workspace-avatar">KH</span>
-          <span className="workspace-copy"><strong>Kirti Heights CHS</strong><small>Society workspace</small></span>
+          <span className="workspace-copy">
+            <strong>Kirti Heights CHS</strong>
+            <small>Society workspace</small>
+          </span>
           <ChevronDown size={15} />
         </div>
         <p className="nav-caption">Workspace</p>
         <nav className="main-nav" aria-label="Primary navigation">
           {navItems.map(({ href, label, icon: Icon }) => (
-            <Link href={href} key={href} onClick={() => setMobileOpen(false)} className={cn('nav-link', location === href && 'active')} data-testid={`link-nav-${label.toLowerCase().replaceAll(' ', '-')}`}>
-              <Icon size={18} strokeWidth={1.8} /><span>{label}</span>
-              {label === 'Post requirement' && <span className="nav-dot" />}
+            <Link
+              href={href}
+              key={href}
+              onClick={() => setMobileOpen(false)}
+              className={cn("nav-link", location === href && "active")}
+              data-testid={`link-nav-${label.toLowerCase().replaceAll(" ", "-")}`}
+            >
+              <Icon size={18} strokeWidth={1.8} />
+              <span>{label}</span>
+              {label === "Post requirement" && <span className="nav-dot" />}
             </Link>
           ))}
         </nav>
         <p className="nav-caption nav-caption-lower">Reference</p>
         <div className="reference-card">
-          <div className="reference-icon"><CircleHelp size={17} /></div>
-          <div><strong>Need a second opinion?</strong><span>Talk to our redevelopment desk.</span></div>
+          <div className="reference-icon">
+            <CircleHelp size={17} />
+          </div>
+          <div>
+            <strong>Need a second opinion?</strong>
+            <span>Talk to our redevelopment desk.</span>
+          </div>
           <ArrowUpRight size={15} />
         </div>
         <div className="sidebar-bottom">
-          <div className={cn('system-status', health.isError && 'status-error')} data-testid="status-system">
-            <span className="status-pulse" /> {health.isError ? 'Connection issue' : 'All systems operational'}
+          <div
+            className={cn("system-status", health.isError && "status-error")}
+            data-testid="status-system"
+          >
+            <span className="status-pulse" />{" "}
+            {health.isError ? "Connection issue" : "All systems operational"}
           </div>
           <div className="user-row">
             <span className="user-avatar">AR</span>
-            <span><strong>Aditya Rao</strong><small>Committee secretary</small></span>
+            <span>
+              <strong>Aditya Rao</strong>
+              <small>Committee secretary</small>
+            </span>
             <MoreHorizontal size={17} />
           </div>
         </div>
       </aside>
-      {mobileOpen && <button className="sidebar-backdrop" onClick={() => setMobileOpen(false)} aria-label="Close navigation overlay" data-testid="button-navigation-overlay" />}
+      {mobileOpen && (
+        <button
+          className="sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation overlay"
+          data-testid="button-navigation-overlay"
+        />
+      )}
       <main className="main-area">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="icon-button mobile-menu" onClick={() => setMobileOpen(true)} aria-label="Open navigation" data-testid="button-open-navigation"><Menu size={20} /></button>
-            <span className="eyebrow">{current?.label || 'Workspace'}</span>
+            <button
+              className="icon-button mobile-menu"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+              data-testid="button-open-navigation"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="eyebrow">{current?.label || "Workspace"}</span>
             <span className="breadcrumb-divider">/</span>
-            <span className="breadcrumb-current">{location === '/workspace' ? 'Kirti Heights CHS' : current?.label}</span>
+            <span className="breadcrumb-current">
+              {location === "/workspace" ? "Kirti Heights CHS" : current?.label}
+            </span>
           </div>
           <div className="topbar-right">
-            <button className="topbar-help" onClick={() => setUtilityPanel('help')} data-testid="button-help"><CircleHelp size={17} /> Help desk</button>
-            <button className="notification-button" onClick={() => setUtilityPanel('notifications')} aria-label="Notifications" data-testid="button-notifications"><ActivityIcon size={18} /><span /></button>
+            <button
+              className="topbar-help"
+              onClick={() => setUtilityPanel("help")}
+              data-testid="button-help"
+            >
+              <CircleHelp size={17} /> Help desk
+            </button>
+            <button
+              className="notification-button"
+              onClick={() => setUtilityPanel("notifications")}
+              aria-label="Notifications"
+              data-testid="button-notifications"
+            >
+              <ActivityIcon size={18} />
+              <span />
+            </button>
             <span className="topbar-user">AR</span>
           </div>
         </header>
         <div className="page-wrap">
-          <ErrorBoundary resetKey={location} FallbackComponent={WorkspaceErrorFallback}>{children}</ErrorBoundary>
+          <ErrorBoundary
+            resetKey={location}
+            FallbackComponent={WorkspaceErrorFallback}
+          >
+            {children}
+          </ErrorBoundary>
         </div>
       </main>
-      <ExperienceDrawer open={utilityPanel === 'help'} onClose={() => setUtilityPanel(null)} eyebrow="RENOVA support" title="How can we help your committee?">
-        <div className="utility-intro"><span><Handshake size={22} /></span><div><strong>Redevelopment desk</strong><p>Get practical guidance on requirements, professionals, documents and your next committee step.</p></div></div>
-        <div className="utility-action-list">
-          <Link href="/assessment" onClick={() => setUtilityPanel(null)}><ClipboardCheck size={18} /><span><strong>Post a society requirement</strong><small>Share your brief with RENOVA</small></span><ChevronRight size={17} /></Link>
-          <Link href="/professionals" onClick={() => setUtilityPanel(null)}><UsersRound size={18} /><span><strong>Find a verified professional</strong><small>Explore developers, PMCs and architects</small></span><ChevronRight size={17} /></Link>
-          <Link href="/regulations" onClick={() => setUtilityPanel(null)}><BookOpenText size={18} /><span><strong>Understand the process</strong><small>Read plain-language guidance</small></span><ChevronRight size={17} /></Link>
+      <ExperienceDrawer
+        open={utilityPanel === "help"}
+        onClose={() => setUtilityPanel(null)}
+        eyebrow="RENOVA support"
+        title="How can we help your committee?"
+      >
+        <div className="utility-intro">
+          <span>
+            <Handshake size={22} />
+          </span>
+          <div>
+            <strong>Redevelopment desk</strong>
+            <p>
+              Get practical guidance on requirements, professionals, documents
+              and your next committee step.
+            </p>
+          </div>
         </div>
-        <div className="utility-contact"><span>Need personal assistance?</span><Link href="/assessment" onClick={() => setUtilityPanel(null)}>Send your requirement to the redevelopment desk <ArrowUpRight size={14} /></Link></div>
+        <div className="utility-action-list">
+          <Link href="/assessment" onClick={() => setUtilityPanel(null)}>
+            <ClipboardCheck size={18} />
+            <span>
+              <strong>Post a society requirement</strong>
+              <small>Share your brief with RENOVA</small>
+            </span>
+            <ChevronRight size={17} />
+          </Link>
+          <Link href="/professionals" onClick={() => setUtilityPanel(null)}>
+            <UsersRound size={18} />
+            <span>
+              <strong>Find a verified professional</strong>
+              <small>Explore developers, PMCs and architects</small>
+            </span>
+            <ChevronRight size={17} />
+          </Link>
+          <Link href="/regulations" onClick={() => setUtilityPanel(null)}>
+            <BookOpenText size={18} />
+            <span>
+              <strong>Understand the process</strong>
+              <small>Read plain-language guidance</small>
+            </span>
+            <ChevronRight size={17} />
+          </Link>
+        </div>
+        <div className="utility-contact">
+          <span>Need personal assistance?</span>
+          <Link href="/assessment" onClick={() => setUtilityPanel(null)}>
+            Send your requirement to the redevelopment desk{" "}
+            <ArrowUpRight size={14} />
+          </Link>
+        </div>
       </ExperienceDrawer>
-      <ExperienceDrawer open={utilityPanel === 'notifications'} onClose={() => setUtilityPanel(null)} eyebrow="Project pulse" title="Your latest updates">
+      <ExperienceDrawer
+        open={utilityPanel === "notifications"}
+        onClose={() => setUtilityPanel(null)}
+        eyebrow="Project pulse"
+        title="Your latest updates"
+      >
         <div className="drawer-feed">
-          <article><span className="drawer-feed-icon"><BadgeCheck size={18} /></span><div><strong>New verified PMC match</strong><p>UrbanFrame Consultants is a 96% match for your active project.</p><small>Today · 10:42 AM</small></div></article>
-          <article><span className="drawer-feed-icon"><AlertTriangle size={18} /></span><div><strong>Document action needed</strong><p>Your conveyance status still needs committee confirmation.</p><small>Yesterday</small></div></article>
-          <article><span className="drawer-feed-icon"><BookOpenText size={18} /></span><div><strong>Guidance updated</strong><p>The MHADA redevelopment overview has new committee notes.</p><small>2 days ago</small></div></article>
+          <article>
+            <span className="drawer-feed-icon">
+              <BadgeCheck size={18} />
+            </span>
+            <div>
+              <strong>New verified PMC match</strong>
+              <p>
+                UrbanFrame Consultants is a 96% match for your active project.
+              </p>
+              <small>Today · 10:42 AM</small>
+            </div>
+          </article>
+          <article>
+            <span className="drawer-feed-icon">
+              <AlertTriangle size={18} />
+            </span>
+            <div>
+              <strong>Document action needed</strong>
+              <p>Your conveyance status still needs committee confirmation.</p>
+              <small>Yesterday</small>
+            </div>
+          </article>
+          <article>
+            <span className="drawer-feed-icon">
+              <BookOpenText size={18} />
+            </span>
+            <div>
+              <strong>Guidance updated</strong>
+              <p>The MHADA redevelopment overview has new committee notes.</p>
+              <small>2 days ago</small>
+            </div>
+          </article>
         </div>
       </ExperienceDrawer>
     </div>
   );
 }
 
-function LoadingPage({ label = 'Preparing your workspace' }: { label?: string }) {
+function LoadingPage({
+  label = "Preparing your workspace",
+}: {
+  label?: string;
+}) {
   return (
     <div className="state-page" data-testid="state-loading">
-      <div className="skeleton-mark"><LoaderCircle size={22} /></div>
+      <div className="skeleton-mark">
+        <LoaderCircle size={22} />
+      </div>
       <div className="skeleton-line skeleton-wide" />
       <div className="skeleton-line skeleton-mid" />
       <p>{label}</p>
@@ -202,59 +391,150 @@ function LoadingPage({ label = 'Preparing your workspace' }: { label?: string })
   );
 }
 
-function ErrorState({ onRetry, label = 'We could not load this view.' }: { onRetry: () => void; label?: string }) {
+function ErrorState({
+  onRetry,
+  label = "We could not load this view.",
+}: {
+  onRetry: () => void;
+  label?: string;
+}) {
   return (
     <div className="state-page error-state" data-testid="state-error">
-      <div className="state-icon state-icon-red"><AlertTriangle size={23} /></div>
+      <div className="state-icon state-icon-red">
+        <AlertTriangle size={23} />
+      </div>
       <h2>Something got in the way</h2>
       <p>{label} Your work is safe. Try again in a moment.</p>
-      <button className="button button-dark" onClick={onRetry} data-testid="button-retry"><RotateCcw size={16} /> Try again</button>
+      <button
+        className="button button-dark"
+        onClick={onRetry}
+        data-testid="button-retry"
+      >
+        <RotateCcw size={16} /> Try again
+      </button>
     </div>
   );
 }
 
 function WorkspaceErrorFallback({ resetError }: ErrorFallbackProps) {
   return (
-    <div className="state-page workspace-error" data-testid="state-workspace-error">
-      <div className="state-icon state-icon-red"><AlertTriangle size={23} /></div>
+    <div
+      className="state-page workspace-error"
+      data-testid="state-workspace-error"
+    >
+      <div className="state-icon state-icon-red">
+        <AlertTriangle size={23} />
+      </div>
       <p className="section-kicker">Workspace recovery</p>
       <h2>We could not open this view.</h2>
-      <p>Your information is safe. Refresh the workspace connection and continue where you left off.</p>
-      <button className="button button-dark" onClick={resetError} data-testid="button-recover-workspace"><RotateCcw size={16} /> Reload workspace</button>
+      <p>
+        Your information is safe. Refresh the workspace connection and continue
+        where you left off.
+      </p>
+      <button
+        className="button button-dark"
+        onClick={resetError}
+        data-testid="button-recover-workspace"
+      >
+        <RotateCcw size={16} /> Reload workspace
+      </button>
     </div>
   );
 }
 
-function EmptyState({ icon: Icon, title, detail, action }: { icon: typeof Building2; title: string; detail: string; action?: ReactNode }) {
+function EmptyState({
+  icon: Icon,
+  title,
+  detail,
+  action,
+}: {
+  icon: typeof Building2;
+  title: string;
+  detail: string;
+  action?: ReactNode;
+}) {
   return (
     <div className="empty-state" data-testid="state-empty">
-      <div className="state-icon"><Icon size={23} /></div>
-      <h3>{title}</h3><p>{detail}</p>{action}
+      <div className="state-icon">
+        <Icon size={23} />
+      </div>
+      <h3>{title}</h3>
+      <p>{detail}</p>
+      {action}
     </div>
   );
 }
 
-function StatusPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'orange' | 'green' | 'red' }) {
-  return <span className={`status-pill status-${tone}`} data-testid={`status-${String(children).toLowerCase().replaceAll(' ', '-')}`}>{children}</span>;
+function StatusPill({
+  children,
+  tone = "neutral",
+}: {
+  children: ReactNode;
+  tone?: "neutral" | "orange" | "green" | "red";
+}) {
+  return (
+    <span
+      className={`status-pill status-${tone}`}
+      data-testid={`status-${String(children).toLowerCase().replaceAll(" ", "-")}`}
+    >
+      {children}
+    </span>
+  );
 }
 
-function ExperienceDrawer({ open, onClose, eyebrow, title, children }: { open: boolean; onClose: () => void; eyebrow: string; title: string; children: ReactNode }) {
+function ExperienceDrawer({
+  open,
+  onClose,
+  eyebrow,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  eyebrow: string;
+  title: string;
+  children: ReactNode;
+}) {
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
-    document.addEventListener('keydown', closeOnEscape);
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) =>
+      event.key === "Escape" && onClose();
+    document.addEventListener("keydown", closeOnEscape);
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', closeOnEscape);
+      document.removeEventListener("keydown", closeOnEscape);
     };
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="experience-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="experience-drawer" role="dialog" aria-modal="true" aria-labelledby="experience-drawer-title">
-        <div className="experience-drawer-head"><div><p>{eyebrow}</p><h2 id="experience-drawer-title">{title}</h2></div><button type="button" className="icon-button" onClick={onClose} aria-label="Close" autoFocus><X size={20} /></button></div>
+    <div
+      className="experience-overlay"
+      role="presentation"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <section
+        className="experience-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="experience-drawer-title"
+      >
+        <div className="experience-drawer-head">
+          <div>
+            <p>{eyebrow}</p>
+            <h2 id="experience-drawer-title">{title}</h2>
+          </div>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Close"
+            autoFocus
+          >
+            <X size={20} />
+          </button>
+        </div>
         <div className="experience-drawer-body">{children}</div>
       </section>
     </div>
@@ -265,20 +545,48 @@ function ProgressRing({ value, size = 86 }: { value: number; size?: number }) {
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   return (
-    <div className="progress-ring" style={{ width: size, height: size }} data-testid="display-readiness">
+    <div
+      className="progress-ring"
+      style={{ width: size, height: size }}
+      data-testid="display-readiness"
+    >
       <svg viewBox="0 0 80 80" aria-hidden="true">
         <circle className="ring-track" cx="40" cy="40" r={radius} />
-        <circle className="ring-value" cx="40" cy="40" r={radius} strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * value) / 100} />
+        <circle
+          className="ring-value"
+          cx="40"
+          cy="40"
+          r={radius}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - (circumference * value) / 100}
+        />
       </svg>
-      <strong>{value}<small>%</small></strong>
+      <strong>
+        {value}
+        <small>%</small>
+      </strong>
     </div>
   );
 }
 
-function PageIntro({ kicker, title, detail, action }: { kicker: string; title: ReactNode; detail: string; action?: ReactNode }) {
+function PageIntro({
+  kicker,
+  title,
+  detail,
+  action,
+}: {
+  kicker: string;
+  title: ReactNode;
+  detail: string;
+  action?: ReactNode;
+}) {
   return (
     <div className="page-intro">
-      <div><p className="section-kicker">{kicker}</p><h1>{title}</h1><p className="page-description">{detail}</p></div>
+      <div>
+        <p className="section-kicker">{kicker}</p>
+        <h1>{title}</h1>
+        <p className="page-description">{detail}</p>
+      </div>
       {action}
     </div>
   );
@@ -287,12 +595,23 @@ function PageIntro({ kicker, title, detail, action }: { kicker: string; title: R
 function Overview() {
   const dashboard = useGetDashboard();
   const projects = useListProjects();
-  if (dashboard.isLoading) return <LoadingPage label="Loading your society workspace" />;
-  if (dashboard.isError || !dashboard.data) return <ErrorState onRetry={() => dashboard.refetch()} />;
+  if (dashboard.isLoading)
+    return <LoadingPage label="Loading your society workspace" />;
+  if (dashboard.isError || !dashboard.data)
+    return <ErrorState onRetry={() => dashboard.refetch()} />;
   const activeProject = dashboard.data.activeProject ?? projects.data?.[0];
   if (!activeProject) {
-    if (projects.isLoading) return <LoadingPage label="Finding your active project" />;
-    return <ErrorState onRetry={() => { void dashboard.refetch(); void projects.refetch(); }} label="We could not find an active society project." />;
+    if (projects.isLoading)
+      return <LoadingPage label="Finding your active project" />;
+    return (
+      <ErrorState
+        onRetry={() => {
+          void dashboard.refetch();
+          void projects.refetch();
+        }}
+        label="We could not find an active society project."
+      />
+    );
   }
   const { recentActivity } = dashboard.data;
 
@@ -300,130 +619,822 @@ function Overview() {
     <div className="content-stack">
       <PageIntro
         kicker="Monday, 06 May 2024 · Committee workspace"
-        title={<>Good morning, Aditya.<br /><em>Let’s move this forward.</em></>}
+        title={
+          <>
+            Good morning, Aditya.
+            <br />
+            <em>Let’s move this forward.</em>
+          </>
+        }
         detail="A clear view of your society’s redevelopment, from first assessment to possession."
-        action={<Link href="/assessment" className="button button-accent" data-testid="link-start-assessment"><Plus size={17} /> Start an assessment</Link>}
+        action={
+          <Link
+            href="/assessment"
+            className="button button-accent"
+            data-testid="link-start-assessment"
+          >
+            <Plus size={17} /> Start an assessment
+          </Link>
+        }
       />
       <section className="hero-project" data-testid="card-active-project">
         <div className="hero-project-info">
-          <div className="label-row"><span className="section-kicker">Active project</span><StatusPill tone="orange">{activeProject.stage || 'Assessment in progress'}</StatusPill></div>
+          <div className="label-row">
+            <span className="section-kicker">Active project</span>
+            <StatusPill tone="orange">
+              {activeProject.stage || "Assessment in progress"}
+            </StatusPill>
+          </div>
           <h2>{activeProject.name}</h2>
-          <div className="meta-row"><span><MapPin size={14} /> {activeProject.location}</span><span><Building2 size={14} /> {activeProject.societyType}</span><span><UsersRound size={14} /> {activeProject.memberCount || '—'} members</span></div>
+          <div className="meta-row">
+            <span>
+              <MapPin size={14} /> {activeProject.location}
+            </span>
+            <span>
+              <Building2 size={14} /> {activeProject.societyType}
+            </span>
+            <span>
+              <UsersRound size={14} /> {activeProject.memberCount || "—"}{" "}
+              members
+            </span>
+          </div>
           <div className="hero-project-bottom">
-            <div><span className="tiny-label">Next best step</span><strong>{activeProject.nextStep}</strong></div>
-            <Link href={`/project/${activeProject.id}`} className="text-link" data-testid={`link-project-${activeProject.id}`}>Open project <ArrowUpRight size={15} /></Link>
+            <div>
+              <span className="tiny-label">Next best step</span>
+              <strong>{activeProject.nextStep}</strong>
+            </div>
+            <Link
+              href={`/project/${activeProject.id}`}
+              className="text-link"
+              data-testid={`link-project-${activeProject.id}`}
+            >
+              Open project <ArrowUpRight size={15} />
+            </Link>
           </div>
         </div>
-        <div className="hero-project-image"><img src="/renova-hero.png" alt="Architectural vision of a redeveloped Mumbai housing society" /><span className="image-caption">The building ahead, made visible.</span></div>
+        <div className="hero-project-image">
+          <img
+            src="/renova-hero.png"
+            alt="Architectural vision of a redeveloped Mumbai housing society"
+          />
+          <span className="image-caption">
+            The building ahead, made visible.
+          </span>
+        </div>
       </section>
       <section className="metric-grid" aria-label="Project summary">
-        <div className="metric-card metric-primary"><div className="metric-card-top"><span>Readiness score</span><TrendingUp size={17} /></div><div className="metric-value">{dashboard.data.totalReadiness}<small>%</small></div><div className="metric-bar"><i style={{ width: `${dashboard.data.totalReadiness}%` }} /></div><p>Up 8 points this month</p></div>
-        <div className="metric-card"><div className="metric-card-top"><span>Open red flags</span><AlertTriangle size={17} /></div><div className="metric-value">{dashboard.data.openRedFlags}</div><p className="metric-note"><span className="dot dot-red" /> Needs committee attention</p><Link href={`/project/${activeProject.id}`} className="metric-link" data-testid="link-view-red-flags">Review flags <ChevronRight size={14} /></Link></div>
-        <div className="metric-card"><div className="metric-card-top"><span>Steps completed</span><CheckCircle2 size={17} /></div><div className="metric-value">{dashboard.data.completedSteps}<small>/ 12</small></div><p className="metric-note"><span className="dot dot-green" /> Good pace for this stage</p><Link href={`/project/${activeProject.id}`} className="metric-link" data-testid="link-view-progress">View progress <ChevronRight size={14} /></Link></div>
+        <div className="metric-card metric-primary">
+          <div className="metric-card-top">
+            <span>Readiness score</span>
+            <TrendingUp size={17} />
+          </div>
+          <div className="metric-value">
+            {dashboard.data.totalReadiness}
+            <small>%</small>
+          </div>
+          <div className="metric-bar">
+            <i style={{ width: `${dashboard.data.totalReadiness}%` }} />
+          </div>
+          <p>Up 8 points this month</p>
+        </div>
+        <div className="metric-card">
+          <div className="metric-card-top">
+            <span>Open red flags</span>
+            <AlertTriangle size={17} />
+          </div>
+          <div className="metric-value">{dashboard.data.openRedFlags}</div>
+          <p className="metric-note">
+            <span className="dot dot-red" /> Needs committee attention
+          </p>
+          <Link
+            href={`/project/${activeProject.id}`}
+            className="metric-link"
+            data-testid="link-view-red-flags"
+          >
+            Review flags <ChevronRight size={14} />
+          </Link>
+        </div>
+        <div className="metric-card">
+          <div className="metric-card-top">
+            <span>Steps completed</span>
+            <CheckCircle2 size={17} />
+          </div>
+          <div className="metric-value">
+            {dashboard.data.completedSteps}
+            <small>/ 12</small>
+          </div>
+          <p className="metric-note">
+            <span className="dot dot-green" /> Good pace for this stage
+          </p>
+          <Link
+            href={`/project/${activeProject.id}`}
+            className="metric-link"
+            data-testid="link-view-progress"
+          >
+            View progress <ChevronRight size={14} />
+          </Link>
+        </div>
       </section>
       <section className="overview-lower">
         <div className="panel activity-panel">
-          <div className="panel-heading"><div><p className="section-kicker">The paper trail</p><h3>Recent activity</h3></div><button className="subtle-button" data-testid="button-view-all-activity">View all <ArrowUpRight size={14} /></button></div>
-          {recentActivity?.length ? <div className="activity-list">{recentActivity.map((item, index) => <div className="activity-item" key={item.id} data-testid={`activity-${item.id}`}><span className={`activity-icon activity-${item.kind}`}><ActivityIcon size={16} /></span><div><strong>{item.title}</strong><p>{item.detail}</p></div><time>{index === 0 ? 'Today' : item.date}</time></div>)}</div> : <EmptyState icon={ActivityIcon} title="Your paper trail starts here" detail="Actions and decisions will appear as your committee moves through the process." /> }
+          <div className="panel-heading">
+            <div>
+              <p className="section-kicker">The paper trail</p>
+              <h3>Recent activity</h3>
+            </div>
+            <button
+              className="subtle-button"
+              data-testid="button-view-all-activity"
+            >
+              View all <ArrowUpRight size={14} />
+            </button>
+          </div>
+          {recentActivity?.length ? (
+            <div className="activity-list">
+              {recentActivity.map((item, index) => (
+                <div
+                  className="activity-item"
+                  key={item.id}
+                  data-testid={`activity-${item.id}`}
+                >
+                  <span className={`activity-icon activity-${item.kind}`}>
+                    <ActivityIcon size={16} />
+                  </span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                  <time>{index === 0 ? "Today" : item.date}</time>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={ActivityIcon}
+              title="Your paper trail starts here"
+              detail="Actions and decisions will appear as your committee moves through the process."
+            />
+          )}
         </div>
         <div className="panel focus-panel">
-          <div className="panel-heading"><div><p className="section-kicker">In focus</p><h3>Project health</h3></div><ShieldCheck size={20} className="panel-heading-icon" /></div>
-          <div className="health-score"><ProgressRing value={dashboard.data.totalReadiness} size={96} /><div><strong>On the right track</strong><p>Your readiness is ahead of the average for societies at this stage.</p></div></div>
+          <div className="panel-heading">
+            <div>
+              <p className="section-kicker">In focus</p>
+              <h3>Project health</h3>
+            </div>
+            <ShieldCheck size={20} className="panel-heading-icon" />
+          </div>
+          <div className="health-score">
+            <ProgressRing value={dashboard.data.totalReadiness} size={96} />
+            <div>
+              <strong>On the right track</strong>
+              <p>
+                Your readiness is ahead of the average for societies at this
+                stage.
+              </p>
+            </div>
+          </div>
           <div className="focus-divider" />
-          <div className="focus-row"><span><Zap size={15} /> Recommended this week</span><strong>Resolve {dashboard.data.openRedFlags} open flags</strong></div>
-          <Link href="/professionals" className="button button-outline button-full" data-testid="link-find-professionals">Find a professional <ArrowUpRight size={15} /></Link>
+          <div className="focus-row">
+            <span>
+              <Zap size={15} /> Recommended this week
+            </span>
+            <strong>Resolve {dashboard.data.openRedFlags} open flags</strong>
+          </div>
+          <Link
+            href="/professionals"
+            className="button button-outline button-full"
+            data-testid="link-find-professionals"
+          >
+            Find a professional <ArrowUpRight size={15} />
+          </Link>
         </div>
       </section>
-      {projects.data && projects.data.length > 1 && <section className="workspace-projects"><div className="panel-heading"><div><p className="section-kicker">Portfolio</p><h3>All society projects</h3></div></div><div className="project-mini-list">{projects.data.map((project) => <Link href={`/project/${project.id}`} className="project-mini-row" key={project.id} data-testid={`link-portfolio-project-${project.id}`}><span className="project-mini-icon"><Building2 size={17} /></span><span><strong>{project.name}</strong><small>{project.location}</small></span><span className="project-mini-readiness">{project.readiness}% ready</span><ChevronRight size={16} /></Link>)}</div></section>}
+      {projects.data && projects.data.length > 1 && (
+        <section className="workspace-projects">
+          <div className="panel-heading">
+            <div>
+              <p className="section-kicker">Portfolio</p>
+              <h3>All society projects</h3>
+            </div>
+          </div>
+          <div className="project-mini-list">
+            {projects.data.map((project) => (
+              <Link
+                href={`/project/${project.id}`}
+                className="project-mini-row"
+                key={project.id}
+                data-testid={`link-portfolio-project-${project.id}`}
+              >
+                <span className="project-mini-icon">
+                  <Building2 size={17} />
+                </span>
+                <span>
+                  <strong>{project.name}</strong>
+                  <small>{project.location}</small>
+                </span>
+                <span className="project-mini-readiness">
+                  {project.readiness}% ready
+                </span>
+                <ChevronRight size={16} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
-const requirementServices = ['Developer', 'PMC', 'Architect', 'Legal advisor', 'Structural consultant'];
+const requirementServices = [
+  "Developer",
+  "PMC",
+  "Architect",
+  "Legal advisor",
+  "Structural consultant",
+];
 
 function Assessment() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState<{ reference: string; status: string; nextStep: string; projectId?: string; demo?: boolean } | null>(null);
+  const [submitted, setSubmitted] = useState<{
+    reference: string;
+    status: string;
+    nextStep: string;
+    projectId?: string;
+    demo?: boolean;
+  } | null>(null);
   const [form, setForm] = useState({
-    societyName: '', location: '', societyType: '', memberCount: '', buildingAge: '',
-    landType: '', plotArea: '', conveyanceStatus: '', structuralAudit: '',
-    services: [] as string[], timeline: '', brief: '', contactName: '', contactRole: '',
-    phone: '', email: '', consent: false,
+    societyName: "",
+    location: "",
+    societyType: "",
+    memberCount: "",
+    buildingAge: "",
+    landType: "",
+    plotArea: "",
+    conveyanceStatus: "",
+    structuralAudit: "",
+    services: [] as string[],
+    timeline: "",
+    brief: "",
+    contactName: "",
+    contactRole: "",
+    phone: "",
+    email: "",
+    consent: false,
   });
-  const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((current) => ({ ...current, [key]: value }));
-  const toggleService = (service: string) => update('services', form.services.includes(service) ? form.services.filter((item) => item !== service) : [...form.services, service]);
-  const canContinue = step === 1
-    ? Boolean(form.societyName && form.location && form.societyType && form.memberCount && form.buildingAge)
-    : step === 2
-      ? Boolean(form.conveyanceStatus && form.structuralAudit)
-      : step === 3
-        ? Boolean(form.services.length && form.timeline)
-        : Boolean(form.contactName && form.contactRole && form.phone.replace(/\D/g, '').length >= 10 && form.email.includes('@') && form.consent);
+  const update = <K extends keyof typeof form>(
+    key: K,
+    value: (typeof form)[K],
+  ) => setForm((current) => ({ ...current, [key]: value }));
+  const toggleService = (service: string) =>
+    update(
+      "services",
+      form.services.includes(service)
+        ? form.services.filter((item) => item !== service)
+        : [...form.services, service],
+    );
+  const canContinue =
+    step === 1
+      ? Boolean(
+          form.societyName &&
+          form.location &&
+          form.societyType &&
+          form.memberCount &&
+          form.buildingAge,
+        )
+      : step === 2
+        ? Boolean(form.conveyanceStatus && form.structuralAudit)
+        : step === 3
+          ? Boolean(form.services.length && form.timeline)
+          : Boolean(
+              form.contactName &&
+              form.contactRole &&
+              form.phone.replace(/\D/g, "").length >= 10 &&
+              form.email.includes("@") &&
+              form.consent,
+            );
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!canContinue) return;
     const data = {
-      societyName: form.societyName.trim(), location: form.location.trim(), societyType: form.societyType,
-      memberCount: Number(form.memberCount), buildingAge: Number(form.buildingAge),
-      landType: form.landType || undefined, plotArea: form.plotArea ? Number(form.plotArea) : undefined,
-      conveyanceStatus: form.conveyanceStatus || undefined, structuralAudit: form.structuralAudit || undefined,
-      services: form.services, timeline: form.timeline, brief: form.brief.trim() || undefined,
-      contactName: form.contactName.trim(), contactRole: form.contactRole, phone: form.phone.trim(),
-      email: form.email.trim(), consent: form.consent,
+      societyName: form.societyName.trim(),
+      location: form.location.trim(),
+      societyType: form.societyType,
+      memberCount: Number(form.memberCount),
+      buildingAge: Number(form.buildingAge),
+      landType: form.landType || undefined,
+      plotArea: form.plotArea ? Number(form.plotArea) : undefined,
+      conveyanceStatus: form.conveyanceStatus || undefined,
+      structuralAudit: form.structuralAudit || undefined,
+      services: form.services,
+      timeline: form.timeline,
+      brief: form.brief.trim() || undefined,
+      contactName: form.contactName.trim(),
+      contactRole: form.contactRole,
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      consent: form.consent,
     };
     setIsSubmitting(true);
-    fetch('/api/requirements', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
+    fetch("/api/requirements", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(data),
+    })
       .then(async (response) => {
-        if (!response.ok) throw new Error('Live requirement intake is not connected yet.');
-        return response.json() as Promise<{ reference: string; status: string; nextStep: string; projectId?: string }>;
+        if (!response.ok)
+          throw new Error("Live requirement intake is not connected yet.");
+        return response.json() as Promise<{
+          reference: string;
+          status: string;
+          nextStep: string;
+          projectId?: string;
+        }>;
       })
       .then((result) => setSubmitted(result))
       .catch(() => {
         const reference = `RNV-DEMO-${String(Date.now()).slice(-6)}`;
-        localStorage.setItem('renova:last-requirement', JSON.stringify({ ...data, reference, savedAt: new Date().toISOString() }));
-        setSubmitted({ reference, status: 'Saved on this device', nextStep: 'Connect the production database to route this requirement into RENOVA’s review queue.', demo: true });
+        localStorage.setItem(
+          "renova:last-requirement",
+          JSON.stringify({
+            ...data,
+            reference,
+            savedAt: new Date().toISOString(),
+          }),
+        );
+        setSubmitted({
+          reference,
+          status: "Saved on this device",
+          nextStep:
+            "Connect the production database to route this requirement into RENOVA’s review queue.",
+          demo: true,
+        });
       })
       .finally(() => setIsSubmitting(false));
   };
 
-  if (submitted) return (
-    <div className="requirement-success" data-testid="state-requirement-success">
-      <div className="success-mark"><Check size={34} /></div>
-      <p className="section-kicker">Requirement submitted</p>
-      <h1>Your society has taken<br /><em>the first clear step.</em></h1>
-      <p className="success-lead">Your requirement reference is <strong>{submitted.reference}</strong>. Keep it handy for future conversations with RENOVA.</p>
-      <div className="submission-receipt">
-        <div><span>Status</span><strong>{submitted.status}</strong></div>
-        <div><span>Society</span><strong>{form.societyName}</strong></div>
-        <div><span>Services requested</span><strong>{form.services.join(', ')}</strong></div>
-        <div><span>Next step</span><strong>{submitted.nextStep}</strong></div>
+  if (submitted)
+    return (
+      <div
+        className="requirement-success"
+        data-testid="state-requirement-success"
+      >
+        <div className="success-mark">
+          <Check size={34} />
+        </div>
+        <p className="section-kicker">Requirement submitted</p>
+        <h1>
+          Your society has taken
+          <br />
+          <em>the first clear step.</em>
+        </h1>
+        <p className="success-lead">
+          Your requirement reference is <strong>{submitted.reference}</strong>.
+          Keep it handy for future conversations with RENOVA.
+        </p>
+        <div className="submission-receipt">
+          <div>
+            <span>Status</span>
+            <strong>{submitted.status}</strong>
+          </div>
+          <div>
+            <span>Society</span>
+            <strong>{form.societyName}</strong>
+          </div>
+          <div>
+            <span>Services requested</span>
+            <strong>{form.services.join(", ")}</strong>
+          </div>
+          <div>
+            <span>Next step</span>
+            <strong>{submitted.nextStep}</strong>
+          </div>
+        </div>
+        {submitted.demo && (
+          <div className="demo-mode-note">
+            <CircleHelp size={17} />
+            <span>
+              This submission is saved locally for the investor-ready
+              demonstration. The live-data phase will add the production review
+              queue and notifications.
+            </span>
+          </div>
+        )}
+        <div className="success-actions">
+          <Link href="/" className="button button-outline">
+            <ArrowLeft size={16} /> RENOVA home
+          </Link>
+          <Link href="/workspace" className="button button-dark">
+            Open society workspace <ArrowUpRight size={16} />
+          </Link>
+        </div>
       </div>
-      {submitted.demo && <div className="demo-mode-note"><CircleHelp size={17} /><span>This submission is saved locally for the investor-ready demonstration. The live-data phase will add the production review queue and notifications.</span></div>}
-      <div className="success-actions"><Link href="/" className="button button-outline"><ArrowLeft size={16} /> RENOVA home</Link><Link href="/workspace" className="button button-dark">Open society workspace <ArrowUpRight size={16} /></Link></div>
-    </div>
-  );
+    );
 
   return (
     <div className="requirement-page">
-      <div className="requirement-brand-row"><Logo /><span>Society requirement</span><Link href="/workspace">Existing workspace <ArrowUpRight size={14} /></Link></div>
+      <div className="requirement-brand-row">
+        <Logo />
+        <span>Society requirement</span>
+        <Link href="/workspace">
+          Existing workspace <ArrowUpRight size={14} />
+        </Link>
+      </div>
       <div className="requirement-heading">
-        <Link href="/" className="back-link"><ArrowLeft size={15} /> RENOVA home</Link>
-        <PageIntro kicker="Post your requirement · About 6 minutes" title={<>Put your society’s<br /><em>needs into focus.</em></>} detail="Share the essentials once. RENOVA will use this brief to understand the opportunity and prepare the right next conversation." />
+        <Link href="/" className="back-link">
+          <ArrowLeft size={15} /> RENOVA home
+        </Link>
+        <PageIntro
+          kicker="Post your requirement · About 6 minutes"
+          title={
+            <>
+              Put your society’s
+              <br />
+              <em>needs into focus.</em>
+            </>
+          }
+          detail="Share the essentials once. RENOVA will use this brief to understand the opportunity and prepare the right next conversation."
+        />
       </div>
       <div className="requirement-shell">
-        <aside className="requirement-progress" aria-label="Submission progress">
-          {[['01', 'Society'], ['02', 'Property'], ['03', 'Requirement'], ['04', 'Contact']].map(([number, label], index) => <button type="button" key={number} onClick={() => index + 1 < step && setStep(index + 1)} className={cn(step === index + 1 && 'active', step > index + 1 && 'complete')}><span>{step > index + 1 ? <Check size={14} /> : number}</span><b>{label}</b><small>{index === 0 ? 'Who you are' : index === 1 ? 'What you have' : index === 2 ? 'What you need' : 'Who we contact'}</small></button>)}
-          <div className="requirement-trust"><ShieldCheck size={20} /><strong>Your details stay private.</strong><p>RENOVA will not share them with third parties without your permission.</p></div>
+        <aside
+          className="requirement-progress"
+          aria-label="Submission progress"
+        >
+          {[
+            ["01", "Society"],
+            ["02", "Property"],
+            ["03", "Requirement"],
+            ["04", "Contact"],
+          ].map(([number, label], index) => (
+            <button
+              type="button"
+              key={number}
+              onClick={() => index + 1 < step && setStep(index + 1)}
+              className={cn(
+                step === index + 1 && "active",
+                step > index + 1 && "complete",
+              )}
+            >
+              <span>{step > index + 1 ? <Check size={14} /> : number}</span>
+              <b>{label}</b>
+              <small>
+                {index === 0
+                  ? "Who you are"
+                  : index === 1
+                    ? "What you have"
+                    : index === 2
+                      ? "What you need"
+                      : "Who we contact"}
+              </small>
+            </button>
+          ))}
+          <div className="requirement-trust">
+            <ShieldCheck size={20} />
+            <strong>Your details stay private.</strong>
+            <p>
+              RENOVA will not share them with third parties without your
+              permission.
+            </p>
+          </div>
         </aside>
         <form className="requirement-form" onSubmit={submit}>
-          <div className="requirement-step-label"><span>Step {step} of 4</span><b>{step * 25}% complete</b></div>
-          <div className="requirement-progress-bar"><i style={{ width: `${step * 25}%` }} /></div>
-          {step === 1 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">01</span><div><h2>Tell us about your society</h2><p>Start with the details your committee already knows.</p></div></div><div className="requirement-fields"><label className="field-wide">Registered society name<input required value={form.societyName} onChange={(event) => update('societyName', event.target.value)} placeholder="e.g. Kirti Heights CHS" /></label><label className="field-wide">Area / locality<input required value={form.location} onChange={(event) => update('location', event.target.value)} placeholder="e.g. Chembur, Mumbai" /></label><label>Society type<select required value={form.societyType} onChange={(event) => update('societyType', event.target.value)}><option value="">Select type</option><option>Co-operative Housing Society</option><option>Apartment Owners Association</option><option>MHADA Society</option><option>Cessed building</option></select></label><label>Member households<input required type="number" min="1" value={form.memberCount} onChange={(event) => update('memberCount', event.target.value)} placeholder="e.g. 48" /></label><label>Building age (years)<input required type="number" min="1" value={form.buildingAge} onChange={(event) => update('buildingAge', event.target.value)} placeholder="e.g. 36" /></label></div></div>}
-          {step === 2 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">02</span><div><h2>Set the property context</h2><p>It is fine to choose “Not sure” where documents need review.</p></div></div><div className="requirement-fields"><label>Land tenure<select value={form.landType} onChange={(event) => update('landType', event.target.value)}><option value="">Not sure</option><option>Freehold</option><option>Leasehold</option><option>MHADA lease</option><option>Collector land</option></select></label><label>Approx. plot area (sq. m.)<input type="number" min="1" value={form.plotArea} onChange={(event) => update('plotArea', event.target.value)} placeholder="Optional" /></label><label className="field-wide">Conveyance status<select required value={form.conveyanceStatus} onChange={(event) => update('conveyanceStatus', event.target.value)}><option value="">Select status</option><option>Registered conveyance completed</option><option>Deemed conveyance completed</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label><label className="field-wide">Structural audit<select required value={form.structuralAudit} onChange={(event) => update('structuralAudit', event.target.value)}><option value="">Select status</option><option>Completed in the last 3 years</option><option>Completed more than 3 years ago</option><option>In progress</option><option>Not completed</option><option>Not sure</option></select></label></div></div>}
-          {step === 3 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">03</span><div><h2>What does your society need?</h2><p>Select every service you want RENOVA to help you explore.</p></div></div><div className="requirement-choice-grid">{requirementServices.map((service) => <button type="button" key={service} aria-pressed={form.services.includes(service)} onClick={() => toggleService(service)} className={cn('requirement-choice', form.services.includes(service) && 'selected')}><span>{form.services.includes(service) && <Check size={15} />}</span>{service}</button>)}</div><label className="requirement-block-label">Preferred starting timeline<select required value={form.timeline} onChange={(event) => update('timeline', event.target.value)}><option value="">Select timeline</option><option>Immediately</option><option>Within 3 months</option><option>Within 6 months</option><option>Exploring for the future</option></select></label><label className="requirement-block-label">Anything RENOVA should know? <small>Optional</small><textarea maxLength={1000} value={form.brief} onChange={(event) => update('brief', event.target.value)} placeholder="Share committee priorities, past attempts, document concerns or the support you need most." /><span className="character-count">{form.brief.length}/1000</span></label></div>}
-          {step === 4 && <div className="requirement-form-step"><div className="form-heading"><span className="step-number">04</span><div><h2>Who should RENOVA contact?</h2><p>Use the details of an authorised committee representative.</p></div></div><div className="requirement-fields"><label>Full name<input required value={form.contactName} onChange={(event) => update('contactName', event.target.value)} placeholder="Contact person" /></label><label>Committee role<select required value={form.contactRole} onChange={(event) => update('contactRole', event.target.value)}><option value="">Select role</option><option>Chairperson</option><option>Secretary</option><option>Treasurer</option><option>Committee member</option><option>Authorised representative</option></select></label><label>Mobile number<input required type="tel" value={form.phone} onChange={(event) => update('phone', event.target.value)} placeholder="10-digit mobile number" /></label><label>Email address<input required type="email" value={form.email} onChange={(event) => update('email', event.target.value)} placeholder="name@example.com" /></label></div><div className="requirement-review"><span>Requirement summary</span><div><strong>{form.societyName}</strong><small>{form.location} · {form.memberCount} households · {form.buildingAge}-year-old building</small></div><div><strong>{form.services.join(', ')}</strong><small>Preferred timeline: {form.timeline}</small></div></div><label className="consent-row"><input type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} /><span>I confirm that I am authorised to submit this requirement and agree to be contacted by RENOVA about it.</span></label></div>}
-          <div className="form-actions requirement-form-actions">{step > 1 ? <button type="button" className="button button-ghost" onClick={() => setStep(step - 1)}><ArrowLeft size={16} /> Back</button> : <span />} {step < 4 ? <button type="button" className="button button-dark" disabled={!canContinue} onClick={() => setStep(step + 1)}>Continue <ChevronRight size={16} /></button> : <button className="button button-accent" disabled={!canContinue || isSubmitting}>{isSubmitting ? <LoaderCircle size={16} className="spin" /> : <Send size={16} />} {isSubmitting ? 'Submitting' : 'Submit requirement'}</button>}</div>
+          <div className="requirement-step-label">
+            <span>Step {step} of 4</span>
+            <b>{step * 25}% complete</b>
+          </div>
+          <div className="requirement-progress-bar">
+            <i style={{ width: `${step * 25}%` }} />
+          </div>
+          {step === 1 && (
+            <div className="requirement-form-step">
+              <div className="form-heading">
+                <span className="step-number">01</span>
+                <div>
+                  <h2>Tell us about your society</h2>
+                  <p>Start with the details your committee already knows.</p>
+                </div>
+              </div>
+              <div className="requirement-fields">
+                <label className="field-wide">
+                  Registered society name
+                  <input
+                    required
+                    value={form.societyName}
+                    onChange={(event) =>
+                      update("societyName", event.target.value)
+                    }
+                    placeholder="e.g. Kirti Heights CHS"
+                  />
+                </label>
+                <label className="field-wide">
+                  Area / locality
+                  <input
+                    required
+                    value={form.location}
+                    onChange={(event) => update("location", event.target.value)}
+                    placeholder="e.g. Chembur, Mumbai"
+                  />
+                </label>
+                <label>
+                  Society type
+                  <select
+                    required
+                    value={form.societyType}
+                    onChange={(event) =>
+                      update("societyType", event.target.value)
+                    }
+                  >
+                    <option value="">Select type</option>
+                    <option>Co-operative Housing Society</option>
+                    <option>Apartment Owners Association</option>
+                    <option>MHADA Society</option>
+                    <option>Cessed building</option>
+                  </select>
+                </label>
+                <label>
+                  Member households
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={form.memberCount}
+                    onChange={(event) =>
+                      update("memberCount", event.target.value)
+                    }
+                    placeholder="e.g. 48"
+                  />
+                </label>
+                <label>
+                  Building age (years)
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={form.buildingAge}
+                    onChange={(event) =>
+                      update("buildingAge", event.target.value)
+                    }
+                    placeholder="e.g. 36"
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+          {step === 2 && (
+            <div className="requirement-form-step">
+              <div className="form-heading">
+                <span className="step-number">02</span>
+                <div>
+                  <h2>Set the property context</h2>
+                  <p>
+                    It is fine to choose “Not sure” where documents need review.
+                  </p>
+                </div>
+              </div>
+              <div className="requirement-fields">
+                <label>
+                  Land tenure
+                  <select
+                    value={form.landType}
+                    onChange={(event) => update("landType", event.target.value)}
+                  >
+                    <option value="">Not sure</option>
+                    <option>Freehold</option>
+                    <option>Leasehold</option>
+                    <option>MHADA lease</option>
+                    <option>Collector land</option>
+                  </select>
+                </label>
+                <label>
+                  Approx. plot area (sq. m.)
+                  <input
+                    type="number"
+                    min="1"
+                    value={form.plotArea}
+                    onChange={(event) => update("plotArea", event.target.value)}
+                    placeholder="Optional"
+                  />
+                </label>
+                <label className="field-wide">
+                  Conveyance status
+                  <select
+                    required
+                    value={form.conveyanceStatus}
+                    onChange={(event) =>
+                      update("conveyanceStatus", event.target.value)
+                    }
+                  >
+                    <option value="">Select status</option>
+                    <option>Registered conveyance completed</option>
+                    <option>Deemed conveyance completed</option>
+                    <option>In progress</option>
+                    <option>Not completed</option>
+                    <option>Not sure</option>
+                  </select>
+                </label>
+                <label className="field-wide">
+                  Structural audit
+                  <select
+                    required
+                    value={form.structuralAudit}
+                    onChange={(event) =>
+                      update("structuralAudit", event.target.value)
+                    }
+                  >
+                    <option value="">Select status</option>
+                    <option>Completed in the last 3 years</option>
+                    <option>Completed more than 3 years ago</option>
+                    <option>In progress</option>
+                    <option>Not completed</option>
+                    <option>Not sure</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          )}
+          {step === 3 && (
+            <div className="requirement-form-step">
+              <div className="form-heading">
+                <span className="step-number">03</span>
+                <div>
+                  <h2>What does your society need?</h2>
+                  <p>
+                    Select every service you want RENOVA to help you explore.
+                  </p>
+                </div>
+              </div>
+              <div className="requirement-choice-grid">
+                {requirementServices.map((service) => (
+                  <button
+                    type="button"
+                    key={service}
+                    aria-pressed={form.services.includes(service)}
+                    onClick={() => toggleService(service)}
+                    className={cn(
+                      "requirement-choice",
+                      form.services.includes(service) && "selected",
+                    )}
+                  >
+                    <span>
+                      {form.services.includes(service) && <Check size={15} />}
+                    </span>
+                    {service}
+                  </button>
+                ))}
+              </div>
+              <label className="requirement-block-label">
+                Preferred starting timeline
+                <select
+                  required
+                  value={form.timeline}
+                  onChange={(event) => update("timeline", event.target.value)}
+                >
+                  <option value="">Select timeline</option>
+                  <option>Immediately</option>
+                  <option>Within 3 months</option>
+                  <option>Within 6 months</option>
+                  <option>Exploring for the future</option>
+                </select>
+              </label>
+              <label className="requirement-block-label">
+                Anything RENOVA should know? <small>Optional</small>
+                <textarea
+                  maxLength={1000}
+                  value={form.brief}
+                  onChange={(event) => update("brief", event.target.value)}
+                  placeholder="Share committee priorities, past attempts, document concerns or the support you need most."
+                />
+                <span className="character-count">
+                  {form.brief.length}/1000
+                </span>
+              </label>
+            </div>
+          )}
+          {step === 4 && (
+            <div className="requirement-form-step">
+              <div className="form-heading">
+                <span className="step-number">04</span>
+                <div>
+                  <h2>Who should RENOVA contact?</h2>
+                  <p>
+                    Use the details of an authorised committee representative.
+                  </p>
+                </div>
+              </div>
+              <div className="requirement-fields">
+                <label>
+                  Full name
+                  <input
+                    required
+                    value={form.contactName}
+                    onChange={(event) =>
+                      update("contactName", event.target.value)
+                    }
+                    placeholder="Contact person"
+                  />
+                </label>
+                <label>
+                  Committee role
+                  <select
+                    required
+                    value={form.contactRole}
+                    onChange={(event) =>
+                      update("contactRole", event.target.value)
+                    }
+                  >
+                    <option value="">Select role</option>
+                    <option>Chairperson</option>
+                    <option>Secretary</option>
+                    <option>Treasurer</option>
+                    <option>Committee member</option>
+                    <option>Authorised representative</option>
+                  </select>
+                </label>
+                <label>
+                  Mobile number
+                  <input
+                    required
+                    type="tel"
+                    value={form.phone}
+                    onChange={(event) => update("phone", event.target.value)}
+                    placeholder="10-digit mobile number"
+                  />
+                </label>
+                <label>
+                  Email address
+                  <input
+                    required
+                    type="email"
+                    value={form.email}
+                    onChange={(event) => update("email", event.target.value)}
+                    placeholder="name@example.com"
+                  />
+                </label>
+              </div>
+              <div className="requirement-review">
+                <span>Requirement summary</span>
+                <div>
+                  <strong>{form.societyName}</strong>
+                  <small>
+                    {form.location} · {form.memberCount} households ·{" "}
+                    {form.buildingAge}-year-old building
+                  </small>
+                </div>
+                <div>
+                  <strong>{form.services.join(", ")}</strong>
+                  <small>Preferred timeline: {form.timeline}</small>
+                </div>
+              </div>
+              <label className="consent-row">
+                <input
+                  type="checkbox"
+                  checked={form.consent}
+                  onChange={(event) => update("consent", event.target.checked)}
+                />
+                <span>
+                  I confirm that I am authorised to submit this requirement and
+                  agree to be contacted by RENOVA about it.
+                </span>
+              </label>
+            </div>
+          )}
+          <div className="form-actions requirement-form-actions">
+            {step > 1 ? (
+              <button
+                type="button"
+                className="button button-ghost"
+                onClick={() => setStep(step - 1)}
+              >
+                <ArrowLeft size={16} /> Back
+              </button>
+            ) : (
+              <span />
+            )}{" "}
+            {step < 4 ? (
+              <button
+                type="button"
+                className="button button-dark"
+                disabled={!canContinue}
+                onClick={() => setStep(step + 1)}
+              >
+                Continue <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button
+                className="button button-accent"
+                disabled={!canContinue || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <LoaderCircle size={16} className="spin" />
+                ) : (
+                  <Send size={16} />
+                )}{" "}
+                {isSubmitting ? "Submitting" : "Submit requirement"}
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
@@ -431,67 +1442,579 @@ function Assessment() {
 }
 
 function ProjectDetail() {
-  const { id = '' } = useParams<{ id: string }>();
-  const projectQuery = useGetProject(id, { query: { enabled: Boolean(id), queryKey: getGetProjectQueryKey(id) } });
-  if (projectQuery.isLoading) return <LoadingPage label="Opening project readiness file" />;
-  if (projectQuery.isError || !projectQuery.data) return <ErrorState onRetry={() => projectQuery.refetch()} label="This project readiness file is unavailable." />;
+  const { id = "" } = useParams<{ id: string }>();
+  const projectQuery = useGetProject(id, {
+    query: { enabled: Boolean(id), queryKey: getGetProjectQueryKey(id) },
+  });
+  if (projectQuery.isLoading)
+    return <LoadingPage label="Opening project readiness file" />;
+  if (projectQuery.isError || !projectQuery.data)
+    return (
+      <ErrorState
+        onRetry={() => projectQuery.refetch()}
+        label="This project readiness file is unavailable."
+      />
+    );
   const project = projectQuery.data;
   const pathway = project.pathway || [];
   return (
     <div className="content-stack">
-      <Link href="/workspace" className="back-link" data-testid="link-back-overview"><ArrowLeft size={15} /> Back to overview</Link>
-      <div className="project-header"><div><p className="section-kicker">Project readiness file</p><h1>{project.name}</h1><div className="meta-row"><span><MapPin size={14} /> {project.location}</span><span><Building2 size={14} /> {project.societyType}</span><span>Last updated {project.updatedAt}</span></div></div><button className="icon-button" aria-label="Project options" data-testid="button-project-options"><MoreHorizontal size={20} /></button></div>
-      <section className="readiness-hero"><div className="readiness-copy"><span className="section-kicker">Your project, at a glance</span><h2>Clarity before commitment.</h2><p>Readiness is a living score built from your society’s documents, decisions, and due diligence.</p><div className="readiness-legend"><span><i className="legend-dot orange" /> Current score</span><span><i className="legend-dot pale" /> Path to ready</span></div></div><ProgressRing value={project.readiness} size={144} /></section>
-      <div className="detail-grid">
-        <section className="panel"><div className="panel-heading"><div><p className="section-kicker">Needs attention</p><h3>Open red flags <span className="count-badge">{project.redFlags.length}</span></h3></div><AlertTriangle size={20} className="icon-red" /></div>{project.redFlags.length ? <div className="red-flag-list">{project.redFlags.map((flag, index) => <div className="red-flag-item" key={`${flag}-${index}`} data-testid={`red-flag-${index}`}><span className="flag-number">0{index + 1}</span><div><strong>{flag}</strong><p>Resolve this before the next committee decision.</p></div><ChevronRight size={16} /></div>)}</div> : <EmptyState icon={CheckCircle2} title="No open red flags" detail="Your file is clear at this stage." />}</section>
-        <section className="panel next-step-panel"><div className="panel-heading"><div><p className="section-kicker">Keep moving</p><h3>Next best step</h3></div><Compass size={20} className="icon-accent" /></div><div className="next-step-card"><span className="step-number">01</span><h4>{project.nextStep}</h4><p>Make this the next item on your committee agenda. A clear decision now prevents weeks of drift later.</p><button className="button button-dark button-full" data-testid="button-mark-next-step"><CheckCircle2 size={16} /> Mark as in progress</button></div></section>
+      <Link
+        href="/workspace"
+        className="back-link"
+        data-testid="link-back-overview"
+      >
+        <ArrowLeft size={15} /> Back to overview
+      </Link>
+      <div className="project-header">
+        <div>
+          <p className="section-kicker">Project readiness file</p>
+          <h1>{project.name}</h1>
+          <div className="meta-row">
+            <span>
+              <MapPin size={14} /> {project.location}
+            </span>
+            <span>
+              <Building2 size={14} /> {project.societyType}
+            </span>
+            <span>Last updated {project.updatedAt}</span>
+          </div>
+        </div>
+        <button
+          className="icon-button"
+          aria-label="Project options"
+          data-testid="button-project-options"
+        >
+          <MoreHorizontal size={20} />
+        </button>
       </div>
-      <section className="panel pathway-panel"><div className="panel-heading"><div><p className="section-kicker">Regulatory pathway</p><h3>Route to redevelopment</h3></div><Link href="/regulations" className="subtle-button" data-testid="link-open-regulations">Open regulation centre <ExternalLink size={14} /></Link></div><div className="pathway">{pathway.length ? pathway.map((item, index) => <div className={cn('pathway-step', index === 0 && 'pathway-current')} key={`${item}-${index}`}><span className="pathway-marker">{index === 0 ? <Check size={14} /> : index + 1}</span><div><strong>{item}</strong><p>{index === 0 ? 'Current focus' : index === 1 ? 'Prepare with your committee' : 'Later in the journey'}</p></div>{index < pathway.length - 1 && <i />}</div>) : <EmptyState icon={Compass} title="Pathway being prepared" detail="Complete more of the assessment to reveal your recommended route." />}</div></section>
-      <section className="project-footer-grid"><div className="project-facts"><span><UsersRound size={16} /> {project.memberCount || '—'} households</span><span><Landmark size={16} /> {project.landType || 'Tenure to confirm'}</span><span><Clock3 size={16} /> Stage: {project.stage}</span></div><Link href="/professionals" className="button button-outline" data-testid="link-project-professionals">Explore matched professionals <ArrowUpRight size={15} /></Link></section>
+      <section className="readiness-hero">
+        <div className="readiness-copy">
+          <span className="section-kicker">Your project, at a glance</span>
+          <h2>Clarity before commitment.</h2>
+          <p>
+            Readiness is a living score built from your society’s documents,
+            decisions, and due diligence.
+          </p>
+          <div className="readiness-legend">
+            <span>
+              <i className="legend-dot orange" /> Current score
+            </span>
+            <span>
+              <i className="legend-dot pale" /> Path to ready
+            </span>
+          </div>
+        </div>
+        <ProgressRing value={project.readiness} size={144} />
+      </section>
+      <div className="detail-grid">
+        <section className="panel">
+          <div className="panel-heading">
+            <div>
+              <p className="section-kicker">Needs attention</p>
+              <h3>
+                Open red flags{" "}
+                <span className="count-badge">{project.redFlags.length}</span>
+              </h3>
+            </div>
+            <AlertTriangle size={20} className="icon-red" />
+          </div>
+          {project.redFlags.length ? (
+            <div className="red-flag-list">
+              {project.redFlags.map((flag, index) => (
+                <div
+                  className="red-flag-item"
+                  key={`${flag}-${index}`}
+                  data-testid={`red-flag-${index}`}
+                >
+                  <span className="flag-number">0{index + 1}</span>
+                  <div>
+                    <strong>{flag}</strong>
+                    <p>Resolve this before the next committee decision.</p>
+                  </div>
+                  <ChevronRight size={16} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={CheckCircle2}
+              title="No open red flags"
+              detail="Your file is clear at this stage."
+            />
+          )}
+        </section>
+        <section className="panel next-step-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="section-kicker">Keep moving</p>
+              <h3>Next best step</h3>
+            </div>
+            <Compass size={20} className="icon-accent" />
+          </div>
+          <div className="next-step-card">
+            <span className="step-number">01</span>
+            <h4>{project.nextStep}</h4>
+            <p>
+              Make this the next item on your committee agenda. A clear decision
+              now prevents weeks of drift later.
+            </p>
+            <button
+              className="button button-dark button-full"
+              data-testid="button-mark-next-step"
+            >
+              <CheckCircle2 size={16} /> Mark as in progress
+            </button>
+          </div>
+        </section>
+      </div>
+      <section className="panel pathway-panel">
+        <div className="panel-heading">
+          <div>
+            <p className="section-kicker">Regulatory pathway</p>
+            <h3>Route to redevelopment</h3>
+          </div>
+          <Link
+            href="/regulations"
+            className="subtle-button"
+            data-testid="link-open-regulations"
+          >
+            Open regulation centre <ExternalLink size={14} />
+          </Link>
+        </div>
+        <div className="pathway">
+          {pathway.length ? (
+            pathway.map((item, index) => (
+              <div
+                className={cn("pathway-step", index === 0 && "pathway-current")}
+                key={`${item}-${index}`}
+              >
+                <span className="pathway-marker">
+                  {index === 0 ? <Check size={14} /> : index + 1}
+                </span>
+                <div>
+                  <strong>{item}</strong>
+                  <p>
+                    {index === 0
+                      ? "Current focus"
+                      : index === 1
+                        ? "Prepare with your committee"
+                        : "Later in the journey"}
+                  </p>
+                </div>
+                {index < pathway.length - 1 && <i />}
+              </div>
+            ))
+          ) : (
+            <EmptyState
+              icon={Compass}
+              title="Pathway being prepared"
+              detail="Complete more of the assessment to reveal your recommended route."
+            />
+          )}
+        </div>
+      </section>
+      <section className="project-footer-grid">
+        <div className="project-facts">
+          <span>
+            <UsersRound size={16} /> {project.memberCount || "—"} households
+          </span>
+          <span>
+            <Landmark size={16} /> {project.landType || "Tenure to confirm"}
+          </span>
+          <span>
+            <Clock3 size={16} /> Stage: {project.stage}
+          </span>
+        </div>
+        <Link
+          href="/professionals"
+          className="button button-outline"
+          data-testid="link-project-professionals"
+        >
+          Explore matched professionals <ArrowUpRight size={15} />
+        </Link>
+      </section>
     </div>
   );
 }
 
 function Professionals() {
-  const [role, setRole] = useState(() => new URLSearchParams(window.location.search).get('role') || '');
-  const [search, setSearch] = useState('');
-  const [savedIds, setSavedIds] = useState<string[]>(() => readStoredArray<string>('renova:saved-professionals'));
+  const [role, setRole] = useState(
+    () => new URLSearchParams(window.location.search).get("role") || "",
+  );
+  const [search, setSearch] = useState("");
+  const [savedIds, setSavedIds] = useState<string[]>(() =>
+    readStoredArray<string>("renova:saved-professionals"),
+  );
   const [showSaved, setShowSaved] = useState(false);
-  const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
-  const [drawerMode, setDrawerMode] = useState<'profile' | 'introduction'>('profile');
+  const [activeProfessionalId, setActiveProfessionalId] = useState<
+    string | null
+  >(null);
+  const [drawerMode, setDrawerMode] = useState<"profile" | "introduction">(
+    "profile",
+  );
   const [introductionSent, setIntroductionSent] = useState(false);
-  const [introductionNote, setIntroductionNote] = useState('');
+  const [introductionNote, setIntroductionNote] = useState("");
   const params = useMemo(() => ({ role: role || undefined }), [role]);
-  const professionals = useListProfessionals(params, { query: { queryKey: getListProfessionalsQueryKey(params) } });
-  if (professionals.isLoading) return <LoadingPage label="Finding the right people for your project" />;
-  if (professionals.isError) return <ErrorState onRetry={() => professionals.refetch()} label="The professional directory is unavailable." />;
-  const activeProfessional = (professionals.data || []).find((person) => person.id === activeProfessionalId);
-  const filtered = (professionals.data || []).filter((person) => (!showSaved || savedIds.includes(person.id)) && `${person.name} ${person.role} ${person.location} ${person.specialties.join(' ')}`.toLowerCase().includes(search.toLowerCase()));
+  const professionals = useListProfessionals(params, {
+    query: { queryKey: getListProfessionalsQueryKey(params) },
+  });
+  if (professionals.isLoading)
+    return <LoadingPage label="Finding the right people for your project" />;
+  if (professionals.isError)
+    return (
+      <ErrorState
+        onRetry={() => professionals.refetch()}
+        label="The professional directory is unavailable."
+      />
+    );
+  const activeProfessional = (professionals.data || []).find(
+    (person) => person.id === activeProfessionalId,
+  );
+  const filtered = (professionals.data || []).filter(
+    (person) =>
+      (!showSaved || savedIds.includes(person.id)) &&
+      `${person.name} ${person.role} ${person.location} ${person.specialties.join(" ")}`
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
   const saveProfessional = (id: string) => {
-    const next = savedIds.includes(id) ? savedIds.filter((savedId) => savedId !== id) : [...savedIds, id];
+    const next = savedIds.includes(id)
+      ? savedIds.filter((savedId) => savedId !== id)
+      : [...savedIds, id];
     setSavedIds(next);
-    localStorage.setItem('renova:saved-professionals', JSON.stringify(next));
+    localStorage.setItem("renova:saved-professionals", JSON.stringify(next));
   };
-  const openProfessional = (id: string, mode: 'profile' | 'introduction') => {
+  const openProfessional = (id: string, mode: "profile" | "introduction") => {
     setActiveProfessionalId(id);
     setDrawerMode(mode);
     setIntroductionSent(false);
-    setIntroductionNote('');
+    setIntroductionNote("");
   };
   const requestIntroduction = () => {
     if (!activeProfessional) return;
-    const requests = readStoredArray<{ professionalId: string; note: string; requestedAt: string }>('renova:introduction-requests');
-    localStorage.setItem('renova:introduction-requests', JSON.stringify([...requests, { professionalId: activeProfessional.id, note: introductionNote.trim(), requestedAt: new Date().toISOString() }]));
+    const requests = readStoredArray<{
+      professionalId: string;
+      note: string;
+      requestedAt: string;
+    }>("renova:introduction-requests");
+    localStorage.setItem(
+      "renova:introduction-requests",
+      JSON.stringify([
+        ...requests,
+        {
+          professionalId: activeProfessional.id,
+          note: introductionNote.trim(),
+          requestedAt: new Date().toISOString(),
+        },
+      ]),
+    );
     setIntroductionSent(true);
   };
   return (
     <div className="content-stack">
-      <PageIntro kicker="The people around the table" title={<>Find expertise<br /><em>that earns trust.</em></>} detail="A considered shortlist of professionals matched to the realities of Mumbai society redevelopment." action={<button className={cn('button button-outline', showSaved && 'button-selected')} onClick={() => { setShowSaved((current) => !current); setRole(''); }} data-testid="button-save-shortlist"><Check size={16} /> Saved shortlist <span className="button-count">{savedIds.length}</span></button>} />
-      <div className="directory-toolbar"><div className="search-field"><Search size={17} /><input type="search" placeholder="Search by name, role, or specialty" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-search-professionals" /></div><div className="filter-group"><Filter size={15} /><span>Filter by</span>{['', 'Developer', 'PMC', 'Architect', 'Legal', 'Technical'].map((item) => <button key={item || 'all'} className={cn('filter-chip', role === item && 'selected')} onClick={() => setRole(item)} data-testid={`button-filter-${item || 'all'}`}>{item || 'All roles'}</button>)}</div><button className="icon-button filter-mobile" onClick={() => setRole('')} aria-label="Clear role filter" data-testid="button-more-filters"><SlidersHorizontal size={17} /></button></div>
-      <div className="directory-result-bar"><span>{filtered.length} verified matches</span>{(search || role || showSaved) && <button type="button" onClick={() => { setSearch(''); setRole(''); setShowSaved(false); }}>Reset view <RotateCcw size={13} /></button>}</div>
-      {filtered.length ? <div className="professional-list">{filtered.map((person) => <article className="professional-card" key={person.id} data-testid={`card-professional-${person.id}`}><div className="professional-top"><span className="professional-avatar">{person.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><div className="professional-title"><h3>{person.name} {person.verified && <BadgeCheck size={16} />}</h3><p>{person.role} · {person.location}</p></div><button className={cn('save-button', savedIds.includes(person.id) && 'saved')} onClick={() => saveProfessional(person.id)} aria-pressed={savedIds.includes(person.id)} aria-label={`${savedIds.includes(person.id) ? 'Remove' : 'Save'} ${person.name}`} data-testid={`button-save-${person.id}`}><Check size={16} /></button></div><div className="professional-match"><span><strong>{person.match}%</strong> match</span><div><i style={{ width: `${person.match}%` }} /></div><span className="experience">{person.experience}</span></div><div className="specialty-list">{person.specialties.map((specialty) => <span key={specialty}>{specialty}</span>)}</div><div className="professional-actions"><button className="button button-dark" onClick={() => openProfessional(person.id, 'introduction')} data-testid={`button-request-intro-${person.id}`}>Request introduction <ArrowUpRight size={14} /></button><button className="text-link" onClick={() => openProfessional(person.id, 'profile')} data-testid={`button-view-profile-${person.id}`}>View profile <ChevronRight size={14} /></button></div></article>)}</div> : <EmptyState icon={UsersRound} title={showSaved ? 'Your shortlist is ready to begin' : 'No professionals match that search'} detail={showSaved ? 'Save trusted professionals to compare them here.' : 'Try a broader role or a different search term.'} action={<button className="button button-ghost" onClick={() => { setSearch(''); setRole(''); setShowSaved(false); }} data-testid="button-clear-professionals">Clear filters</button>} />}
-      <ExperienceDrawer open={Boolean(activeProfessional)} onClose={() => setActiveProfessionalId(null)} eyebrow={drawerMode === 'profile' ? 'Verified RENOVA network' : 'Private introduction request'} title={activeProfessional?.name || 'Professional'}>
-        {activeProfessional && <>{drawerMode === 'profile' ? <div className="profile-detail"><div className="profile-identity"><span className="professional-avatar professional-avatar-large">{activeProfessional.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><div><StatusPill tone="green">Verified</StatusPill><p>{activeProfessional.role} · {activeProfessional.location}</p></div></div><div className="profile-score"><strong>{activeProfessional.match}%</strong><span>project match</span><i><b style={{ width: `${activeProfessional.match}%` }} /></i></div><div className="profile-facts"><div><span>Experience</span><strong>{activeProfessional.experience}</strong></div><div><span>Specialisms</span><strong>{activeProfessional.specialties.length} relevant areas</strong></div></div><div><p className="drawer-label">Relevant expertise</p><div className="specialty-list">{activeProfessional.specialties.map((specialty) => <span key={specialty}>{specialty}</span>)}</div></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA reviews credentials and project relevance before professionals enter the network. Societies should complete their own appointment due diligence.</p></div><button className="button button-dark button-full" onClick={() => setDrawerMode('introduction')}>Request an introduction <ArrowUpRight size={15} /></button></div> : introductionSent ? <div className="drawer-success"><span><Check size={30} /></span><h3>Request saved</h3><p>RENOVA will review the fit and prepare the next conversation. Your society’s contact details are never shared automatically.</p><button className="button button-outline" onClick={() => setActiveProfessionalId(null)}>Done</button></div> : <div className="introduction-card"><div className="drawer-note"><ShieldCheck size={18} /><p>This is a private request. RENOVA reviews both sides before making an introduction.</p></div><div className="intro-summary"><span>Professional</span><strong>{activeProfessional.name}</strong><small>{activeProfessional.role} · {activeProfessional.match}% match</small></div><label>What support do you need?<textarea value={introductionNote} onChange={(event) => setIntroductionNote(event.target.value)} placeholder="Briefly describe your society’s current stage and the help you need." /></label><button className="button button-dark button-full" disabled={introductionNote.trim().length < 10} onClick={requestIntroduction}>Send request <Send size={15} /></button></div>}</>}
+      <PageIntro
+        kicker="The people around the table"
+        title={
+          <>
+            Find expertise
+            <br />
+            <em>that earns trust.</em>
+          </>
+        }
+        detail="A considered shortlist of professionals matched to the realities of Mumbai society redevelopment."
+        action={
+          <button
+            className={cn(
+              "button button-outline",
+              showSaved && "button-selected",
+            )}
+            onClick={() => {
+              setShowSaved((current) => !current);
+              setRole("");
+            }}
+            data-testid="button-save-shortlist"
+          >
+            <Check size={16} /> Saved shortlist{" "}
+            <span className="button-count">{savedIds.length}</span>
+          </button>
+        }
+      />
+      <div className="directory-toolbar">
+        <div className="search-field">
+          <Search size={17} />
+          <input
+            type="search"
+            placeholder="Search by name, role, or specialty"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            data-testid="input-search-professionals"
+          />
+        </div>
+        <div className="filter-group">
+          <Filter size={15} />
+          <span>Filter by</span>
+          {["", "Developer", "PMC", "Architect", "Legal", "Technical"].map(
+            (item) => (
+              <button
+                key={item || "all"}
+                className={cn("filter-chip", role === item && "selected")}
+                onClick={() => setRole(item)}
+                data-testid={`button-filter-${item || "all"}`}
+              >
+                {item || "All roles"}
+              </button>
+            ),
+          )}
+        </div>
+        <button
+          className="icon-button filter-mobile"
+          onClick={() => setRole("")}
+          aria-label="Clear role filter"
+          data-testid="button-more-filters"
+        >
+          <SlidersHorizontal size={17} />
+        </button>
+      </div>
+      <div className="directory-result-bar">
+        <span>{filtered.length} verified matches</span>
+        {(search || role || showSaved) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setRole("");
+              setShowSaved(false);
+            }}
+          >
+            Reset view <RotateCcw size={13} />
+          </button>
+        )}
+      </div>
+      {filtered.length ? (
+        <div className="professional-list">
+          {filtered.map((person) => (
+            <article
+              className="professional-card"
+              key={person.id}
+              data-testid={`card-professional-${person.id}`}
+            >
+              <div className="professional-top">
+                <span className="professional-avatar">
+                  {person.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .slice(0, 2)
+                    .join("")}
+                </span>
+                <div className="professional-title">
+                  <h3>
+                    {person.name} {person.verified && <BadgeCheck size={16} />}
+                  </h3>
+                  <p>
+                    {person.role} · {person.location}
+                  </p>
+                </div>
+                <button
+                  className={cn(
+                    "save-button",
+                    savedIds.includes(person.id) && "saved",
+                  )}
+                  onClick={() => saveProfessional(person.id)}
+                  aria-pressed={savedIds.includes(person.id)}
+                  aria-label={`${savedIds.includes(person.id) ? "Remove" : "Save"} ${person.name}`}
+                  data-testid={`button-save-${person.id}`}
+                >
+                  <Check size={16} />
+                </button>
+              </div>
+              <div className="professional-match">
+                <span>
+                  <strong>{person.match}%</strong> match
+                </span>
+                <div>
+                  <i style={{ width: `${person.match}%` }} />
+                </div>
+                <span className="experience">{person.experience}</span>
+              </div>
+              <div className="specialty-list">
+                {person.specialties.map((specialty) => (
+                  <span key={specialty}>{specialty}</span>
+                ))}
+              </div>
+              <div className="professional-actions">
+                <button
+                  className="button button-dark"
+                  onClick={() => openProfessional(person.id, "introduction")}
+                  data-testid={`button-request-intro-${person.id}`}
+                >
+                  Request introduction <ArrowUpRight size={14} />
+                </button>
+                <button
+                  className="text-link"
+                  onClick={() => openProfessional(person.id, "profile")}
+                  data-testid={`button-view-profile-${person.id}`}
+                >
+                  View profile <ChevronRight size={14} />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={UsersRound}
+          title={
+            showSaved
+              ? "Your shortlist is ready to begin"
+              : "No professionals match that search"
+          }
+          detail={
+            showSaved
+              ? "Save trusted professionals to compare them here."
+              : "Try a broader role or a different search term."
+          }
+          action={
+            <button
+              className="button button-ghost"
+              onClick={() => {
+                setSearch("");
+                setRole("");
+                setShowSaved(false);
+              }}
+              data-testid="button-clear-professionals"
+            >
+              Clear filters
+            </button>
+          }
+        />
+      )}
+      <ExperienceDrawer
+        open={Boolean(activeProfessional)}
+        onClose={() => setActiveProfessionalId(null)}
+        eyebrow={
+          drawerMode === "profile"
+            ? "Verified RENOVA network"
+            : "Private introduction request"
+        }
+        title={activeProfessional?.name || "Professional"}
+      >
+        {activeProfessional && (
+          <>
+            {drawerMode === "profile" ? (
+              <div className="profile-detail">
+                <div className="profile-identity">
+                  <span className="professional-avatar professional-avatar-large">
+                    {activeProfessional.name
+                      .split(" ")
+                      .map((part) => part[0])
+                      .slice(0, 2)
+                      .join("")}
+                  </span>
+                  <div>
+                    <StatusPill tone="green">Verified</StatusPill>
+                    <p>
+                      {activeProfessional.role} · {activeProfessional.location}
+                    </p>
+                  </div>
+                </div>
+                <div className="profile-score">
+                  <strong>{activeProfessional.match}%</strong>
+                  <span>project match</span>
+                  <i>
+                    <b style={{ width: `${activeProfessional.match}%` }} />
+                  </i>
+                </div>
+                <div className="profile-facts">
+                  <div>
+                    <span>Experience</span>
+                    <strong>{activeProfessional.experience}</strong>
+                  </div>
+                  <div>
+                    <span>Specialisms</span>
+                    <strong>
+                      {activeProfessional.specialties.length} relevant areas
+                    </strong>
+                  </div>
+                </div>
+                <div>
+                  <p className="drawer-label">Relevant expertise</p>
+                  <div className="specialty-list">
+                    {activeProfessional.specialties.map((specialty) => (
+                      <span key={specialty}>{specialty}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="drawer-note">
+                  <ShieldCheck size={18} />
+                  <p>
+                    RENOVA reviews credentials and project relevance before
+                    professionals enter the network. Societies should complete
+                    their own appointment due diligence.
+                  </p>
+                </div>
+                <button
+                  className="button button-dark button-full"
+                  onClick={() => setDrawerMode("introduction")}
+                >
+                  Request an introduction <ArrowUpRight size={15} />
+                </button>
+              </div>
+            ) : introductionSent ? (
+              <div className="drawer-success">
+                <span>
+                  <Check size={30} />
+                </span>
+                <h3>Request saved</h3>
+                <p>
+                  RENOVA will review the fit and prepare the next conversation.
+                  Your society’s contact details are never shared automatically.
+                </p>
+                <button
+                  className="button button-outline"
+                  onClick={() => setActiveProfessionalId(null)}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <div className="introduction-card">
+                <div className="drawer-note">
+                  <ShieldCheck size={18} />
+                  <p>
+                    This is a private request. RENOVA reviews both sides before
+                    making an introduction.
+                  </p>
+                </div>
+                <div className="intro-summary">
+                  <span>Professional</span>
+                  <strong>{activeProfessional.name}</strong>
+                  <small>
+                    {activeProfessional.role} · {activeProfessional.match}%
+                    match
+                  </small>
+                </div>
+                <label>
+                  What support do you need?
+                  <textarea
+                    value={introductionNote}
+                    onChange={(event) =>
+                      setIntroductionNote(event.target.value)
+                    }
+                    placeholder="Briefly describe your society’s current stage and the help you need."
+                  />
+                </label>
+                <button
+                  className="button button-dark button-full"
+                  disabled={introductionNote.trim().length < 10}
+                  onClick={requestIntroduction}
+                >
+                  Send request <Send size={15} />
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </ExperienceDrawer>
     </div>
   );
@@ -499,139 +2022,573 @@ function Professionals() {
 
 function Regulations() {
   const regulations = useListRegulations();
-  const [search, setSearch] = useState('');
-  const [activeStatus, setActiveStatus] = useState('All');
-  const [activeRegulationId, setActiveRegulationId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [activeStatus, setActiveStatus] = useState("All");
+  const [activeRegulationId, setActiveRegulationId] = useState<string | null>(
+    null,
+  );
   const [showOrientation, setShowOrientation] = useState(false);
-  if (regulations.isLoading) return <LoadingPage label="Loading the regulation centre" />;
-  if (regulations.isError) return <ErrorState onRetry={() => regulations.refetch()} label="The regulation centre is unavailable." />;
-  const statuses = ['All', ...Array.from(new Set((regulations.data || []).map((item) => item.status)))];
-  const filtered = (regulations.data || []).filter((item) => (activeStatus === 'All' || item.status === activeStatus) && `${item.code} ${item.title} ${item.summary} ${item.authority}`.toLowerCase().includes(search.toLowerCase()));
-  const activeRegulation = (regulations.data || []).find((item) => item.id === activeRegulationId);
+  if (regulations.isLoading)
+    return <LoadingPage label="Loading the regulation centre" />;
+  if (regulations.isError)
+    return (
+      <ErrorState
+        onRetry={() => regulations.refetch()}
+        label="The regulation centre is unavailable."
+      />
+    );
+  const statuses = [
+    "All",
+    ...Array.from(new Set((regulations.data || []).map((item) => item.status))),
+  ];
+  const filtered = (regulations.data || []).filter(
+    (item) =>
+      (activeStatus === "All" || item.status === activeStatus) &&
+      `${item.code} ${item.title} ${item.summary} ${item.authority}`
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
+  const activeRegulation = (regulations.data || []).find(
+    (item) => item.id === activeRegulationId,
+  );
   const downloadGuide = () => {
-    const guide = ['RENOVA — SOCIETY REDEVELOPMENT COMMITTEE STARTER GUIDE', '', '1. Record the society’s redevelopment intent and committee authority.', '2. Collect title, conveyance, property-card and structural-audit records.', '3. Commission an independent feasibility study before inviting proposals.', '4. Define transparent evaluation criteria for PMC, architect and developer selection.', '5. Record every resolution, disclosure and member communication.', '', 'Important: This guide is an orientation tool, not legal or technical advice. Verify the applicable pathway with qualified professionals and the relevant authority.'].join('\n');
-    const url = URL.createObjectURL(new Blob([guide], { type: 'text/plain' }));
-    const link = document.createElement('a');
+    const guide = [
+      "RENOVA — SOCIETY REDEVELOPMENT COMMITTEE STARTER GUIDE",
+      "",
+      "1. Record the society’s redevelopment intent and committee authority.",
+      "2. Collect title, conveyance, property-card and structural-audit records.",
+      "3. Commission an independent feasibility study before inviting proposals.",
+      "4. Define transparent evaluation criteria for PMC, architect and developer selection.",
+      "5. Record every resolution, disclosure and member communication.",
+      "",
+      "Important: This guide is an orientation tool, not legal or technical advice. Verify the applicable pathway with qualified professionals and the relevant authority.",
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([guide], { type: "text/plain" }));
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'RENOVA-committee-starter-guide.txt';
+    link.download = "RENOVA-committee-starter-guide.txt";
     link.click();
     URL.revokeObjectURL(url);
   };
   return (
     <div className="content-stack">
-      <PageIntro kicker="Know the rules before you negotiate" title={<>The regulation<br /><em>centre.</em></>} detail="Plain-language guidance for the permissions, notices, and approvals that shape your redevelopment." action={<button className="button button-outline" onClick={downloadGuide} data-testid="button-regulation-guide"><FileText size={16} /> Download committee guide</button>} />
-      <div className="regulation-feature"><div><span className="feature-label"><BookOpenText size={15} /> Start here</span><h2>What changes when<br />your society redevelops?</h2><p>A practical orientation to the decisions your committee will make, from consent to conveyance.</p><button className="text-link light-link" onClick={() => setShowOrientation(true)} data-testid="button-read-orientation">Read the orientation <ArrowUpRight size={15} /></button></div><div className="feature-lines"><span>01&nbsp; Consent</span><span>02&nbsp; Feasibility</span><span>03&nbsp; Appointment</span><span>04&nbsp; Approvals</span></div></div>
-      <div className="directory-toolbar regulation-toolbar"><div className="search-field"><Search size={17} /><input type="search" placeholder="Search codes, topics, or authorities" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-search-regulations" /></div><div className="filter-group"><ListFilter size={15} /><span>Show</span>{statuses.map((status) => <button key={status} className={cn('filter-chip', activeStatus === status && 'selected')} onClick={() => setActiveStatus(status)} data-testid={`button-regulation-filter-${status.toLowerCase().replaceAll(' ', '-')}`}>{status}</button>)}</div></div>
-      <div className="directory-result-bar"><span>{filtered.length} guidance notes</span>{(search || activeStatus !== 'All') && <button type="button" onClick={() => { setSearch(''); setActiveStatus('All'); }}>Reset view <RotateCcw size={13} /></button>}</div>
-      <div className="regulation-list">{filtered.length ? filtered.map((item) => <article className="regulation-row" key={item.id} data-testid={`row-regulation-${item.id}`}><div className="regulation-code">{item.code}</div><div className="regulation-copy"><div className="regulation-title-row"><h3>{item.title}</h3><StatusPill tone={item.status.toLowerCase().includes('active') || item.status.toLowerCase().includes('current') ? 'green' : 'neutral'}>{item.status}</StatusPill></div><p>{item.summary}</p><div className="regulation-meta"><span><Landmark size={13} /> {item.authority}</span><span><CalendarDays size={13} /> Updated {item.updatedAt}</span></div></div><button className="icon-button regulation-open" onClick={() => setActiveRegulationId(item.id)} aria-label={`Open ${item.code}`} data-testid={`button-open-regulation-${item.id}`}><ArrowUpRight size={17} /></button></article>) : <EmptyState icon={BookOpenText} title="No guidance found" detail="Try searching for a code, authority, or topic." />}</div>
-      <ExperienceDrawer open={showOrientation} onClose={() => setShowOrientation(false)} eyebrow="Redevelopment orientation" title="Four decisions shape a safer start">
-        <div className="orientation-steps">{[['01', 'Build informed consent', 'Give members the same facts, record questions and define how decisions will be taken.'], ['02', 'Establish feasibility', 'Understand title, land, planning potential, liabilities and realistic project economics.'], ['03', 'Appoint independently', 'Use documented criteria and conflict disclosures when selecting advisors and development partners.'], ['04', 'Protect execution', 'Track approvals, bank guarantees, milestones, member obligations and handover evidence.']].map(([number, title, detail]) => <article key={number}><span>{number}</span><div><strong>{title}</strong><p>{detail}</p></div></article>)}</div>
-        <div className="drawer-note"><AlertTriangle size={18} /><p>Applicable rules depend on land tenure, building category and authority. Confirm your route with qualified legal and technical advisors.</p></div>
+      <PageIntro
+        kicker="Know the rules before you negotiate"
+        title={
+          <>
+            The regulation
+            <br />
+            <em>centre.</em>
+          </>
+        }
+        detail="Plain-language guidance for the permissions, notices, and approvals that shape your redevelopment."
+        action={
+          <button
+            className="button button-outline"
+            onClick={downloadGuide}
+            data-testid="button-regulation-guide"
+          >
+            <FileText size={16} /> Download committee guide
+          </button>
+        }
+      />
+      <div className="regulation-feature">
+        <div>
+          <span className="feature-label">
+            <BookOpenText size={15} /> Start here
+          </span>
+          <h2>
+            What changes when
+            <br />
+            your society redevelops?
+          </h2>
+          <p>
+            A practical orientation to the decisions your committee will make,
+            from consent to conveyance.
+          </p>
+          <button
+            className="text-link light-link"
+            onClick={() => setShowOrientation(true)}
+            data-testid="button-read-orientation"
+          >
+            Read the orientation <ArrowUpRight size={15} />
+          </button>
+        </div>
+        <div className="feature-lines">
+          <span>01&nbsp; Consent</span>
+          <span>02&nbsp; Feasibility</span>
+          <span>03&nbsp; Appointment</span>
+          <span>04&nbsp; Approvals</span>
+        </div>
+      </div>
+      <div className="directory-toolbar regulation-toolbar">
+        <div className="search-field">
+          <Search size={17} />
+          <input
+            type="search"
+            placeholder="Search codes, topics, or authorities"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            data-testid="input-search-regulations"
+          />
+        </div>
+        <div className="filter-group">
+          <ListFilter size={15} />
+          <span>Show</span>
+          {statuses.map((status) => (
+            <button
+              key={status}
+              className={cn(
+                "filter-chip",
+                activeStatus === status && "selected",
+              )}
+              onClick={() => setActiveStatus(status)}
+              data-testid={`button-regulation-filter-${status.toLowerCase().replaceAll(" ", "-")}`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="directory-result-bar">
+        <span>{filtered.length} guidance notes</span>
+        {(search || activeStatus !== "All") && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setActiveStatus("All");
+            }}
+          >
+            Reset view <RotateCcw size={13} />
+          </button>
+        )}
+      </div>
+      <div className="regulation-list">
+        {filtered.length ? (
+          filtered.map((item) => (
+            <article
+              className="regulation-row"
+              key={item.id}
+              data-testid={`row-regulation-${item.id}`}
+            >
+              <div className="regulation-code">{item.code}</div>
+              <div className="regulation-copy">
+                <div className="regulation-title-row">
+                  <h3>{item.title}</h3>
+                  <StatusPill
+                    tone={
+                      item.status.toLowerCase().includes("active") ||
+                      item.status.toLowerCase().includes("current")
+                        ? "green"
+                        : "neutral"
+                    }
+                  >
+                    {item.status}
+                  </StatusPill>
+                </div>
+                <p>{item.summary}</p>
+                <div className="regulation-meta">
+                  <span>
+                    <Landmark size={13} /> {item.authority}
+                  </span>
+                  <span>
+                    <CalendarDays size={13} /> Updated {item.updatedAt}
+                  </span>
+                </div>
+              </div>
+              <button
+                className="icon-button regulation-open"
+                onClick={() => setActiveRegulationId(item.id)}
+                aria-label={`Open ${item.code}`}
+                data-testid={`button-open-regulation-${item.id}`}
+              >
+                <ArrowUpRight size={17} />
+              </button>
+            </article>
+          ))
+        ) : (
+          <EmptyState
+            icon={BookOpenText}
+            title="No guidance found"
+            detail="Try searching for a code, authority, or topic."
+          />
+        )}
+      </div>
+      <ExperienceDrawer
+        open={showOrientation}
+        onClose={() => setShowOrientation(false)}
+        eyebrow="Redevelopment orientation"
+        title="Four decisions shape a safer start"
+      >
+        <div className="orientation-steps">
+          {[
+            [
+              "01",
+              "Build informed consent",
+              "Give members the same facts, record questions and define how decisions will be taken.",
+            ],
+            [
+              "02",
+              "Establish feasibility",
+              "Understand title, land, planning potential, liabilities and realistic project economics.",
+            ],
+            [
+              "03",
+              "Appoint independently",
+              "Use documented criteria and conflict disclosures when selecting advisors and development partners.",
+            ],
+            [
+              "04",
+              "Protect execution",
+              "Track approvals, bank guarantees, milestones, member obligations and handover evidence.",
+            ],
+          ].map(([number, title, detail]) => (
+            <article key={number}>
+              <span>{number}</span>
+              <div>
+                <strong>{title}</strong>
+                <p>{detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="drawer-note">
+          <AlertTriangle size={18} />
+          <p>
+            Applicable rules depend on land tenure, building category and
+            authority. Confirm your route with qualified legal and technical
+            advisors.
+          </p>
+        </div>
       </ExperienceDrawer>
-      <ExperienceDrawer open={Boolean(activeRegulation)} onClose={() => setActiveRegulationId(null)} eyebrow={`Guidance note · ${activeRegulation?.code || ''}`} title={activeRegulation?.title || 'Regulation guidance'}>
-        {activeRegulation && <div className="regulation-detail"><div className="regulation-detail-status"><StatusPill tone="green">{activeRegulation.status}</StatusPill><span>Reviewed {activeRegulation.updatedAt}</span></div><p className="regulation-detail-lead">{activeRegulation.summary}</p><div className="profile-facts"><div><span>Authority</span><strong>{activeRegulation.authority}</strong></div><div><span>RENOVA status</span><strong>Orientation available</strong></div></div><div><p className="drawer-label">Committee questions to confirm</p><ul><li>Does the society and its land fall within this pathway?</li><li>Which documents establish eligibility and development potential?</li><li>Which authority approvals and member resolutions apply?</li><li>What should be independently verified before proposals are compared?</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>RENOVA presents plain-language orientation. The governing notification, circular or regulation and professional advice remain authoritative.</p></div><Link href="/professionals/legal" className="button button-dark button-full">Find a legal advisor <ArrowUpRight size={15} /></Link></div>}
+      <ExperienceDrawer
+        open={Boolean(activeRegulation)}
+        onClose={() => setActiveRegulationId(null)}
+        eyebrow={`Guidance note · ${activeRegulation?.code || ""}`}
+        title={activeRegulation?.title || "Regulation guidance"}
+      >
+        {activeRegulation && (
+          <div className="regulation-detail">
+            <div className="regulation-detail-status">
+              <StatusPill tone="green">{activeRegulation.status}</StatusPill>
+              <span>Reviewed {activeRegulation.updatedAt}</span>
+            </div>
+            <p className="regulation-detail-lead">{activeRegulation.summary}</p>
+            <div className="profile-facts">
+              <div>
+                <span>Authority</span>
+                <strong>{activeRegulation.authority}</strong>
+              </div>
+              <div>
+                <span>RENOVA status</span>
+                <strong>Orientation available</strong>
+              </div>
+            </div>
+            <div>
+              <p className="drawer-label">Committee questions to confirm</p>
+              <ul>
+                <li>Does the society and its land fall within this pathway?</li>
+                <li>
+                  Which documents establish eligibility and development
+                  potential?
+                </li>
+                <li>Which authority approvals and member resolutions apply?</li>
+                <li>
+                  What should be independently verified before proposals are
+                  compared?
+                </li>
+              </ul>
+            </div>
+            <div className="drawer-note">
+              <ShieldCheck size={18} />
+              <p>
+                RENOVA presents plain-language orientation. The governing
+                notification, circular or regulation and professional advice
+                remain authoritative.
+              </p>
+            </div>
+            <Link
+              href="/professionals/legal"
+              className="button button-dark button-full"
+            >
+              Find a legal advisor <ArrowUpRight size={15} />
+            </Link>
+          </div>
+        )}
       </ExperienceDrawer>
     </div>
   );
 }
 
 const publicNav = [
-  { href: '/', label: 'Home', items: [
-    { href: '/#top', label: 'Hero' },
-    { href: '/#about', label: 'What is RENOVA?' },
-    { href: '/#listings', label: 'Who Are You?' },
-    { href: '/#opportunities', label: 'Featured Opportunities' },
-    { href: '/#how-it-works', label: 'How RENOVA Works' },
-    { href: '/#why-renova', label: 'Why RENOVA' },
-    { href: '/#requirement', label: 'CTA' },
-  ] },
-  { href: '/projects', label: 'Projects', items: [
-    { href: '/projects', label: 'All Projects' },
-    { href: '/projects/current', label: 'Current Opportunities' },
-    { href: '/projects/ongoing', label: 'Ongoing Projects' },
-    { href: '/projects/upcoming', label: 'Upcoming Projects' },
-    { href: '/projects/completed', label: 'Completed Projects' },
-  ] },
-  { href: '/ecosystem', label: 'Ecosystem', items: [
-    { href: '/ecosystem', label: 'Explore Directory' },
-    { href: '/ecosystem?category=Developers', label: 'Developers' },
-    { href: '/ecosystem?category=PMC', label: 'PMCs' },
-    { href: '/ecosystem?category=Architects', label: 'Architects' },
-    { href: '/ecosystem?category=Legal', label: 'Legal & Specialists' },
-  ] },
-  { href: '/platform', label: 'Platform' },
-  { href: '/societies', label: 'For Societies', items: [
-    { href: '/societies', label: 'Why RENOVA' },
-    { href: '/societies/how-it-works', label: 'How It Works' },
-    { href: '/assessment', label: 'Register Society' },
-  ] },
-  { href: '/developers', label: 'For Developers', items: [
-    { href: '/projects/current', label: 'Find Opportunities' },
-    { href: '/developers', label: 'Developer Benefits' },
-    { href: '/join/developer', label: 'Register Developer' },
-  ] },
-  { href: '/professionals', label: 'Professionals', items: [
-    { href: '/professionals/pmcs', label: 'PMCs' },
-    { href: '/professionals/architects', label: 'Architects' },
-    { href: '/professionals/legal', label: 'Legal' },
-    { href: '/professionals/others', label: 'Other Professionals' },
-  ] },
-  { href: '/join', label: 'Join RENOVA', items: [
-    { href: '/assessment', label: 'Society Registration' },
-    { href: '/join/developer', label: 'Developer Registration' },
-    { href: '/join/pmc', label: 'PMC Registration' },
-    { href: '/join/architect', label: 'Architect Registration' },
-  ] },
-  { href: '/knowledge-centre', label: 'Knowledge Centre', items: [
-    { href: '/knowledge-centre/redevelopment-guide', label: 'Redevelopment Guide' },
-    { href: '/regulations', label: 'DCPR' },
-    { href: '/knowledge-centre/society-process', label: 'Society Process' },
-    { href: '/knowledge-centre/developer-selection', label: 'Developer Selection' },
-    { href: '/knowledge-centre/faqs', label: 'FAQs' },
-  ] },
-  { href: '/success-stories', label: 'Success Stories' },
-  { href: '/about', label: 'About RENOVA' },
-  { href: '/contact', label: 'Contact' },
+  {
+    href: "/",
+    label: "Home",
+    items: [
+      { href: "/#top", label: "Hero" },
+      { href: "/#about", label: "What is RENOVA?" },
+      { href: "/#listings", label: "Who Are You?" },
+      { href: "/#opportunities", label: "Featured Opportunities" },
+      { href: "/#how-it-works", label: "How RENOVA Works" },
+      { href: "/#why-renova", label: "Why RENOVA" },
+      { href: "/#requirement", label: "CTA" },
+    ],
+  },
+  {
+    href: "/projects",
+    label: "Projects",
+    items: [
+      { href: "/projects", label: "All Projects" },
+      { href: "/projects/current", label: "Current Opportunities" },
+      { href: "/projects/ongoing", label: "Ongoing Projects" },
+      { href: "/projects/upcoming", label: "Upcoming Projects" },
+      { href: "/projects/completed", label: "Completed Projects" },
+    ],
+  },
+  {
+    href: "/ecosystem",
+    label: "Ecosystem",
+    items: [
+      { href: "/ecosystem", label: "Explore Directory" },
+      { href: "/ecosystem?category=Developers", label: "Developers" },
+      { href: "/ecosystem?category=PMC", label: "PMCs" },
+      { href: "/ecosystem?category=Architects", label: "Architects" },
+      { href: "/ecosystem?category=Legal", label: "Legal & Specialists" },
+    ],
+  },
+  { href: "/platform", label: "Platform" },
+  {
+    href: "/societies",
+    label: "For Societies",
+    items: [
+      { href: "/societies", label: "Why RENOVA" },
+      { href: "/societies/how-it-works", label: "How It Works" },
+      { href: "/assessment", label: "Register Society" },
+    ],
+  },
+  {
+    href: "/developers",
+    label: "For Developers",
+    items: [
+      { href: "/projects/current", label: "Find Opportunities" },
+      { href: "/developers", label: "Developer Benefits" },
+      { href: "/join/developer", label: "Register Developer" },
+    ],
+  },
+  {
+    href: "/professionals",
+    label: "Professionals",
+    items: [
+      { href: "/professionals/pmcs", label: "PMCs" },
+      { href: "/professionals/architects", label: "Architects" },
+      { href: "/professionals/legal", label: "Legal" },
+      { href: "/professionals/others", label: "Other Professionals" },
+    ],
+  },
+  {
+    href: "/join",
+    label: "Join RENOVA",
+    items: [
+      { href: "/assessment", label: "Society Registration" },
+      { href: "/join/developer", label: "Developer Registration" },
+      { href: "/join/pmc", label: "PMC Registration" },
+      { href: "/join/architect", label: "Architect Registration" },
+    ],
+  },
+  {
+    href: "/knowledge-centre",
+    label: "Knowledge Centre",
+    items: [
+      {
+        href: "/knowledge-centre/redevelopment-guide",
+        label: "Redevelopment Guide",
+      },
+      { href: "/regulations", label: "DCPR" },
+      { href: "/knowledge-centre/society-process", label: "Society Process" },
+      {
+        href: "/knowledge-centre/developer-selection",
+        label: "Developer Selection",
+      },
+      { href: "/knowledge-centre/faqs", label: "FAQs" },
+    ],
+  },
+  { href: "/success-stories", label: "Success Stories" },
+  { href: "/about", label: "About RENOVA" },
+  { href: "/contact", label: "Contact" },
 ];
 
-function PublicNavLink({ href, children, onClick, className }: { href: string; children: ReactNode; onClick?: () => void; className?: string }) {
-  if (href.startsWith('#')) return <a href={href} onClick={onClick} className={className}>{children}</a>;
-  return <Link href={href} onClick={onClick} className={className}>{children}</Link>;
+function PublicNavLink({
+  href,
+  children,
+  onClick,
+  className,
+}: {
+  href: string;
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string;
+}) {
+  if (href.startsWith("#"))
+    return (
+      <a href={href} onClick={onClick} className={className}>
+        {children}
+      </a>
+    );
+  return (
+    <Link href={href} onClick={onClick} className={className}>
+      {children}
+    </Link>
+  );
 }
 
-function PublicNavigation({ menuOpen, onNavigate }: { menuOpen: boolean; onNavigate: () => void }) {
+function PublicNavigation({
+  menuOpen,
+  onNavigate,
+}: {
+  menuOpen: boolean;
+  onNavigate: () => void;
+}) {
   return (
-    <nav className={cn('stitch-desktop-nav public-mega-nav', menuOpen && 'is-open')} aria-label="RENOVA website navigation">
-      {publicNav.map((section) => section.items ? (
-        <div className="public-nav-item" key={section.label}>
-          <PublicNavLink href={section.href} onClick={onNavigate} className="public-nav-trigger">{section.label}<ChevronDown size={12} /></PublicNavLink>
-          <div className="public-nav-dropdown">
-            {section.items.map((item) => <PublicNavLink href={item.href} onClick={onNavigate} key={item.href + item.label}>{item.label}<ChevronRight size={13} /></PublicNavLink>)}
+    <nav
+      className={cn(
+        "stitch-desktop-nav public-mega-nav",
+        menuOpen && "is-open",
+      )}
+      aria-label="RENOVA website navigation"
+    >
+      {publicNav.map((section) =>
+        section.items ? (
+          <div className="public-nav-item" key={section.label}>
+            <PublicNavLink
+              href={section.href}
+              onClick={onNavigate}
+              className="public-nav-trigger"
+            >
+              {section.label}
+              <ChevronDown size={12} />
+            </PublicNavLink>
+            <div className="public-nav-dropdown">
+              {section.items.map((item) => (
+                <PublicNavLink
+                  href={item.href}
+                  onClick={onNavigate}
+                  key={item.href + item.label}
+                >
+                  {item.label}
+                  <ChevronRight size={13} />
+                </PublicNavLink>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : <PublicNavLink href={section.href} onClick={onNavigate} key={section.href}>{section.label}</PublicNavLink>)}
+        ) : (
+          <PublicNavLink
+            href={section.href}
+            onClick={onNavigate}
+            key={section.href}
+          >
+            {section.label}
+          </PublicNavLink>
+        ),
+      )}
     </nav>
   );
 }
 
 const stakeholderCards = [
-  { title: 'Find a Developer', detail: 'Explore public developer profiles and their documented services.', icon: Building2, href: '/ecosystem?category=Developers' },
-  { title: 'Explore Societies', detail: 'See how structured redevelopment opportunities can appear on RENOVA.', icon: Landmark, href: '#opportunities' },
-  { title: 'Find a PMC', detail: 'Bring structure, evaluation and oversight to your redevelopment.', icon: ClipboardCheck, href: '/ecosystem?category=PMC' },
-  { title: 'Find an Architect', detail: 'Explore architecture practices across the ecosystem.', icon: Compass, href: '/ecosystem?category=Architects' },
+  {
+    title: "Find a Developer",
+    detail: "Explore public developer profiles and their documented services.",
+    icon: Building2,
+    href: "/ecosystem?category=Developers",
+  },
+  {
+    title: "Explore Societies",
+    detail:
+      "See how structured redevelopment opportunities can appear on RENOVA.",
+    icon: Landmark,
+    href: "#opportunities",
+  },
+  {
+    title: "Find a PMC",
+    detail: "Bring structure, evaluation and oversight to your redevelopment.",
+    icon: ClipboardCheck,
+    href: "/ecosystem?category=PMC",
+  },
+  {
+    title: "Find an Architect",
+    detail: "Explore architecture practices across the ecosystem.",
+    icon: Compass,
+    href: "/ecosystem?category=Architects",
+  },
 ];
 
 const featuredOpportunities = [
-  { status: 'Ready to explore', name: 'Ashirwad CHS', location: 'Andheri West', detail: 'A resident-led opportunity seeking a transparent redevelopment partner.', age: '42 yrs', homes: '96', area: '1.8 acres', scale: '₹80–120 Cr' },
-  { status: 'Shortlisting', name: 'Shantivan Cooperative', location: 'Chembur', detail: 'Large-format society with a clear committee mandate and strong connectivity.', age: '38 yrs', homes: '144', area: '2.4 acres', scale: '₹120–180 Cr' },
-  { status: 'New opportunity', name: 'Sea Breeze Apartments', location: 'Bandra East', detail: 'An established community looking for a capable PMC to begin feasibility.', age: '51 yrs', homes: '58', area: '0.9 acres', scale: '₹45–70 Cr' },
-  { status: 'Open for proposals', name: 'Navjeevan Nagar', location: 'Vikhroli', detail: 'A high-potential opportunity near major transit and employment corridors.', age: '34 yrs', homes: '212', area: '3.1 acres', scale: '₹180–260 Cr' },
+  {
+    status: "Ready to explore",
+    name: "Ashirwad CHS",
+    location: "Andheri West",
+    detail:
+      "A resident-led opportunity seeking a transparent redevelopment partner.",
+    age: "42 yrs",
+    homes: "96",
+    area: "1.8 acres",
+    scale: "₹80–120 Cr",
+  },
+  {
+    status: "Shortlisting",
+    name: "Shantivan Cooperative",
+    location: "Chembur",
+    detail:
+      "Large-format society with a clear committee mandate and strong connectivity.",
+    age: "38 yrs",
+    homes: "144",
+    area: "2.4 acres",
+    scale: "₹120–180 Cr",
+  },
+  {
+    status: "New opportunity",
+    name: "Sea Breeze Apartments",
+    location: "Bandra East",
+    detail:
+      "An established community looking for a capable PMC to begin feasibility.",
+    age: "51 yrs",
+    homes: "58",
+    area: "0.9 acres",
+    scale: "₹45–70 Cr",
+  },
+  {
+    status: "Open for proposals",
+    name: "Navjeevan Nagar",
+    location: "Vikhroli",
+    detail:
+      "A high-potential opportunity near major transit and employment corridors.",
+    age: "34 yrs",
+    homes: "212",
+    area: "3.1 acres",
+    scale: "₹180–260 Cr",
+  },
 ];
 
 const trustBenefits = [
-  { title: 'Clear Profile Status', detail: 'Public profiles and RENOVA-verified organizations are labelled distinctly, so provenance stays visible.', icon: ShieldCheck },
-  { title: 'Accelerated Timelines', detail: 'Structured requirements and milestone tracking reduce avoidable delays.', icon: Zap },
-  { title: 'Absolute Transparency', detail: 'Clear context, project details and expectations support better decisions.', icon: Eye },
+  {
+    title: "Clear Profile Status",
+    detail:
+      "Public profiles and RENOVA-verified organizations are labelled distinctly, so provenance stays visible.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Accelerated Timelines",
+    detail:
+      "Structured requirements and milestone tracking reduce avoidable delays.",
+    icon: Zap,
+  },
+  {
+    title: "Absolute Transparency",
+    detail:
+      "Clear context, project details and expectations support better decisions.",
+    icon: Eye,
+  },
 ];
 
 function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
@@ -649,15 +2606,18 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const isSmallScreen = window.matchMedia('(max-width: 760px)').matches;
-    fallbackTimerRef.current = window.setTimeout(() => {
-      const video = videoRef.current;
-      if (!video || video.readyState < 2 || video.paused) {
-        setShowFallback(true);
-        window.setTimeout(finishIntro, isSmallScreen ? 300 : 700);
-      }
-    }, isSmallScreen ? 950 : 1800);
+    document.body.style.overflow = "hidden";
+    const isSmallScreen = window.matchMedia("(max-width: 760px)").matches;
+    fallbackTimerRef.current = window.setTimeout(
+      () => {
+        const video = videoRef.current;
+        if (!video || video.readyState < 2 || video.paused) {
+          setShowFallback(true);
+          window.setTimeout(finishIntro, isSmallScreen ? 300 : 700);
+        }
+      },
+      isSmallScreen ? 950 : 1800,
+    );
     const video = videoRef.current;
     if (video) {
       video.play().catch(() => {
@@ -668,13 +2628,14 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
     return () => {
       document.body.style.overflow = previousOverflow;
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
-      if (fallbackTimerRef.current) window.clearTimeout(fallbackTimerRef.current);
+      if (fallbackTimerRef.current)
+        window.clearTimeout(fallbackTimerRef.current);
     };
   }, []);
 
   return (
     <section
-      className={`renova-film-intro${isExiting ? ' is-exiting' : ''}`}
+      className={`renova-film-intro${isExiting ? " is-exiting" : ""}`}
       role="dialog"
       aria-label="RENOVA introduction film"
       aria-modal="true"
@@ -700,10 +2661,18 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
           <span>RENOVA</span>
           <strong>The same property. A new possibility.</strong>
           <p>The intro film is taking longer to load on this connection.</p>
-          <button type="button" className="renova-film-enter" onClick={finishIntro}>Enter RENOVA <ArrowUpRight size={14} /></button>
+          <button
+            type="button"
+            className="renova-film-enter"
+            onClick={finishIntro}
+          >
+            Enter RENOVA <ArrowUpRight size={14} />
+          </button>
         </div>
       )}
-      <button type="button" className="renova-film-skip" onClick={finishIntro}>Skip Intro <ArrowUpRight size={14} /></button>
+      <button type="button" className="renova-film-skip" onClick={finishIntro}>
+        Skip Intro <ArrowUpRight size={14} />
+      </button>
     </section>
   );
 }
@@ -712,100 +2681,268 @@ function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoReveal, setShowLogoReveal] = useState(true);
   const [updatesOpen, setUpdatesOpen] = useState(false);
-  const [activeOpportunityName, setActiveOpportunityName] = useState<string | null>(null);
-  const activeOpportunity = featuredOpportunities.find((item) => item.name === activeOpportunityName);
+  const [activeOpportunityName, setActiveOpportunityName] = useState<
+    string | null
+  >(null);
+  const activeOpportunity = featuredOpportunities.find(
+    (item) => item.name === activeOpportunityName,
+  );
   const finishLogoReveal = () => setShowLogoReveal(false);
   return (
-    <div className={cn('marketing-site stitch-site', showLogoReveal && 'intro-active')} id="top">
+    <div
+      className={cn(
+        "marketing-site stitch-site",
+        showLogoReveal && "intro-active",
+      )}
+      id="top"
+    >
       {showLogoReveal && <CinematicVideoIntro onFinish={finishLogoReveal} />}
       <header className="stitch-header">
         <div className="stitch-header-inner">
-          <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">
+          <button
+            className="stitch-menu"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
+          >
             {menuOpen ? <X size={20} /> : <Compass size={20} />}
           </button>
           <Logo />
-          <button className="stitch-notification" onClick={() => setUpdatesOpen((open) => !open)} aria-expanded={updatesOpen} aria-label="RENOVA updates"><Bell size={19} /><span className="stitch-notification-dot" /></button>
-          <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
-          {updatesOpen && <div className="stitch-update-popover"><div><span>RENOVA pulse</span><button type="button" onClick={() => setUpdatesOpen(false)} aria-label="Close updates"><X size={16} /></button></div><article><BadgeCheck size={17} /><p><strong>Verified network growing</strong><span>New PMCs and architects are being reviewed for Mumbai societies.</span></p></article><article><Building2 size={17} /><p><strong>Opportunity preview available</strong><span>Explore demonstration listings showing how society requirements can be structured.</span></p></article><Link href="/assessment" onClick={() => setUpdatesOpen(false)}>Post your requirement <ArrowUpRight size={14} /></Link></div>}
+          <button
+            className="stitch-notification"
+            onClick={() => setUpdatesOpen((open) => !open)}
+            aria-expanded={updatesOpen}
+            aria-label="RENOVA updates"
+          >
+            <Bell size={19} />
+            <span className="stitch-notification-dot" />
+          </button>
+          <PublicNavigation
+            menuOpen={menuOpen}
+            onNavigate={() => setMenuOpen(false)}
+          />
+          {updatesOpen && (
+            <div className="stitch-update-popover">
+              <div>
+                <span>RENOVA pulse</span>
+                <button
+                  type="button"
+                  onClick={() => setUpdatesOpen(false)}
+                  aria-label="Close updates"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <article>
+                <BadgeCheck size={17} />
+                <p>
+                  <strong>Verified network growing</strong>
+                  <span>
+                    New PMCs and architects are being reviewed for Mumbai
+                    societies.
+                  </span>
+                </p>
+              </article>
+              <article>
+                <Building2 size={17} />
+                <p>
+                  <strong>Opportunity preview available</strong>
+                  <span>
+                    Explore demonstration listings showing how society
+                    requirements can be structured.
+                  </span>
+                </p>
+              </article>
+              <Link href="/assessment" onClick={() => setUpdatesOpen(false)}>
+                Post your requirement <ArrowUpRight size={14} />
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
       <main>
         <section className="stitch-hero" aria-labelledby="renova-hero-title">
-          <div className="stitch-hero-image" role="img" aria-label="A 44-storey Mumbai residential tower transforming from architectural blueprint into completed reality" />
+          <div
+            className="stitch-hero-image"
+            role="img"
+            aria-label="A 44-storey Mumbai residential tower transforming from architectural blueprint into completed reality"
+          />
           <div className="stitch-hero-overlay" />
           <div className="stitch-hero-frame" aria-hidden="true" />
-          <div className="stitch-hero-meta" aria-hidden="true"><span>01 / Mumbai</span><span>19.0760° N&nbsp;&nbsp;72.8777° E</span></div>
+          <div className="stitch-hero-meta" aria-hidden="true">
+            <span>01 / Mumbai</span>
+            <span>19.0760° N&nbsp;&nbsp;72.8777° E</span>
+          </div>
           <div className="stitch-hero-transformation" aria-hidden="true">
-            <span>Existing</span><i>↓</i><span>Reimagined</span><i>↓</i><span>Renewed</span>
-            <small>The same property.<br />A new possibility.</small>
+            <span>Existing</span>
+            <i>↓</i>
+            <span>Reimagined</span>
+            <i>↓</i>
+            <span>Renewed</span>
+            <small>
+              The same property.
+              <br />A new possibility.
+            </small>
           </div>
 
           <div className="stitch-hero-copy">
             <p className="stitch-eyebrow">Redevelopment, reimagined.</p>
-            <h1 id="renova-hero-title"><span>Renew Mumbai.</span><span>Responsibly.</span></h1>
-            <p>RENOVA brings societies, developers and specialists into one clear, professional redevelopment process.</p>
+            <h1 id="renova-hero-title">
+              <span>Renew Mumbai.</span>
+              <span>Responsibly.</span>
+            </h1>
+            <p>
+              RENOVA brings societies, developers and specialists into one
+              clear, professional redevelopment process.
+            </p>
             <div className="stitch-hero-actions">
-              <Link href="/assessment" className="stitch-primary-button">Post a requirement <ArrowUpRight size={15} /></Link>
-              <a href="#opportunities" className="stitch-secondary-button">View opportunities <ArrowUpRight size={15} /></a>
+              <Link href="/assessment" className="stitch-primary-button">
+                Post a requirement <ArrowUpRight size={15} />
+              </Link>
+              <a href="#opportunities" className="stitch-secondary-button">
+                View opportunities <ArrowUpRight size={15} />
+              </a>
             </div>
           </div>
 
-          <div className="stitch-hero-word" aria-hidden="true">RENOVA</div>
-          <div className="stitch-hero-index" aria-label="RENOVA connects the redevelopment ecosystem">
-            <span>For societies</span><span>For developers</span><span>For professionals</span><span>Explore RENOVA <ArrowUpRight size={14} /></span>
+          <div className="stitch-hero-word" aria-hidden="true">
+            RENOVA
+          </div>
+          <div
+            className="stitch-hero-index"
+            aria-label="RENOVA connects the redevelopment ecosystem"
+          >
+            <span>For societies</span>
+            <span>For developers</span>
+            <span>For professionals</span>
+            <span>
+              Explore RENOVA <ArrowUpRight size={14} />
+            </span>
           </div>
         </section>
 
-        <section className="stitch-platform-definition" aria-labelledby="platform-definition-title">
+        <section
+          className="stitch-platform-definition"
+          aria-labelledby="platform-definition-title"
+        >
           <div>
             <p>More than a directory</p>
-            <h2 id="platform-definition-title">The digital infrastructure<br />for redevelopment.</h2>
+            <h2 id="platform-definition-title">
+              The digital infrastructure
+              <br />
+              for redevelopment.
+            </h2>
           </div>
           <div className="stitch-platform-definition-copy">
-            <p>RENOVA helps societies, developers and PMCs move from discovery to a shared, permission-controlled project workspace—without losing proposals, documents or decisions across fragmented channels.</p>
-            <Link href="/platform">Explore the RENOVA platform <ArrowUpRight size={15} /></Link>
+            <p>
+              RENOVA helps societies, developers and PMCs move from discovery to
+              a shared, permission-controlled project workspace—without losing
+              proposals, documents or decisions across fragmented channels.
+            </p>
+            <Link href="/platform">
+              Explore the RENOVA platform <ArrowUpRight size={15} />
+            </Link>
           </div>
-          <div className="stitch-platform-flow" aria-label="RENOVA redevelopment workflow">
-            {['Discover', 'Verify', 'Connect', 'Opportunity', 'Proposal', 'Compare', 'Select', 'Collaborate', 'Track'].map((item, index) => <span key={item}><small>{String(index + 1).padStart(2, '0')}</small><strong>{item}</strong></span>)}
-          </div>
-        </section>
-
-        <section className="stitch-actions" id="listings" aria-label="Explore RENOVA">
-          <div className="stitch-action-grid">
-            {stakeholderCards.map(({ title, detail, icon: Icon, href }) => (
-              href.startsWith('/') ? (
-                <Link href={href} className="stitch-action-card" key={title}>
-                  <span className="stitch-action-icon"><Icon size={22} /></span><strong>{title}</strong><p>{detail}</p><ArrowUpRight size={15} />
-                </Link>
-              ) : (
-                <a href={href} className="stitch-action-card" key={title}>
-                  <span className="stitch-action-icon"><Icon size={22} /></span><strong>{title}</strong><p>{detail}</p><ArrowUpRight size={15} />
-                </a>
-              )
+          <div
+            className="stitch-platform-flow"
+            aria-label="RENOVA redevelopment workflow"
+          >
+            {[
+              "Discover",
+              "Verify",
+              "Connect",
+              "Opportunity",
+              "Proposal",
+              "Compare",
+              "Select",
+              "Collaborate",
+              "Track",
+            ].map((item, index) => (
+              <span key={item}>
+                <small>{String(index + 1).padStart(2, "0")}</small>
+                <strong>{item}</strong>
+              </span>
             ))}
           </div>
         </section>
 
-        <section className="stitch-section stitch-opportunities" id="opportunities">
-          <div className="stitch-section-heading">
-            <div><p>Product preview · demo data</p><h2>Illustrative redevelopment opportunities</h2></div>
-            <Link href="/assessment">Post an opportunity <ArrowUpRight size={14} /></Link>
+        <section
+          className="stitch-actions"
+          id="listings"
+          aria-label="Explore RENOVA"
+        >
+          <div className="stitch-action-grid">
+            {stakeholderCards.map(({ title, detail, icon: Icon, href }) =>
+              href.startsWith("/") ? (
+                <Link href={href} className="stitch-action-card" key={title}>
+                  <span className="stitch-action-icon">
+                    <Icon size={22} />
+                  </span>
+                  <strong>{title}</strong>
+                  <p>{detail}</p>
+                  <ArrowUpRight size={15} />
+                </Link>
+              ) : (
+                <a href={href} className="stitch-action-card" key={title}>
+                  <span className="stitch-action-icon">
+                    <Icon size={22} />
+                  </span>
+                  <strong>{title}</strong>
+                  <p>{detail}</p>
+                  <ArrowUpRight size={15} />
+                </a>
+              ),
+            )}
           </div>
-          <p className="stitch-opportunity-disclaimer">These sample listings demonstrate the RENOVA experience. They do not represent real societies, verified projects, commercial offers or investment opportunities.</p>
+        </section>
+
+        <section
+          className="stitch-section stitch-opportunities"
+          id="opportunities"
+        >
+          <div className="stitch-section-heading">
+            <div>
+              <p>Product preview · demo data</p>
+              <h2>Illustrative redevelopment opportunities</h2>
+            </div>
+            <Link href="/assessment">
+              Post an opportunity <ArrowUpRight size={14} />
+            </Link>
+          </div>
+          <p className="stitch-opportunity-disclaimer">
+            These sample listings demonstrate the RENOVA experience. They do not
+            represent real societies, verified projects, commercial offers or
+            investment opportunities.
+          </p>
           <div className="stitch-opportunity-grid">
             {featuredOpportunities.map((item) => (
               <article className="stitch-opportunity-card" key={item.name}>
                 <span className="stitch-status">{item.status}</span>
                 <h3>{item.name}</h3>
-                <p><MapPin size={14} /> {item.location}</p>
+                <p>
+                  <MapPin size={14} /> {item.location}
+                </p>
                 <p className="stitch-opportunity-detail">{item.detail}</p>
                 <div>
-                  <span>Building age<strong>{item.age}</strong></span>
-                  <span>Homes<strong>{item.homes}</strong></span>
-                  <span>Site area<strong>{item.area}</strong></span>
+                  <span>
+                    Building age<strong>{item.age}</strong>
+                  </span>
+                  <span>
+                    Homes<strong>{item.homes}</strong>
+                  </span>
+                  <span>
+                    Site area<strong>{item.area}</strong>
+                  </span>
                 </div>
-                <button type="button" className="stitch-details-button" onClick={() => setActiveOpportunityName(item.name)}>View demo opportunity · {item.scale} <ArrowUpRight size={14} /></button>
+                <button
+                  type="button"
+                  className="stitch-details-button"
+                  onClick={() => setActiveOpportunityName(item.name)}
+                >
+                  View demo opportunity · {item.scale}{" "}
+                  <ArrowUpRight size={14} />
+                </button>
               </article>
             ))}
           </div>
@@ -813,55 +2950,177 @@ function MarketingHome() {
 
         <section className="stitch-section stitch-why" id="why-renova">
           <div className="stitch-section-heading stitch-heading-stack">
-            <div><p>A clearer way forward</p><h2>Why RENOVA?</h2></div>
-            <span>Streamlining redevelopment through structured processes, verified connections and absolute clarity.</span>
+            <div>
+              <p>A clearer way forward</p>
+              <h2>Why RENOVA?</h2>
+            </div>
+            <span>
+              Streamlining redevelopment through structured processes, verified
+              connections and absolute clarity.
+            </span>
           </div>
           <div className="stitch-benefit-grid">
             {trustBenefits.map(({ title, detail, icon: Icon }) => (
-              <article key={title}><span><Icon size={22} /></span><div><h3>{title}</h3><p>{detail}</p></div></article>
+              <article key={title}>
+                <span>
+                  <Icon size={22} />
+                </span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{detail}</p>
+                </div>
+              </article>
             ))}
           </div>
         </section>
 
         <section className="stitch-section stitch-process" id="how-it-works">
           <div className="stitch-section-heading stitch-heading-stack">
-            <div><p>How it works</p><h2>From requirement to right connection.</h2></div>
+            <div>
+              <p>How it works</p>
+              <h2>From requirement to right connection.</h2>
+            </div>
           </div>
           <div className="stitch-process-grid">
-            {[['01', 'Make your intent clear', 'Tell us where you are in the journey, from first conversation to a ready opportunity.'], ['02', 'Meet the right people', 'Explore a focused network of developers, PMCs, architects and advisors.'], ['03', 'Move forward, together', 'Shortlist a match, start a conversation and shape a better brief.']].map(([number, title, detail]) => (
-              <article key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p></article>
+            {[
+              [
+                "01",
+                "Make your intent clear",
+                "Tell us where you are in the journey, from first conversation to a ready opportunity.",
+              ],
+              [
+                "02",
+                "Meet the right people",
+                "Explore a focused network of developers, PMCs, architects and advisors.",
+              ],
+              [
+                "03",
+                "Move forward, together",
+                "Shortlist a match, start a conversation and shape a better brief.",
+              ],
+            ].map(([number, title, detail]) => (
+              <article key={number}>
+                <span>{number}</span>
+                <h3>{title}</h3>
+                <p>{detail}</p>
+              </article>
             ))}
           </div>
           <div className="stitch-requirement-cta" id="requirement">
-            <div><p>Ready to begin?</p><h2>Start your society's redevelopment journey.</h2></div>
-            <Link href="/assessment" className="stitch-primary-button">Post your requirement <ArrowUpRight size={16} /></Link>
+            <div>
+              <p>Ready to begin?</p>
+              <h2>Start your society's redevelopment journey.</h2>
+            </div>
+            <Link href="/assessment" className="stitch-primary-button">
+              Post your requirement <ArrowUpRight size={16} />
+            </Link>
           </div>
         </section>
 
         <section className="stitch-section stitch-about" id="about">
           <p>About RENOVA</p>
-          <h2>Renewing communities. Restoring ageing properties. Creating better possibilities for Mumbai.</h2>
+          <h2>
+            Renewing communities. Restoring ageing properties. Creating better
+            possibilities for Mumbai.
+          </h2>
           <div>
-            <p>RENOVA is a redevelopment-focused platform and service ecosystem that brings housing societies, developers, PMCs, architects and specialists together.</p>
-            <Link href="/regulations">Open knowledge centre <BookOpenText size={16} /></Link>
+            <p>
+              RENOVA is a redevelopment-focused platform and service ecosystem
+              that brings housing societies, developers, PMCs, architects and
+              specialists together.
+            </p>
+            <Link href="/regulations">
+              Open knowledge centre <BookOpenText size={16} />
+            </Link>
           </div>
         </section>
       </main>
 
       <footer className="stitch-footer" id="contact">
-        <div><Logo /><p>Renew. Connect. Redevelop.</p></div>
-        <div><a href="#listings">Listings</a><a href="#opportunities">Opportunities</a><Link href="/regulations">Knowledge centre</Link><Link href="/assessment">Post requirement</Link></div>
+        <div>
+          <Logo />
+          <p>Renew. Connect. Redevelop.</p>
+        </div>
+        <div>
+          <a href="#listings">Listings</a>
+          <a href="#opportunities">Opportunities</a>
+          <Link href="/regulations">Knowledge centre</Link>
+          <Link href="/assessment">Post requirement</Link>
+        </div>
         <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
       </footer>
 
       <nav className="stitch-bottom-nav" aria-label="Mobile navigation">
-        <a href="#top" className="active"><Home size={20} /><span>Home</span></a>
-        <a href="#listings"><Building2 size={20} /><span>Listings</span></a>
-        <a href="#opportunities"><Handshake size={20} /><span>Opportunities</span></a>
-        <Link href="/assessment"><Plus size={22} /><span>Post</span></Link>
+        <a href="#top" className="active">
+          <Home size={20} />
+          <span>Home</span>
+        </a>
+        <a href="#listings">
+          <Building2 size={20} />
+          <span>Listings</span>
+        </a>
+        <a href="#opportunities">
+          <Handshake size={20} />
+          <span>Opportunities</span>
+        </a>
+        <Link href="/assessment">
+          <Plus size={22} />
+          <span>Post</span>
+        </Link>
       </nav>
-      <ExperienceDrawer open={Boolean(activeOpportunity)} onClose={() => setActiveOpportunityName(null)} eyebrow="Product preview · demo data" title={activeOpportunity?.name || 'Opportunity'}>
-        {activeOpportunity && <div className="opportunity-detail"><div className="opportunity-detail-top"><span className="stitch-status">{activeOpportunity.status}</span><p><MapPin size={15} /> {activeOpportunity.location}</p></div><p className="regulation-detail-lead">{activeOpportunity.detail}</p><div className="opportunity-metrics"><div><span>Building age</span><strong>{activeOpportunity.age}</strong></div><div><span>Member homes</span><strong>{activeOpportunity.homes}</strong></div><div><span>Site area</span><strong>{activeOpportunity.area}</strong></div><div><span>Illustrative scale</span><strong>{activeOpportunity.scale}</strong></div></div><div><p className="drawer-label">Example requirement</p><ul><li>Initial fit assessment and stakeholder verification</li><li>Professional support appropriate to the society’s stage</li><li>Transparent next-step discussion through RENOVA</li></ul></div><div className="drawer-note"><ShieldCheck size={18} /><p>This is demonstration data, not a real society, verified project, commercial offer or investment opportunity.</p></div><Link href="/assessment" className="button button-dark button-full">Prepare a real opportunity brief <ArrowUpRight size={15} /></Link></div>}
+      <ExperienceDrawer
+        open={Boolean(activeOpportunity)}
+        onClose={() => setActiveOpportunityName(null)}
+        eyebrow="Product preview · demo data"
+        title={activeOpportunity?.name || "Opportunity"}
+      >
+        {activeOpportunity && (
+          <div className="opportunity-detail">
+            <div className="opportunity-detail-top">
+              <span className="stitch-status">{activeOpportunity.status}</span>
+              <p>
+                <MapPin size={15} /> {activeOpportunity.location}
+              </p>
+            </div>
+            <p className="regulation-detail-lead">{activeOpportunity.detail}</p>
+            <div className="opportunity-metrics">
+              <div>
+                <span>Building age</span>
+                <strong>{activeOpportunity.age}</strong>
+              </div>
+              <div>
+                <span>Member homes</span>
+                <strong>{activeOpportunity.homes}</strong>
+              </div>
+              <div>
+                <span>Site area</span>
+                <strong>{activeOpportunity.area}</strong>
+              </div>
+              <div>
+                <span>Illustrative scale</span>
+                <strong>{activeOpportunity.scale}</strong>
+              </div>
+            </div>
+            <div>
+              <p className="drawer-label">Example requirement</p>
+              <ul>
+                <li>Initial fit assessment and stakeholder verification</li>
+                <li>Professional support appropriate to the society’s stage</li>
+                <li>Transparent next-step discussion through RENOVA</li>
+              </ul>
+            </div>
+            <div className="drawer-note">
+              <ShieldCheck size={18} />
+              <p>
+                This is demonstration data, not a real society, verified
+                project, commercial offer or investment opportunity.
+              </p>
+            </div>
+            <Link href="/assessment" className="button button-dark button-full">
+              Prepare a real opportunity brief <ArrowUpRight size={15} />
+            </Link>
+          </div>
+        )}
       </ExperienceDrawer>
     </div>
   );
@@ -877,286 +3136,639 @@ type PublicPageData = {
 };
 
 const publicPageMap: Record<string, PublicPageData> = {
-  '/projects': {
-    eyebrow: 'RENOVA project directory',
-    title: 'Redevelopment opportunities, clearly organised.',
-    intro: 'Explore society opportunities and follow projects from early intent through active execution and completion.',
+  "/projects": {
+    eyebrow: "RENOVA project directory",
+    title: "Redevelopment opportunities, clearly organised.",
+    intro:
+      "Explore society opportunities and follow projects from early intent through active execution and completion.",
     highlights: [
-      { title: 'Current Opportunities', detail: 'Societies actively seeking the right development or professional partner.' },
-      { title: 'Ongoing Projects', detail: 'Redevelopment journeys that have moved into planning, approvals or execution.' },
-      { title: 'Upcoming Projects', detail: 'Early-stage societies preparing documents, feasibility and committee alignment.' },
-      { title: 'Completed Projects', detail: 'Finished redevelopment stories with practical outcomes and learning.' },
+      {
+        title: "Current Opportunities",
+        detail:
+          "Societies actively seeking the right development or professional partner.",
+      },
+      {
+        title: "Ongoing Projects",
+        detail:
+          "Redevelopment journeys that have moved into planning, approvals or execution.",
+      },
+      {
+        title: "Upcoming Projects",
+        detail:
+          "Early-stage societies preparing documents, feasibility and committee alignment.",
+      },
+      {
+        title: "Completed Projects",
+        detail:
+          "Finished redevelopment stories with practical outcomes and learning.",
+      },
     ],
-    ctaLabel: 'View current opportunities', ctaHref: '/projects/current',
+    ctaLabel: "View current opportunities",
+    ctaHref: "/projects/current",
   },
-  '/projects/current': {
-    eyebrow: 'Current opportunities',
-    title: 'Verified opportunities ready for the next conversation.',
-    intro: 'Review active society requirements with clear location, scale, project stage and professional needs.',
-    highlights: featuredOpportunities.map((item) => ({ title: item.name + ' · ' + item.location, detail: item.detail + ' Indicative scale: ' + item.scale + '.' })),
-    ctaLabel: 'Post a society requirement', ctaHref: '/assessment',
+  "/projects/current": {
+    eyebrow: "Current opportunities",
+    title: "Verified opportunities ready for the next conversation.",
+    intro:
+      "Review active society requirements with clear location, scale, project stage and professional needs.",
+    highlights: featuredOpportunities.map((item) => ({
+      title: item.name + " · " + item.location,
+      detail: item.detail + " Indicative scale: " + item.scale + ".",
+    })),
+    ctaLabel: "Post a society requirement",
+    ctaHref: "/assessment",
   },
-  '/projects/ongoing': {
-    eyebrow: 'Ongoing projects',
-    title: 'Track redevelopment beyond the first introduction.',
-    intro: 'RENOVA brings milestones, project context and stakeholder visibility into one structured view.',
+  "/projects/ongoing": {
+    eyebrow: "Ongoing projects",
+    title: "Track redevelopment beyond the first introduction.",
+    intro:
+      "RENOVA brings milestones, project context and stakeholder visibility into one structured view.",
     highlights: [
-      { title: 'Planning & feasibility', detail: 'Track technical studies, member inputs and project viability.' },
-      { title: 'Selection & appointment', detail: 'Keep evaluation criteria, proposals and decisions transparent.' },
-      { title: 'Approvals & execution', detail: 'Follow permissions, vacating, construction and handover milestones.' },
+      {
+        title: "Planning & feasibility",
+        detail: "Track technical studies, member inputs and project viability.",
+      },
+      {
+        title: "Selection & appointment",
+        detail:
+          "Keep evaluation criteria, proposals and decisions transparent.",
+      },
+      {
+        title: "Approvals & execution",
+        detail:
+          "Follow permissions, vacating, construction and handover milestones.",
+      },
     ],
-    ctaLabel: 'Open society workspace', ctaHref: '/workspace',
+    ctaLabel: "Open society workspace",
+    ctaHref: "/workspace",
   },
-  '/projects/upcoming': {
-    eyebrow: 'Upcoming projects',
-    title: 'Discover societies preparing for redevelopment.',
-    intro: 'Early visibility helps developers and professionals understand where future opportunities are forming.',
+  "/projects/upcoming": {
+    eyebrow: "Upcoming projects",
+    title: "Discover societies preparing for redevelopment.",
+    intro:
+      "Early visibility helps developers and professionals understand where future opportunities are forming.",
     highlights: [
-      { title: 'Intent recorded', detail: 'The society has begun internal redevelopment discussions.' },
-      { title: 'Documents in preparation', detail: 'Title, conveyance, audit and property information are being organised.' },
-      { title: 'Professional guidance required', detail: 'PMCs, architects and legal advisors can support the next step.' },
+      {
+        title: "Intent recorded",
+        detail: "The society has begun internal redevelopment discussions.",
+      },
+      {
+        title: "Documents in preparation",
+        detail:
+          "Title, conveyance, audit and property information are being organised.",
+      },
+      {
+        title: "Professional guidance required",
+        detail:
+          "PMCs, architects and legal advisors can support the next step.",
+      },
     ],
-    ctaLabel: 'Join the RENOVA network', ctaHref: '/join',
+    ctaLabel: "Join the RENOVA network",
+    ctaHref: "/join",
   },
-  '/projects/completed': {
-    eyebrow: 'Completed projects',
-    title: 'Successful redevelopment, documented with clarity.',
-    intro: 'See how communities, developers and professionals worked together to create safer, better homes.',
+  "/projects/completed": {
+    eyebrow: "Completed projects",
+    title: "Successful redevelopment, documented with clarity.",
+    intro:
+      "See how communities, developers and professionals worked together to create safer, better homes.",
     highlights: [
-      { title: 'Before and after', detail: 'Understand the property challenge and the completed transformation.' },
-      { title: 'Delivery journey', detail: 'Review key milestones, decisions and project safeguards.' },
-      { title: 'Community outcome', detail: 'See the residential, amenity and long-term value created.' },
+      {
+        title: "Before and after",
+        detail:
+          "Understand the property challenge and the completed transformation.",
+      },
+      {
+        title: "Delivery journey",
+        detail: "Review key milestones, decisions and project safeguards.",
+      },
+      {
+        title: "Community outcome",
+        detail: "See the residential, amenity and long-term value created.",
+      },
     ],
-    ctaLabel: 'Explore success stories', ctaHref: '/success-stories',
+    ctaLabel: "Explore success stories",
+    ctaHref: "/success-stories",
   },
-  '/societies': {
-    eyebrow: 'For housing societies',
-    title: 'Make the first redevelopment decision with confidence.',
-    intro: 'RENOVA helps committees understand potential, organise requirements and connect with verified developers and specialists.',
+  "/societies": {
+    eyebrow: "For housing societies",
+    title: "Make the first redevelopment decision with confidence.",
+    intro:
+      "RENOVA helps committees understand potential, organise requirements and connect with verified developers and specialists.",
     highlights: [
-      { title: 'Clear first step', detail: 'Post your society requirement in a structured, private format.' },
-      { title: 'Verified connections', detail: 'Meet developers, PMCs, architects and advisors suited to your stage.' },
-      { title: 'Better comparison', detail: 'Bring project information and expectations into one consistent process.' },
+      {
+        title: "Clear first step",
+        detail:
+          "Post your society requirement in a structured, private format.",
+      },
+      {
+        title: "Verified connections",
+        detail:
+          "Meet developers, PMCs, architects and advisors suited to your stage.",
+      },
+      {
+        title: "Better comparison",
+        detail:
+          "Bring project information and expectations into one consistent process.",
+      },
     ],
-    ctaLabel: 'Register your society', ctaHref: '/assessment',
+    ctaLabel: "Register your society",
+    ctaHref: "/assessment",
   },
-  '/societies/how-it-works': {
-    eyebrow: 'Society journey',
-    title: 'From committee intent to the right redevelopment team.',
-    intro: 'A practical route designed around society readiness, independent understanding and transparent selection.',
+  "/societies/how-it-works": {
+    eyebrow: "Society journey",
+    title: "From committee intent to the right redevelopment team.",
+    intro:
+      "A practical route designed around society readiness, independent understanding and transparent selection.",
     highlights: [
-      { title: '01 · Register', detail: 'Share society, property and committee details.' },
-      { title: '02 · Review', detail: 'RENOVA understands your stage, needs and documentation gaps.' },
-      { title: '03 · Connect', detail: 'Explore appropriate developers and professional specialists.' },
-      { title: '04 · Progress', detail: 'Use a structured workspace to follow decisions and milestones.' },
+      {
+        title: "01 · Register",
+        detail: "Share society, property and committee details.",
+      },
+      {
+        title: "02 · Review",
+        detail: "RENOVA understands your stage, needs and documentation gaps.",
+      },
+      {
+        title: "03 · Connect",
+        detail: "Explore appropriate developers and professional specialists.",
+      },
+      {
+        title: "04 · Progress",
+        detail:
+          "Use a structured workspace to follow decisions and milestones.",
+      },
     ],
-    ctaLabel: 'Start society registration', ctaHref: '/assessment',
+    ctaLabel: "Start society registration",
+    ctaHref: "/assessment",
   },
-  '/developers': {
-    eyebrow: 'For developers',
-    title: 'Find better-qualified redevelopment opportunities.',
-    intro: 'RENOVA helps developers discover genuine society requirements with clearer project context and professional introductions.',
+  "/developers": {
+    eyebrow: "For developers",
+    title: "Find better-qualified redevelopment opportunities.",
+    intro:
+      "RENOVA helps developers discover genuine society requirements with clearer project context and professional introductions.",
     highlights: [
-      { title: 'Relevant opportunities', detail: 'Filter society requirements by location, scale, stage and need.' },
-      { title: 'Structured briefs', detail: 'Understand the opportunity before investing time in a proposal.' },
-      { title: 'Credible presence', detail: 'Present capabilities, experience and project fit within a verified network.' },
+      {
+        title: "Relevant opportunities",
+        detail:
+          "Filter society requirements by location, scale, stage and need.",
+      },
+      {
+        title: "Structured briefs",
+        detail:
+          "Understand the opportunity before investing time in a proposal.",
+      },
+      {
+        title: "Credible presence",
+        detail:
+          "Present capabilities, experience and project fit within a verified network.",
+      },
     ],
-    ctaLabel: 'Register as a developer', ctaHref: '/join/developer',
+    ctaLabel: "Register as a developer",
+    ctaHref: "/join/developer",
   },
-  '/professionals': {
-    eyebrow: 'RENOVA professional network',
-    title: 'The right expertise for every redevelopment stage.',
-    intro: 'Discover PMCs, architects, legal advisors and specialist professionals who understand Mumbai society redevelopment.',
+  "/professionals": {
+    eyebrow: "RENOVA professional network",
+    title: "The right expertise for every redevelopment stage.",
+    intro:
+      "Discover PMCs, architects, legal advisors and specialist professionals who understand Mumbai society redevelopment.",
     highlights: [
-      { title: 'PMCs', detail: 'Feasibility, tendering, developer evaluation, project controls and society representation.' },
-      { title: 'Architects', detail: 'Planning potential, DCPR strategy, design, approvals and redevelopment coordination.' },
-      { title: 'Legal', detail: 'Title, conveyance, agreements, member protection and redevelopment documentation.' },
-      { title: 'Other Professionals', detail: 'Structural, financial, valuation, liaison and specialist project support.' },
+      {
+        title: "PMCs",
+        detail:
+          "Feasibility, tendering, developer evaluation, project controls and society representation.",
+      },
+      {
+        title: "Architects",
+        detail:
+          "Planning potential, DCPR strategy, design, approvals and redevelopment coordination.",
+      },
+      {
+        title: "Legal",
+        detail:
+          "Title, conveyance, agreements, member protection and redevelopment documentation.",
+      },
+      {
+        title: "Other Professionals",
+        detail:
+          "Structural, financial, valuation, liaison and specialist project support.",
+      },
     ],
-    ctaLabel: 'Join as a professional', ctaHref: '/join',
+    ctaLabel: "Join as a professional",
+    ctaHref: "/join",
   },
-  '/professionals/pmcs': {
-    eyebrow: 'Professional network · PMCs',
-    title: 'Bring structure and independent oversight to redevelopment.',
-    intro: 'Connect with project management consultants experienced in feasibility, tendering, evaluation, execution monitoring and society communication.',
+  "/professionals/pmcs": {
+    eyebrow: "Professional network · PMCs",
+    title: "Bring structure and independent oversight to redevelopment.",
+    intro:
+      "Connect with project management consultants experienced in feasibility, tendering, evaluation, execution monitoring and society communication.",
     highlights: [
-      { title: 'Feasibility & readiness', detail: 'Assess property information, planning potential, documentation and member priorities.' },
-      { title: 'Tender & selection', detail: 'Prepare scope, invite proposals and compare developers through consistent criteria.' },
-      { title: 'Project oversight', detail: 'Track approvals, milestones, quality, reporting and handover obligations.' },
+      {
+        title: "Feasibility & readiness",
+        detail:
+          "Assess property information, planning potential, documentation and member priorities.",
+      },
+      {
+        title: "Tender & selection",
+        detail:
+          "Prepare scope, invite proposals and compare developers through consistent criteria.",
+      },
+      {
+        title: "Project oversight",
+        detail:
+          "Track approvals, milestones, quality, reporting and handover obligations.",
+      },
     ],
-    ctaLabel: 'Register as a PMC', ctaHref: '/join/pmc',
+    ctaLabel: "Register as a PMC",
+    ctaHref: "/join/pmc",
   },
-  '/professionals/architects': {
-    eyebrow: 'Professional network · Architects',
-    title: 'Translate redevelopment potential into better communities.',
-    intro: 'Find architects who combine planning knowledge, design quality and practical coordination for Mumbai redevelopment projects.',
+  "/professionals/architects": {
+    eyebrow: "Professional network · Architects",
+    title: "Translate redevelopment potential into better communities.",
+    intro:
+      "Find architects who combine planning knowledge, design quality and practical coordination for Mumbai redevelopment projects.",
     highlights: [
-      { title: 'Potential studies', detail: 'Interpret site context, development controls and realistic built-form opportunity.' },
-      { title: 'Planning & design', detail: 'Balance member needs, sale potential, amenities, circulation and buildability.' },
-      { title: 'Approvals coordination', detail: 'Support the technical documentation and authority process needed to progress.' },
+      {
+        title: "Potential studies",
+        detail:
+          "Interpret site context, development controls and realistic built-form opportunity.",
+      },
+      {
+        title: "Planning & design",
+        detail:
+          "Balance member needs, sale potential, amenities, circulation and buildability.",
+      },
+      {
+        title: "Approvals coordination",
+        detail:
+          "Support the technical documentation and authority process needed to progress.",
+      },
     ],
-    ctaLabel: 'Register as an architect', ctaHref: '/join/architect',
+    ctaLabel: "Register as an architect",
+    ctaHref: "/join/architect",
   },
-  '/professionals/legal': {
-    eyebrow: 'Professional network · Legal',
-    title: 'Protect the society before, during and after appointment.',
-    intro: 'Connect with legal professionals experienced in society title, conveyance, tender safeguards, development agreements and member rights.',
+  "/professionals/legal": {
+    eyebrow: "Professional network · Legal",
+    title: "Protect the society before, during and after appointment.",
+    intro:
+      "Connect with legal professionals experienced in society title, conveyance, tender safeguards, development agreements and member rights.",
     highlights: [
-      { title: 'Title & authority', detail: 'Review ownership, conveyance, society records and the legal ability to proceed.' },
-      { title: 'Appointment safeguards', detail: 'Strengthen tender conditions, selection records, guarantees and development terms.' },
-      { title: 'Member protection', detail: 'Clarify rent, corpus, area, timelines, defaults, insurance and handover obligations.' },
+      {
+        title: "Title & authority",
+        detail:
+          "Review ownership, conveyance, society records and the legal ability to proceed.",
+      },
+      {
+        title: "Appointment safeguards",
+        detail:
+          "Strengthen tender conditions, selection records, guarantees and development terms.",
+      },
+      {
+        title: "Member protection",
+        detail:
+          "Clarify rent, corpus, area, timelines, defaults, insurance and handover obligations.",
+      },
     ],
-    ctaLabel: 'Contact RENOVA', ctaHref: '/contact',
+    ctaLabel: "Contact RENOVA",
+    ctaHref: "/contact",
   },
-  '/professionals/others': {
-    eyebrow: 'Professional network · Specialists',
-    title: 'Complete the redevelopment team with specialist expertise.',
-    intro: 'Find the technical, financial and coordination support needed for clearer decisions and stronger project delivery.',
+  "/professionals/others": {
+    eyebrow: "Professional network · Specialists",
+    title: "Complete the redevelopment team with specialist expertise.",
+    intro:
+      "Find the technical, financial and coordination support needed for clearer decisions and stronger project delivery.",
     highlights: [
-      { title: 'Structural & technical', detail: 'Audits, surveys, engineering review, quality control and specialist certification.' },
-      { title: 'Financial & valuation', detail: 'Project economics, proposal comparison, taxation, valuation and member guidance.' },
-      { title: 'Liaison & coordination', detail: 'Documentation, authority follow-up and specialist support across the project lifecycle.' },
+      {
+        title: "Structural & technical",
+        detail:
+          "Audits, surveys, engineering review, quality control and specialist certification.",
+      },
+      {
+        title: "Financial & valuation",
+        detail:
+          "Project economics, proposal comparison, taxation, valuation and member guidance.",
+      },
+      {
+        title: "Liaison & coordination",
+        detail:
+          "Documentation, authority follow-up and specialist support across the project lifecycle.",
+      },
     ],
-    ctaLabel: 'Introduce your practice', ctaHref: '/contact',
+    ctaLabel: "Introduce your practice",
+    ctaHref: "/contact",
   },
-  '/join': {
-    eyebrow: 'Join RENOVA',
-    title: 'Choose how you want to participate.',
-    intro: 'Create the right RENOVA pathway for your society, development business or professional practice.',
+  "/join": {
+    eyebrow: "Join RENOVA",
+    title: "Choose how you want to participate.",
+    intro:
+      "Create the right RENOVA pathway for your society, development business or professional practice.",
     highlights: [
-      { title: 'Housing Society', detail: 'Post a requirement and organise your redevelopment journey.' },
-      { title: 'Developer', detail: 'Find suitable opportunities and build a trusted profile.' },
-      { title: 'PMC', detail: 'Support societies with feasibility, process and oversight.' },
-      { title: 'Architect', detail: 'Bring design, planning and redevelopment potential to life.' },
+      {
+        title: "Housing Society",
+        detail: "Post a requirement and organise your redevelopment journey.",
+      },
+      {
+        title: "Developer",
+        detail: "Find suitable opportunities and build a trusted profile.",
+      },
+      {
+        title: "PMC",
+        detail: "Support societies with feasibility, process and oversight.",
+      },
+      {
+        title: "Architect",
+        detail: "Bring design, planning and redevelopment potential to life.",
+      },
     ],
-    ctaLabel: 'Register a society', ctaHref: '/assessment',
+    ctaLabel: "Register a society",
+    ctaHref: "/assessment",
   },
-  '/join/developer': {
-    eyebrow: 'Developer registration',
-    title: 'Build your verified RENOVA developer profile.',
-    intro: 'Share your organisation, experience, preferred locations, project scale and redevelopment capabilities.',
+  "/join/developer": {
+    eyebrow: "Developer registration",
+    title: "Build your verified RENOVA developer profile.",
+    intro:
+      "Share your organisation, experience, preferred locations, project scale and redevelopment capabilities.",
     highlights: [
-      { title: 'Company profile', detail: 'Organisation, leadership, registration and contact information.' },
-      { title: 'Redevelopment experience', detail: 'Completed, ongoing and relevant society projects.' },
-      { title: 'Opportunity preferences', detail: 'Locations, plot sizes, member counts and project values.' },
+      {
+        title: "Company profile",
+        detail:
+          "Organisation, leadership, registration and contact information.",
+      },
+      {
+        title: "Redevelopment experience",
+        detail: "Completed, ongoing and relevant society projects.",
+      },
+      {
+        title: "Opportunity preferences",
+        detail: "Locations, plot sizes, member counts and project values.",
+      },
     ],
-    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+    ctaLabel: "Contact the RENOVA team",
+    ctaHref: "/contact",
   },
-  '/join/pmc': {
-    eyebrow: 'PMC registration',
-    title: 'Help societies move forward with structure.',
-    intro: 'Create a professional profile covering feasibility, tendering, project management and delivery oversight.',
+  "/join/pmc": {
+    eyebrow: "PMC registration",
+    title: "Help societies move forward with structure.",
+    intro:
+      "Create a professional profile covering feasibility, tendering, project management and delivery oversight.",
     highlights: [
-      { title: 'Practice credentials', detail: 'Team, registrations, years of experience and service areas.' },
-      { title: 'Society experience', detail: 'Relevant redevelopment mandates and completed assignments.' },
-      { title: 'Specialist services', detail: 'Feasibility, tendering, evaluation, approvals and monitoring.' },
+      {
+        title: "Practice credentials",
+        detail: "Team, registrations, years of experience and service areas.",
+      },
+      {
+        title: "Society experience",
+        detail: "Relevant redevelopment mandates and completed assignments.",
+      },
+      {
+        title: "Specialist services",
+        detail: "Feasibility, tendering, evaluation, approvals and monitoring.",
+      },
     ],
-    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+    ctaLabel: "Contact the RENOVA team",
+    ctaHref: "/contact",
   },
-  '/join/architect': {
-    eyebrow: 'Architect registration',
-    title: 'Shape what Mumbai communities can become.',
-    intro: 'Present your redevelopment design, planning, approvals and society consultation capabilities.',
+  "/join/architect": {
+    eyebrow: "Architect registration",
+    title: "Shape what Mumbai communities can become.",
+    intro:
+      "Present your redevelopment design, planning, approvals and society consultation capabilities.",
     highlights: [
-      { title: 'Practice profile', detail: 'Team, registrations, portfolio and design approach.' },
-      { title: 'Planning expertise', detail: 'DCPR pathways, potential studies and authority coordination.' },
-      { title: 'Relevant portfolio', detail: 'Residential, mixed-use and society redevelopment work.' },
+      {
+        title: "Practice profile",
+        detail: "Team, registrations, portfolio and design approach.",
+      },
+      {
+        title: "Planning expertise",
+        detail: "DCPR pathways, potential studies and authority coordination.",
+      },
+      {
+        title: "Relevant portfolio",
+        detail: "Residential, mixed-use and society redevelopment work.",
+      },
     ],
-    ctaLabel: 'Contact the RENOVA team', ctaHref: '/contact',
+    ctaLabel: "Contact the RENOVA team",
+    ctaHref: "/contact",
   },
-  '/knowledge-centre': {
-    eyebrow: 'Knowledge centre',
-    title: 'Redevelopment knowledge, without the confusion.',
-    intro: 'Plain-language guidance for committees, developers and professionals navigating Mumbai redevelopment.',
+  "/knowledge-centre": {
+    eyebrow: "Knowledge centre",
+    title: "Redevelopment knowledge, without the confusion.",
+    intro:
+      "Plain-language guidance for committees, developers and professionals navigating Mumbai redevelopment.",
     highlights: [
-      { title: 'Redevelopment Guide', detail: 'A stage-by-stage orientation from first intent to possession.' },
-      { title: 'DCPR', detail: 'Understand the planning routes and terms that may shape project potential.' },
-      { title: 'Society Process', detail: 'Learn the resolutions, documents and committee actions involved.' },
-      { title: 'Developer Selection', detail: 'Compare capability, commercial terms and execution safeguards.' },
-      { title: 'FAQs', detail: 'Practical answers to common redevelopment questions.' },
+      {
+        title: "Redevelopment Guide",
+        detail: "A stage-by-stage orientation from first intent to possession.",
+      },
+      {
+        title: "DCPR",
+        detail:
+          "Understand the planning routes and terms that may shape project potential.",
+      },
+      {
+        title: "Society Process",
+        detail:
+          "Learn the resolutions, documents and committee actions involved.",
+      },
+      {
+        title: "Developer Selection",
+        detail:
+          "Compare capability, commercial terms and execution safeguards.",
+      },
+      {
+        title: "FAQs",
+        detail: "Practical answers to common redevelopment questions.",
+      },
     ],
-    ctaLabel: 'Open DCPR guidance', ctaHref: '/regulations',
+    ctaLabel: "Open DCPR guidance",
+    ctaHref: "/regulations",
   },
-  '/knowledge-centre/redevelopment-guide': {
-    eyebrow: 'Redevelopment guide',
-    title: 'A clearer route from intent to possession.',
-    intro: 'Use this guide to understand the major decisions, documents and safeguards across the redevelopment lifecycle.',
+  "/knowledge-centre/redevelopment-guide": {
+    eyebrow: "Redevelopment guide",
+    title: "A clearer route from intent to possession.",
+    intro:
+      "Use this guide to understand the major decisions, documents and safeguards across the redevelopment lifecycle.",
     highlights: [
-      { title: 'Prepare', detail: 'Align members, confirm authority and collect property records.' },
-      { title: 'Assess', detail: 'Commission feasibility and understand the applicable planning pathway.' },
-      { title: 'Select', detail: 'Appoint advisors and evaluate developers through recorded criteria.' },
-      { title: 'Execute', detail: 'Protect milestones, payments, quality and handover obligations.' },
+      {
+        title: "Prepare",
+        detail:
+          "Align members, confirm authority and collect property records.",
+      },
+      {
+        title: "Assess",
+        detail:
+          "Commission feasibility and understand the applicable planning pathway.",
+      },
+      {
+        title: "Select",
+        detail:
+          "Appoint advisors and evaluate developers through recorded criteria.",
+      },
+      {
+        title: "Execute",
+        detail:
+          "Protect milestones, payments, quality and handover obligations.",
+      },
     ],
-    ctaLabel: 'Post your requirement', ctaHref: '/assessment',
+    ctaLabel: "Post your requirement",
+    ctaHref: "/assessment",
   },
-  '/knowledge-centre/society-process': {
-    eyebrow: 'Society process',
-    title: 'Every committee step, organised.',
-    intro: 'Understand the sequence of member communication, resolutions, professional appointments and project decisions.',
+  "/knowledge-centre/society-process": {
+    eyebrow: "Society process",
+    title: "Every committee step, organised.",
+    intro:
+      "Understand the sequence of member communication, resolutions, professional appointments and project decisions.",
     highlights: [
-      { title: 'Committee readiness', detail: 'Define roles, communication and record-keeping.' },
-      { title: 'Member consent', detail: 'Share consistent information and record decisions transparently.' },
-      { title: 'Professional appointments', detail: 'Use documented scope, criteria and conflict disclosures.' },
-      { title: 'Project safeguards', detail: 'Review agreements, guarantees, timelines and reporting.' },
+      {
+        title: "Committee readiness",
+        detail: "Define roles, communication and record-keeping.",
+      },
+      {
+        title: "Member consent",
+        detail:
+          "Share consistent information and record decisions transparently.",
+      },
+      {
+        title: "Professional appointments",
+        detail: "Use documented scope, criteria and conflict disclosures.",
+      },
+      {
+        title: "Project safeguards",
+        detail: "Review agreements, guarantees, timelines and reporting.",
+      },
     ],
-    ctaLabel: 'Register your society', ctaHref: '/assessment',
+    ctaLabel: "Register your society",
+    ctaHref: "/assessment",
   },
-  '/knowledge-centre/developer-selection': {
-    eyebrow: 'Developer selection',
-    title: 'Compare more than the headline offer.',
-    intro: 'A strong selection process tests capability, financial strength, design quality, terms and execution safeguards.',
+  "/knowledge-centre/developer-selection": {
+    eyebrow: "Developer selection",
+    title: "Compare more than the headline offer.",
+    intro:
+      "A strong selection process tests capability, financial strength, design quality, terms and execution safeguards.",
     highlights: [
-      { title: 'Track record', detail: 'Review comparable redevelopment work and delivery performance.' },
-      { title: 'Commercial clarity', detail: 'Compare area, corpus, rent, timelines and obligations consistently.' },
-      { title: 'Execution strength', detail: 'Assess approvals capability, funding and construction systems.' },
-      { title: 'Member protection', detail: 'Verify guarantees, insurance, default provisions and reporting.' },
+      {
+        title: "Track record",
+        detail:
+          "Review comparable redevelopment work and delivery performance.",
+      },
+      {
+        title: "Commercial clarity",
+        detail:
+          "Compare area, corpus, rent, timelines and obligations consistently.",
+      },
+      {
+        title: "Execution strength",
+        detail:
+          "Assess approvals capability, funding and construction systems.",
+      },
+      {
+        title: "Member protection",
+        detail:
+          "Verify guarantees, insurance, default provisions and reporting.",
+      },
     ],
-    ctaLabel: 'Find verified developers', ctaHref: '/developers',
+    ctaLabel: "Find verified developers",
+    ctaHref: "/developers",
   },
-  '/knowledge-centre/faqs': {
-    eyebrow: 'Frequently asked questions',
-    title: 'Straight answers for redevelopment decisions.',
-    intro: 'Start with the questions societies most often ask before beginning a formal redevelopment process.',
+  "/knowledge-centre/faqs": {
+    eyebrow: "Frequently asked questions",
+    title: "Straight answers for redevelopment decisions.",
+    intro:
+      "Start with the questions societies most often ask before beginning a formal redevelopment process.",
     highlights: [
-      { title: 'When should a society consider redevelopment?', detail: 'When structural, functional or long-term value needs justify a feasibility review.' },
-      { title: 'Who should advise the society?', detail: 'Independent technical, legal and financial professionals appropriate to the property.' },
-      { title: 'How should developers be compared?', detail: 'Through documented criteria covering capability, proposal terms, safeguards and delivery.' },
-      { title: 'Does RENOVA replace professional advice?', detail: 'No. RENOVA organises information and connections; qualified advice remains essential.' },
+      {
+        title: "When should a society consider redevelopment?",
+        detail:
+          "When structural, functional or long-term value needs justify a feasibility review.",
+      },
+      {
+        title: "Who should advise the society?",
+        detail:
+          "Independent technical, legal and financial professionals appropriate to the property.",
+      },
+      {
+        title: "How should developers be compared?",
+        detail:
+          "Through documented criteria covering capability, proposal terms, safeguards and delivery.",
+      },
+      {
+        title: "Does RENOVA replace professional advice?",
+        detail:
+          "No. RENOVA organises information and connections; qualified advice remains essential.",
+      },
     ],
-    ctaLabel: 'Ask RENOVA', ctaHref: '/contact',
+    ctaLabel: "Ask RENOVA",
+    ctaHref: "/contact",
   },
-  '/success-stories': {
-    eyebrow: 'Success stories',
-    title: 'Better redevelopment starts with better alignment.',
-    intro: 'RENOVA success stories will document the challenge, the people, the process and the community outcome.',
+  "/success-stories": {
+    eyebrow: "Success stories",
+    title: "Better redevelopment starts with better alignment.",
+    intro:
+      "RENOVA success stories will document the challenge, the people, the process and the community outcome.",
     highlights: [
-      { title: 'Society perspective', detail: 'What mattered to members and how decisions became clearer.' },
-      { title: 'Developer perspective', detail: 'How project fit, planning and execution were established.' },
-      { title: 'Professional perspective', detail: 'How specialists protected quality and process.' },
+      {
+        title: "Society perspective",
+        detail: "What mattered to members and how decisions became clearer.",
+      },
+      {
+        title: "Developer perspective",
+        detail: "How project fit, planning and execution were established.",
+      },
+      {
+        title: "Professional perspective",
+        detail: "How specialists protected quality and process.",
+      },
     ],
-    ctaLabel: 'Explore completed projects', ctaHref: '/projects/completed',
+    ctaLabel: "Explore completed projects",
+    ctaHref: "/projects/completed",
   },
-  '/about': {
-    eyebrow: 'About RENOVA',
-    title: 'Redevelopment, reimagined for Mumbai.',
-    intro: 'RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.',
+  "/about": {
+    eyebrow: "About RENOVA",
+    title: "Redevelopment, reimagined for Mumbai.",
+    intro:
+      "RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.",
     highlights: [
-      { title: 'Our purpose', detail: 'Make redevelopment easier to understand, compare and progress.' },
-      { title: 'Our role', detail: 'Create structured requirements, verified discovery and clearer connections.' },
-      { title: 'Our principle', detail: 'Support informed decisions without replacing independent professional advice.' },
+      {
+        title: "Our purpose",
+        detail:
+          "Make redevelopment easier to understand, compare and progress.",
+      },
+      {
+        title: "Our role",
+        detail:
+          "Create structured requirements, verified discovery and clearer connections.",
+      },
+      {
+        title: "Our principle",
+        detail:
+          "Support informed decisions without replacing independent professional advice.",
+      },
     ],
-    ctaLabel: 'See how RENOVA works', ctaHref: '/societies/how-it-works',
+    ctaLabel: "See how RENOVA works",
+    ctaHref: "/societies/how-it-works",
   },
-  '/contact': {
-    eyebrow: 'Contact RENOVA',
-    title: 'Tell us where you are in the journey.',
-    intro: 'Whether you represent a society, developer or professional practice, RENOVA can help identify the right next step.',
+  "/contact": {
+    eyebrow: "Contact RENOVA",
+    title: "Tell us where you are in the journey.",
+    intro:
+      "Whether you represent a society, developer or professional practice, RENOVA can help identify the right next step.",
     highlights: [
-      { title: 'Housing societies', detail: 'Share your property context and current redevelopment stage.' },
-      { title: 'Developers', detail: 'Tell us your opportunity preferences and redevelopment experience.' },
-      { title: 'Professionals', detail: 'Introduce your practice, specialisation and Mumbai project portfolio.' },
+      {
+        title: "Housing societies",
+        detail: "Share your property context and current redevelopment stage.",
+      },
+      {
+        title: "Developers",
+        detail:
+          "Tell us your opportunity preferences and redevelopment experience.",
+      },
+      {
+        title: "Professionals",
+        detail:
+          "Introduce your practice, specialisation and Mumbai project portfolio.",
+      },
     ],
-    ctaLabel: 'Post a society requirement', ctaHref: '/assessment',
+    ctaLabel: "Post a society requirement",
+    ctaHref: "/assessment",
   },
 };
 
@@ -1165,31 +3777,56 @@ function PublicWorkingHeader() {
   return (
     <header className="stitch-header public-page-header">
       <div className="stitch-header-inner">
-        <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+        <button
+          className="stitch-menu"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-label="Toggle navigation"
+        >
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
         <Logo />
-        <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
-        <Link href="/assessment" className="public-header-cta">Post requirement <ArrowUpRight size={14} /></Link>
+        <PublicNavigation
+          menuOpen={menuOpen}
+          onNavigate={() => setMenuOpen(false)}
+        />
+        <Link href="/assessment" className="public-header-cta">
+          Post requirement <ArrowUpRight size={14} />
+        </Link>
       </div>
     </header>
   );
 }
 
 const projectTabs = [
-  { label: 'All Projects', href: '/projects', stage: 'all' },
-  { label: 'Current Opportunities', href: '/projects/current', stage: 'current' },
-  { label: 'Ongoing Projects', href: '/projects/ongoing', stage: 'ongoing' },
-  { label: 'Upcoming Projects', href: '/projects/upcoming', stage: 'upcoming' },
-  { label: 'Completed Projects', href: '/projects/completed', stage: 'completed' },
+  { label: "All Projects", href: "/projects", stage: "all" },
+  {
+    label: "Current Opportunities",
+    href: "/projects/current",
+    stage: "current",
+  },
+  { label: "Ongoing Projects", href: "/projects/ongoing", stage: "ongoing" },
+  { label: "Upcoming Projects", href: "/projects/upcoming", stage: "upcoming" },
+  {
+    label: "Completed Projects",
+    href: "/projects/completed",
+    stage: "completed",
+  },
 ];
 
 function ProjectsDirectory() {
   const [location] = useLocation();
-  const pathname = location.split('?')[0];
-  const activeStage = projectTabs.find((tab) => tab.href === pathname)?.stage || 'all';
-  const [search, setSearch] = useState('');
-  const isActiveListing = activeStage === 'all' || activeStage === 'current';
+  const pathname = location.split("?")[0];
+  const activeStage =
+    projectTabs.find((tab) => tab.href === pathname)?.stage || "all";
+  const [search, setSearch] = useState("");
+  const isActiveListing = activeStage === "all" || activeStage === "current";
   const visibleProjects = isActiveListing
-    ? featuredOpportunities.filter((item) => (item.name + ' ' + item.location + ' ' + item.status).toLowerCase().includes(search.toLowerCase()))
+    ? featuredOpportunities.filter((item) =>
+        (item.name + " " + item.location + " " + item.status)
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      )
     : [];
 
   return (
@@ -1197,84 +3834,248 @@ function ProjectsDirectory() {
       <PublicWorkingHeader />
       <main>
         <section className="working-hero">
-          <div><p>RENOVA project directory</p><h1>Explore redevelopment opportunities.</h1><span>Search verified society opportunities and follow projects through every stage of redevelopment.</span></div>
-          <Link href="/assessment" className="stitch-primary-button">Post an opportunity <ArrowUpRight size={15} /></Link>
+          <div>
+            <p>RENOVA project directory</p>
+            <h1>Explore redevelopment opportunities.</h1>
+            <span>
+              Search verified society opportunities and follow projects through
+              every stage of redevelopment.
+            </span>
+          </div>
+          <Link href="/assessment" className="stitch-primary-button">
+            Post an opportunity <ArrowUpRight size={15} />
+          </Link>
         </section>
         <section className="project-directory-shell">
-          <div className="project-directory-tabs" role="navigation" aria-label="Project categories">
-            {projectTabs.map((tab) => <Link href={tab.href} key={tab.href} className={activeStage === tab.stage ? 'active' : ''}>{tab.label}</Link>)}
+          <div
+            className="project-directory-tabs"
+            role="navigation"
+            aria-label="Project categories"
+          >
+            {projectTabs.map((tab) => (
+              <Link
+                href={tab.href}
+                key={tab.href}
+                className={activeStage === tab.stage ? "active" : ""}
+              >
+                {tab.label}
+              </Link>
+            ))}
           </div>
           <div className="project-directory-toolbar">
-            <label><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by society, area or status" aria-label="Search projects" /></label>
-            <span>{visibleProjects.length} {visibleProjects.length === 1 ? 'project' : 'projects'} found</span>
+            <label>
+              <Search size={18} />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by society, area or status"
+                aria-label="Search projects"
+              />
+            </label>
+            <span>
+              {visibleProjects.length}{" "}
+              {visibleProjects.length === 1 ? "project" : "projects"} found
+            </span>
           </div>
           {visibleProjects.length ? (
             <div className="working-project-grid">
-              {visibleProjects.map((item) => <article key={item.name}>
-                <div><span className="stitch-status">{item.status}</span><small>{item.scale}</small></div>
-                <h2>{item.name}</h2>
-                <p className="working-project-location"><MapPin size={14} /> {item.location}</p>
-                <p>{item.detail}</p>
-                <dl><div><dt>Building age</dt><dd>{item.age}</dd></div><div><dt>Homes</dt><dd>{item.homes}</dd></div><div><dt>Site area</dt><dd>{item.area}</dd></div></dl>
-                <Link href="/contact">Request project details <ArrowUpRight size={14} /></Link>
-              </article>)}
+              {visibleProjects.map((item) => (
+                <article key={item.name}>
+                  <div>
+                    <span className="stitch-status">{item.status}</span>
+                    <small>{item.scale}</small>
+                  </div>
+                  <h2>{item.name}</h2>
+                  <p className="working-project-location">
+                    <MapPin size={14} /> {item.location}
+                  </p>
+                  <p>{item.detail}</p>
+                  <dl>
+                    <div>
+                      <dt>Building age</dt>
+                      <dd>{item.age}</dd>
+                    </div>
+                    <div>
+                      <dt>Homes</dt>
+                      <dd>{item.homes}</dd>
+                    </div>
+                    <div>
+                      <dt>Site area</dt>
+                      <dd>{item.area}</dd>
+                    </div>
+                  </dl>
+                  <Link href="/contact">
+                    Request project details <ArrowUpRight size={14} />
+                  </Link>
+                </article>
+              ))}
             </div>
           ) : (
             <div className="working-empty">
               <Building2 size={30} />
-              <h2>{search ? 'No matching projects found.' : 'No public projects in this stage yet.'}</h2>
-              <p>{search ? 'Try another society name, locality or status.' : 'New verified opportunities will appear here after society approval.'}</p>
-              {search ? <button type="button" onClick={() => setSearch('')}>Clear search</button> : <Link href="/assessment">Post a society opportunity</Link>}
+              <h2>
+                {search
+                  ? "No matching projects found."
+                  : "No public projects in this stage yet."}
+              </h2>
+              <p>
+                {search
+                  ? "Try another society name, locality or status."
+                  : "New verified opportunities will appear here after society approval."}
+              </p>
+              {search ? (
+                <button type="button" onClick={() => setSearch("")}>
+                  Clear search
+                </button>
+              ) : (
+                <Link href="/assessment">Post a society opportunity</Link>
+              )}
             </div>
           )}
         </section>
       </main>
-      <footer className="stitch-footer"><div><Logo /><p>Renew. Connect. Redevelop.</p></div><div><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/about">About RENOVA</Link><Link href="/contact">Contact</Link></div><small>© {new Date().getFullYear()} RENOVA · Mumbai</small></footer>
+      <footer className="stitch-footer">
+        <div>
+          <Logo />
+          <p>Renew. Connect. Redevelop.</p>
+        </div>
+        <div>
+          <Link href="/projects">Projects</Link>
+          <Link href="/knowledge-centre">Knowledge centre</Link>
+          <Link href="/about">About RENOVA</Link>
+          <Link href="/contact">Contact</Link>
+        </div>
+        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
+      </footer>
     </div>
   );
 }
 
-const directoryCategoryLabels = ['All', ...organizationCategories] as const;
+const directoryCategoryLabels = ["All", ...organizationCategories] as const;
 
-function OrganizationMonogram({ organization }: { organization: Organization }) {
-  const initials = organization.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
-  return <span className="ecosystem-monogram" aria-label={`${organization.name} logo not provided`}>{initials}</span>;
+function OrganizationMonogram({
+  organization,
+}: {
+  organization: Organization;
+}) {
+  const initials = organization.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <span
+      className="ecosystem-monogram"
+      aria-label={`${organization.name} logo not provided`}
+    >
+      {initials}
+    </span>
+  );
 }
 
 function EcosystemFooter() {
-  return <footer className="stitch-footer"><div><Logo /><p>Renew. Connect. Redevelop.</p></div><div><Link href="/ecosystem">Ecosystem</Link><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/contact">Contact</Link></div><small>© {new Date().getFullYear()} RENOVA · Mumbai</small></footer>;
+  return (
+    <footer className="stitch-footer">
+      <div>
+        <Logo />
+        <p>Renew. Connect. Redevelop.</p>
+      </div>
+      <div>
+        <Link href="/ecosystem">Ecosystem</Link>
+        <Link href="/projects">Projects</Link>
+        <Link href="/knowledge-centre">Knowledge centre</Link>
+        <Link href="/contact">Contact</Link>
+      </div>
+      <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
+    </footer>
+  );
 }
 
 function EcosystemDirectory() {
   const [location] = useLocation();
-  const requestedCategory = new URLSearchParams(location.split('?')[1] || '').get('category');
-  const initialCategory = organizationCategories.includes(requestedCategory as typeof organizationCategories[number]) ? requestedCategory! : 'All';
-  const [search, setSearch] = useState('');
+  const requestedCategory = new URLSearchParams(
+    location.split("?")[1] || "",
+  ).get("category");
+  const initialCategory = organizationCategories.includes(
+    requestedCategory as (typeof organizationCategories)[number],
+  )
+    ? requestedCategory!
+    : "All";
+  const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
   const [category, setCategory] = useState(initialCategory);
-  const [place, setPlace] = useState('All');
-  const [service, setService] = useState('All');
-  const [redevelopmentType, setRedevelopmentType] = useState('All');
-  const [status, setStatus] = useState('All');
+  const [place, setPlace] = useState("All");
+  const [service, setService] = useState("All");
+  const [redevelopmentType, setRedevelopmentType] = useState("All");
+  const [status, setStatus] = useState("All");
 
-  const options = useMemo(() => ({
-    places: ['All', ...Array.from(new Set(organizations.map((item) => item.location))).sort()],
-    services: ['All', ...Array.from(new Set(organizations.flatMap((item) => item.services))).sort()],
-    types: ['All', ...Array.from(new Set(organizations.flatMap((item) => item.redevelopmentTypes))).sort()],
-  }), []);
+  const options = useMemo(
+    () => ({
+      places: [
+        "All",
+        ...Array.from(
+          new Set(organizations.map((item) => item.location)),
+        ).sort(),
+      ],
+      services: [
+        "All",
+        ...Array.from(
+          new Set(organizations.flatMap((item) => item.services)),
+        ).sort(),
+      ],
+      types: [
+        "All",
+        ...Array.from(
+          new Set(organizations.flatMap((item) => item.redevelopmentTypes)),
+        ).sort(),
+      ],
+    }),
+    [],
+  );
 
-  const filtered = useMemo(() => organizations.filter((item) => {
-    const searchable = [item.name, item.category, item.location, ...item.areasServed, ...item.specializations, ...item.services].join(' ').toLowerCase();
-    return (!deferredSearch || searchable.includes(deferredSearch))
-      && (category === 'All' || item.category === category)
-      && (place === 'All' || item.location === place)
-      && (service === 'All' || item.services.includes(service))
-      && (redevelopmentType === 'All' || item.redevelopmentTypes.includes(redevelopmentType))
-      && (status === 'All' || item.profileStatus === status);
-  }), [category, deferredSearch, place, redevelopmentType, service, status]);
+  const filtered = useMemo(
+    () =>
+      organizations.filter((item) => {
+        const searchable = [
+          item.name,
+          item.category,
+          item.location,
+          ...item.areasServed,
+          ...item.specializations,
+          ...item.services,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return (
+          (!deferredSearch || searchable.includes(deferredSearch)) &&
+          (category === "All" || item.category === category) &&
+          (place === "All" || item.location === place) &&
+          (service === "All" || item.services.includes(service)) &&
+          (redevelopmentType === "All" ||
+            item.redevelopmentTypes.includes(redevelopmentType)) &&
+          (status === "All" || item.profileStatus === status)
+        );
+      }),
+    [category, deferredSearch, place, redevelopmentType, service, status],
+  );
 
-  const reset = () => { setSearch(''); setCategory('All'); setPlace('All'); setService('All'); setRedevelopmentType('All'); setStatus('All'); };
-  const hasFilters = Boolean(search) || category !== 'All' || place !== 'All' || service !== 'All' || redevelopmentType !== 'All' || status !== 'All';
+  const reset = () => {
+    setSearch("");
+    setCategory("All");
+    setPlace("All");
+    setService("All");
+    setRedevelopmentType("All");
+    setStatus("All");
+  };
+  const hasFilters =
+    Boolean(search) ||
+    category !== "All" ||
+    place !== "All" ||
+    service !== "All" ||
+    redevelopmentType !== "All" ||
+    status !== "All";
 
   return (
     <div className="marketing-site public-content-page working-page ecosystem-page">
@@ -1284,49 +4085,236 @@ function EcosystemDirectory() {
           <div className="ecosystem-hero-grid" aria-hidden="true" />
           <div className="ecosystem-hero-copy">
             <p>RENOVA ecosystem directory · Mumbai</p>
-            <h1>Explore the <span>Redevelopment Ecosystem.</span></h1>
-            <div>Find developers, PMCs and professionals across Mumbai’s redevelopment ecosystem — in one place.</div>
+            <h1>
+              Explore the <span>Redevelopment Ecosystem.</span>
+            </h1>
+            <div>
+              Find developers, PMCs and professionals across Mumbai’s
+              redevelopment ecosystem — in one place.
+            </div>
           </div>
-          <div className="ecosystem-hero-stat"><strong>{organizations.length}</strong><span>public profiles with source links</span></div>
+          <div className="ecosystem-hero-stat">
+            <strong>{organizations.length}</strong>
+            <span>public profiles with source links</span>
+          </div>
         </section>
 
         <section className="ecosystem-directory-shell">
           <div className="ecosystem-search-panel">
-            <label className="ecosystem-search"><Search size={22} /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search developers, PMCs, architects or redevelopment professionals..." aria-label="Search the redevelopment ecosystem" /></label>
-            <div className="ecosystem-category-filters" aria-label="Organization categories">
-              {directoryCategoryLabels.map((label) => <button type="button" key={label} className={category === label ? 'active' : ''} onClick={() => setCategory(label)}>{label}</button>)}
+            <label className="ecosystem-search">
+              <Search size={22} />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search developers, PMCs, architects or redevelopment professionals..."
+                aria-label="Search the redevelopment ecosystem"
+              />
+            </label>
+            <div
+              className="ecosystem-category-filters"
+              aria-label="Organization categories"
+            >
+              {directoryCategoryLabels.map((label) => (
+                <button
+                  type="button"
+                  key={label}
+                  className={category === label ? "active" : ""}
+                  onClick={() => setCategory(label)}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <div className="ecosystem-secondary-filters">
-              <label><span>Location</span><select value={place} onChange={(event) => setPlace(event.target.value)}>{options.places.map((item) => <option key={item}>{item}</option>)}</select></label>
-              <label><span>Service</span><select value={service} onChange={(event) => setService(event.target.value)}>{options.services.map((item) => <option key={item}>{item}</option>)}</select></label>
-              <label><span>Redevelopment type</span><select value={redevelopmentType} onChange={(event) => setRedevelopmentType(event.target.value)}>{options.types.map((item) => <option key={item}>{item}</option>)}</select></label>
-              <label><span>Verified status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="All">All statuses</option><option value="public">Public profile</option><option value="verified">RENOVA verified</option></select></label>
+              <label>
+                <span>Location</span>
+                <select
+                  value={place}
+                  onChange={(event) => setPlace(event.target.value)}
+                >
+                  {options.places.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Service</span>
+                <select
+                  value={service}
+                  onChange={(event) => setService(event.target.value)}
+                >
+                  {options.services.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Redevelopment type</span>
+                <select
+                  value={redevelopmentType}
+                  onChange={(event) => setRedevelopmentType(event.target.value)}
+                >
+                  {options.types.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Verified status</span>
+                <select
+                  value={status}
+                  onChange={(event) => setStatus(event.target.value)}
+                >
+                  <option value="All">All statuses</option>
+                  <option value="public">Public profile</option>
+                  <option value="verified">RENOVA verified</option>
+                </select>
+              </label>
             </div>
           </div>
 
-          <div className="ecosystem-results-bar"><div><strong>{filtered.length}</strong><span>{filtered.length === 1 ? 'organization' : 'organizations'} found</span></div>{hasFilters && <button type="button" onClick={reset}><RotateCcw size={14} /> Reset filters</button>}</div>
-          <div className="ecosystem-source-note"><ShieldCheck size={17} /><p><strong>Neutral, source-backed directory</strong><span>Profiles are compiled from official public sources and remain PUBLIC PROFILE until independently verified by RENOVA. Database reviewed {organizationDataVersion}.</span></p></div>
-          {filtered.length ? <div className="ecosystem-card-grid">
-            {filtered.map((organization) => <article className="ecosystem-card" key={organization.slug}>
-              <div className="ecosystem-card-top"><OrganizationMonogram organization={organization} /><span className={cn('ecosystem-status', organization.profileStatus === 'verified' && 'verified')}>{organization.profileStatus === 'verified' ? <><BadgeCheck size={13} /> RENOVA VERIFIED</> : 'PUBLIC PROFILE'}</span></div>
-              <div className="ecosystem-card-title"><p>{organization.category}</p><h2>{organization.name}</h2><span><MapPin size={14} /> {organization.location}</span></div>
-              <div className="ecosystem-tags">{organization.specializations.slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div>
-              <dl><div><dt>Areas served</dt><dd>{organization.areasServed.join(', ') || 'Information not yet provided'}</dd></div><div><dt>Services</dt><dd>{organization.services.join(', ') || 'Information not yet provided'}</dd></div></dl>
-              <div className="ecosystem-card-actions"><Link href={`/ecosystem/${organization.slug}`}>View Profile <ArrowUpRight size={14} /></Link><a href={organization.website} target="_blank" rel="noreferrer">Website <ExternalLink size={13} /></a></div>
-            </article>)}
-          </div> : <div className="working-empty ecosystem-empty"><Search size={30} /><h2>No matching organizations.</h2><p>Try a broader search or reset the directory filters.</p><button type="button" onClick={reset}>Reset filters</button></div>}
+          <div className="ecosystem-results-bar">
+            <div>
+              <strong>{filtered.length}</strong>
+              <span>
+                {filtered.length === 1 ? "organization" : "organizations"} found
+              </span>
+            </div>
+            {hasFilters && (
+              <button type="button" onClick={reset}>
+                <RotateCcw size={14} /> Reset filters
+              </button>
+            )}
+          </div>
+          <div className="ecosystem-source-note">
+            <ShieldCheck size={17} />
+            <p>
+              <strong>Neutral, source-backed directory</strong>
+              <span>
+                Profiles are compiled from official public sources and remain
+                PUBLIC PROFILE until independently verified by RENOVA. Database
+                reviewed {organizationDataVersion}.
+              </span>
+            </p>
+          </div>
+          {filtered.length ? (
+            <div className="ecosystem-card-grid">
+              {filtered.map((organization) => (
+                <article className="ecosystem-card" key={organization.slug}>
+                  <div className="ecosystem-card-top">
+                    <OrganizationMonogram organization={organization} />
+                    <span
+                      className={cn(
+                        "ecosystem-status",
+                        organization.profileStatus === "verified" && "verified",
+                      )}
+                    >
+                      {organization.profileStatus === "verified" ? (
+                        <>
+                          <BadgeCheck size={13} /> RENOVA VERIFIED
+                        </>
+                      ) : (
+                        "PUBLIC PROFILE"
+                      )}
+                    </span>
+                  </div>
+                  <div className="ecosystem-card-title">
+                    <p>{organization.category}</p>
+                    <h2>{organization.name}</h2>
+                    <span>
+                      <MapPin size={14} /> {organization.location}
+                    </span>
+                  </div>
+                  <div className="ecosystem-tags">
+                    {organization.specializations.slice(0, 3).map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Areas served</dt>
+                      <dd>
+                        {organization.areasServed.join(", ") ||
+                          "Information not yet provided"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Services</dt>
+                      <dd>
+                        {organization.services.join(", ") ||
+                          "Information not yet provided"}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="ecosystem-card-actions">
+                    <Link href={`/ecosystem/${organization.slug}`}>
+                      View Profile <ArrowUpRight size={14} />
+                    </Link>
+                    <a
+                      href={organization.website}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Website <ExternalLink size={13} />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="working-empty ecosystem-empty">
+              <Search size={30} />
+              <h2>No matching organizations.</h2>
+              <p>Try a broader search or reset the directory filters.</p>
+              <button type="button" onClick={reset}>
+                Reset filters
+              </button>
+            </div>
+          )}
         </section>
 
-        <section className="ecosystem-list-cta"><div><p>For developers, PMCs and specialists</p><h2>List your organization on RENOVA.</h2><span>Create a structured profile and begin the RENOVA verification process.</span></div><Link href="/contact" className="stitch-primary-button">List Your Organization on RENOVA <ArrowUpRight size={15} /></Link></section>
+        <section className="ecosystem-list-cta">
+          <div>
+            <p>For developers, PMCs and specialists</p>
+            <h2>List your organization on RENOVA.</h2>
+            <span>
+              Create a structured profile and begin the RENOVA verification
+              process.
+            </span>
+          </div>
+          <Link href="/contact" className="stitch-primary-button">
+            List Your Organization on RENOVA <ArrowUpRight size={15} />
+          </Link>
+        </section>
       </main>
       <EcosystemFooter />
     </div>
   );
 }
 
-function InformationValue({ values, children }: { values?: string[]; children?: ReactNode }) {
-  if (values?.length) return <>{values.map((value) => <span className="organization-detail-chip" key={value}>{value}</span>)}</>;
-  return <span className="organization-information-missing">{children || 'Information not yet provided'}</span>;
+function InformationValue({
+  values,
+  children,
+}: {
+  values?: string[];
+  children?: ReactNode;
+}) {
+  if (values?.length)
+    return (
+      <>
+        {values.map((value) => (
+          <span className="organization-detail-chip" key={value}>
+            {value}
+          </span>
+        ))}
+      </>
+    );
+  return (
+    <span className="organization-information-missing">
+      {children || "Information not yet provided"}
+    </span>
+  );
 }
 
 function OrganizationProfilePage() {
@@ -1338,24 +4326,124 @@ function OrganizationProfilePage() {
       <PublicWorkingHeader />
       <main>
         <section className="organization-profile-hero">
-          <Link href="/ecosystem" className="public-page-back"><ArrowLeft size={14} /> Ecosystem directory</Link>
-          <div className="organization-profile-heading"><OrganizationMonogram organization={organization} /><div><span className={cn('ecosystem-status', organization.profileStatus === 'verified' && 'verified')}>{organization.profileStatus === 'verified' ? <><BadgeCheck size={13} /> RENOVA VERIFIED</> : 'PUBLIC PROFILE'}</span><p>{organization.category}</p><h1>{organization.name}</h1><div><MapPin size={15} /> {organization.location}</div></div></div>
-          <p className="organization-profile-disclaimer">This profile is compiled from public information and has not been independently verified by RENOVA.</p>
+          <Link href="/ecosystem" className="public-page-back">
+            <ArrowLeft size={14} /> Ecosystem directory
+          </Link>
+          <div className="organization-profile-heading">
+            <OrganizationMonogram organization={organization} />
+            <div>
+              <span
+                className={cn(
+                  "ecosystem-status",
+                  organization.profileStatus === "verified" && "verified",
+                )}
+              >
+                {organization.profileStatus === "verified" ? (
+                  <>
+                    <BadgeCheck size={13} /> RENOVA VERIFIED
+                  </>
+                ) : (
+                  "PUBLIC PROFILE"
+                )}
+              </span>
+              <p>{organization.category}</p>
+              <h1>{organization.name}</h1>
+              <div>
+                <MapPin size={15} /> {organization.location}
+              </div>
+            </div>
+          </div>
+          <p className="organization-profile-disclaimer">
+            This profile is compiled from public information and has not been
+            independently verified by RENOVA.
+          </p>
         </section>
         <section className="organization-profile-layout">
           <div className="organization-profile-content">
-            <article><p>01 · Overview</p><h2>Overview</h2><div>{organization.overview || 'Information not yet provided'}</div></article>
-            <article><p>02 · Services</p><h2>Redevelopment services</h2><div className="organization-detail-chips"><InformationValue values={organization.services} /></div></article>
-            <article><p>03 · Specializations</p><h2>Specializations</h2><div className="organization-detail-chips"><InformationValue values={organization.specializations} /></div></article>
-            <article><p>04 · Locations</p><h2>Areas served</h2><div className="organization-detail-chips"><InformationValue values={organization.areasServed} /></div></article>
-            <article><p>05 · Projects</p><h2>Redevelopment projects</h2><div className="organization-detail-chips"><InformationValue values={organization.projects} /></div></article>
-            <article><p>06 · Company information</p><h2>Company information</h2><div>{organization.companyInformation || 'Information not yet provided'}</div></article>
+            <article>
+              <p>01 · Overview</p>
+              <h2>Overview</h2>
+              <div>
+                {organization.overview || "Information not yet provided"}
+              </div>
+            </article>
+            <article>
+              <p>02 · Services</p>
+              <h2>Redevelopment services</h2>
+              <div className="organization-detail-chips">
+                <InformationValue values={organization.services} />
+              </div>
+            </article>
+            <article>
+              <p>03 · Specializations</p>
+              <h2>Specializations</h2>
+              <div className="organization-detail-chips">
+                <InformationValue values={organization.specializations} />
+              </div>
+            </article>
+            <article>
+              <p>04 · Locations</p>
+              <h2>Areas served</h2>
+              <div className="organization-detail-chips">
+                <InformationValue values={organization.areasServed} />
+              </div>
+            </article>
+            <article>
+              <p>05 · Projects</p>
+              <h2>Redevelopment projects</h2>
+              <div className="organization-detail-chips">
+                <InformationValue values={organization.projects} />
+              </div>
+            </article>
+            <article>
+              <p>06 · Company information</p>
+              <h2>Company information</h2>
+              <div>
+                {organization.companyInformation ||
+                  "Information not yet provided"}
+              </div>
+            </article>
           </div>
           <aside className="organization-profile-aside">
-            <div><p>Contact / website</p><a href={organization.website} target="_blank" rel="noreferrer">Visit official website <ExternalLink size={15} /></a></div>
-            <div className="organization-source-card"><p>Public sources</p>{organization.sources.map((source) => <a href={source.url} target="_blank" rel="noreferrer" key={source.url}><span>{source.title}<small>Official website · reviewed {source.reviewedAt}</small></span><ExternalLink size={15} /></a>)}</div>
-            <div className="organization-claim-card"><ShieldCheck size={22} /><h2>Is this your company?</h2><p>Claim this profile to submit accurate company information and begin RENOVA verification.</p><Link href="/contact">Claim this profile <ArrowUpRight size={15} /></Link></div>
-            <Link href="/contact" className="organization-list-link">List Your Organization on RENOVA <ArrowUpRight size={15} /></Link>
+            <div>
+              <p>Contact / website</p>
+              <a href={organization.website} target="_blank" rel="noreferrer">
+                Visit official website <ExternalLink size={15} />
+              </a>
+            </div>
+            <div className="organization-source-card">
+              <p>Public sources</p>
+              {organization.sources.map((source) => (
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  key={source.url}
+                >
+                  <span>
+                    {source.title}
+                    <small>
+                      Official website · reviewed {source.reviewedAt}
+                    </small>
+                  </span>
+                  <ExternalLink size={15} />
+                </a>
+              ))}
+            </div>
+            <div className="organization-claim-card">
+              <ShieldCheck size={22} />
+              <h2>Is this your company?</h2>
+              <p>
+                Claim this profile to submit accurate company information and
+                begin RENOVA verification.
+              </p>
+              <Link href="/contact">
+                Claim this profile <ArrowUpRight size={15} />
+              </Link>
+            </div>
+            <Link href="/contact" className="organization-list-link">
+              List Your Organization on RENOVA <ArrowUpRight size={15} />
+            </Link>
           </aside>
         </section>
       </main>
@@ -1364,52 +4452,260 @@ function OrganizationProfilePage() {
   );
 }
 
-const registrationCopy: Record<string, { eyebrow: string; title: string; detail: string }> = {
-  Developer: { eyebrow: 'Developer registration', title: 'Join RENOVA as a verified developer.', detail: 'Tell us about your organisation, redevelopment experience and preferred opportunities.' },
-  PMC: { eyebrow: 'PMC registration', title: 'Bring structure to society redevelopment.', detail: 'Share your feasibility, tendering, project management and oversight capabilities.' },
-  Architect: { eyebrow: 'Architect registration', title: 'Shape Mumbai’s next generation of communities.', detail: 'Introduce your practice, redevelopment portfolio and planning expertise.' },
-  Contact: { eyebrow: 'Contact RENOVA', title: 'Tell us where you are in the journey.', detail: 'Share a few details and the RENOVA team will understand the right next conversation.' },
+const registrationCopy: Record<
+  string,
+  { eyebrow: string; title: string; detail: string }
+> = {
+  Developer: {
+    eyebrow: "Developer registration",
+    title: "Join RENOVA as a verified developer.",
+    detail:
+      "Tell us about your organisation, redevelopment experience and preferred opportunities.",
+  },
+  PMC: {
+    eyebrow: "PMC registration",
+    title: "Bring structure to society redevelopment.",
+    detail:
+      "Share your feasibility, tendering, project management and oversight capabilities.",
+  },
+  Architect: {
+    eyebrow: "Architect registration",
+    title: "Shape Mumbai’s next generation of communities.",
+    detail:
+      "Introduce your practice, redevelopment portfolio and planning expertise.",
+  },
+  Contact: {
+    eyebrow: "Contact RENOVA",
+    title: "Tell us where you are in the journey.",
+    detail:
+      "Share a few details and the RENOVA team will understand the right next conversation.",
+  },
 };
 
-function NetworkRegistrationPage({ role }: { role: 'Developer' | 'PMC' | 'Architect' | 'Contact' }) {
+function NetworkRegistrationPage({
+  role,
+}: {
+  role: "Developer" | "PMC" | "Architect" | "Contact";
+}) {
   const copy = registrationCopy[role];
   const [submitted, setSubmitted] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', organisation: '', email: '', phone: '', city: 'Mumbai', experience: '', interest: role === 'Contact' ? 'Housing Society' : role, message: '', consent: false });
-  const setField = (key: keyof typeof form, value: string | boolean) => setForm((current) => ({ ...current, [key]: value }));
-  const submit = (event: FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    organisation: "",
+    email: "",
+    phone: "",
+    city: "Mumbai",
+    experience: "",
+    interest: role === "Contact" ? "Housing Society" : role,
+    message: "",
+    consent: false,
+  });
+  const setField = (key: keyof typeof form, value: string | boolean) =>
+    setForm((current) => ({ ...current, [key]: value }));
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const reference = 'RNV-' + role.slice(0, 3).toUpperCase() + '-' + String(Date.now()).slice(-6);
-    const record = { ...form, role, reference, submittedAt: new Date().toISOString() };
-    const existing = readStoredArray<typeof record>('renova:network-registrations');
-    localStorage.setItem('renova:network-registrations', JSON.stringify([record, ...existing]));
-    setSubmitted(reference);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const response = await fetch("/api/enquiries", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          organizationName: form.organisation,
+          email: form.email,
+          phone: form.phone,
+          city: form.city,
+          actorType: role === "Contact" ? form.interest : role,
+          experienceYears: role === "Contact" ? null : Number(form.experience),
+          message: form.message,
+          consent: form.consent,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok)
+        throw new Error(
+          typeof result?.error === "string"
+            ? result.error
+            : "Unable to submit your request.",
+        );
+      setSubmitted(result.reference);
+    } catch (cause) {
+      setSubmitError(
+        cause instanceof Error
+          ? cause.message
+          : "Unable to submit your request.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (submitted) return (
-    <div className="marketing-site public-content-page working-page">
-      <PublicWorkingHeader />
-      <main className="working-success"><span><CheckCircle2 size={34} /></span><p>Details received</p><h1>Thank you, {form.name}.</h1><div>Your RENOVA reference is <strong>{submitted}</strong>. Your information has been saved and is ready for review.</div><Link href="/" className="stitch-primary-button">Return to RENOVA home <ArrowUpRight size={15} /></Link></main>
-    </div>
-  );
+  if (submitted)
+    return (
+      <div className="marketing-site public-content-page working-page">
+        <PublicWorkingHeader />
+        <main className="working-success">
+          <span>
+            <CheckCircle2 size={34} />
+          </span>
+          <p>Details received</p>
+          <h1>Thank you, {form.name}.</h1>
+          <div>
+            Your RENOVA reference is <strong>{submitted}</strong>. Your
+            information has been saved and is ready for review.
+          </div>
+          <Link href="/" className="stitch-primary-button">
+            Return to RENOVA home <ArrowUpRight size={15} />
+          </Link>
+        </main>
+      </div>
+    );
 
   return (
     <div className="marketing-site public-content-page working-page">
       <PublicWorkingHeader />
       <main className="working-form-page">
-        <section className="working-form-intro"><p>{copy.eyebrow}</p><h1>{copy.title}</h1><span>{copy.detail}</span><div><ShieldCheck size={19} /><p>Your information remains private and is only used to review your RENOVA request.</p></div></section>
-        <form className="working-form" onSubmit={submit}>
-          <div className="working-form-heading"><span>RENOVA intake</span><h2>{role === 'Contact' ? 'Start a conversation' : 'Create your profile'}</h2><p>Complete the details below. Fields marked * are required.</p></div>
-          <div className="working-form-grid">
-            <label>Full name *<input required value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="Your full name" /></label>
-            <label>Organisation / Society *<input required value={form.organisation} onChange={(event) => setField('organisation', event.target.value)} placeholder={role === 'Contact' ? 'Society or company name' : 'Registered organisation name'} /></label>
-            <label>Email address *<input required type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="name@company.com" /></label>
-            <label>Mobile number *<input required inputMode="tel" pattern="[0-9+ ()-]{10,}" value={form.phone} onChange={(event) => setField('phone', event.target.value)} placeholder="+91 98765 43210" /></label>
-            <label>City / Primary market *<input required value={form.city} onChange={(event) => setField('city', event.target.value)} /></label>
-            {role === 'Contact' ? <label>I represent *<select required value={form.interest} onChange={(event) => setField('interest', event.target.value)}><option>Housing Society</option><option>Developer</option><option>PMC</option><option>Architect</option><option>Legal / Other Professional</option></select></label> : <label>Years of relevant experience *<input required type="number" min="0" value={form.experience} onChange={(event) => setField('experience', event.target.value)} placeholder="e.g. 8" /></label>}
-            <label className="working-field-wide">How can RENOVA help? *<textarea required rows={5} value={form.message} onChange={(event) => setField('message', event.target.value)} placeholder="Tell us about your projects, requirement or the opportunity you are looking for." /></label>
-            <label className="working-consent working-field-wide"><input required type="checkbox" checked={form.consent} onChange={(event) => setField('consent', event.target.checked)} /><span>I confirm these details are accurate and permit RENOVA to contact me about this request.</span></label>
+        <section className="working-form-intro">
+          <p>{copy.eyebrow}</p>
+          <h1>{copy.title}</h1>
+          <span>{copy.detail}</span>
+          <div>
+            <ShieldCheck size={19} />
+            <p>
+              Your information remains private and is only used to review your
+              RENOVA request.
+            </p>
           </div>
-          <button type="submit" className="stitch-primary-button">Submit to RENOVA <Send size={15} /></button>
+        </section>
+        <form className="working-form" onSubmit={submit}>
+          <div className="working-form-heading">
+            <span>RENOVA intake</span>
+            <h2>
+              {role === "Contact"
+                ? "Start a conversation"
+                : "Create your profile"}
+            </h2>
+            <p>Complete the details below. Fields marked * are required.</p>
+          </div>
+          <div className="working-form-grid">
+            <label>
+              Full name *
+              <input
+                required
+                value={form.name}
+                onChange={(event) => setField("name", event.target.value)}
+                placeholder="Your full name"
+              />
+            </label>
+            <label>
+              Organisation / Society *
+              <input
+                required
+                value={form.organisation}
+                onChange={(event) =>
+                  setField("organisation", event.target.value)
+                }
+                placeholder={
+                  role === "Contact"
+                    ? "Society or company name"
+                    : "Registered organisation name"
+                }
+              />
+            </label>
+            <label>
+              Email address *
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={(event) => setField("email", event.target.value)}
+                placeholder="name@company.com"
+              />
+            </label>
+            <label>
+              Mobile number *
+              <input
+                required
+                inputMode="tel"
+                pattern="[0-9+ ()-]{10,}"
+                value={form.phone}
+                onChange={(event) => setField("phone", event.target.value)}
+                placeholder="+91 98765 43210"
+              />
+            </label>
+            <label>
+              City / Primary market *
+              <input
+                required
+                value={form.city}
+                onChange={(event) => setField("city", event.target.value)}
+              />
+            </label>
+            {role === "Contact" ? (
+              <label>
+                I represent *
+                <select
+                  required
+                  value={form.interest}
+                  onChange={(event) => setField("interest", event.target.value)}
+                >
+                  <option>Housing Society</option>
+                  <option>Developer</option>
+                  <option>PMC</option>
+                  <option>Architect</option>
+                  <option>Legal / Other Professional</option>
+                </select>
+              </label>
+            ) : (
+              <label>
+                Years of relevant experience *
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  value={form.experience}
+                  onChange={(event) =>
+                    setField("experience", event.target.value)
+                  }
+                  placeholder="e.g. 8"
+                />
+              </label>
+            )}
+            <label className="working-field-wide">
+              How can RENOVA help? *
+              <textarea
+                required
+                rows={5}
+                value={form.message}
+                onChange={(event) => setField("message", event.target.value)}
+                placeholder="Tell us about your projects, requirement or the opportunity you are looking for."
+              />
+            </label>
+            <label className="working-consent working-field-wide">
+              <input
+                required
+                type="checkbox"
+                checked={form.consent}
+                onChange={(event) => setField("consent", event.target.checked)}
+              />
+              <span>
+                I confirm these details are accurate and permit RENOVA to
+                contact me about this request.
+              </span>
+            </label>
+          </div>
+          {submitError && <p role="alert">{submitError}</p>}
+          <button
+            type="submit"
+            className="stitch-primary-button"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting…" : "Submit to RENOVA"} <Send size={15} />
+          </button>
         </form>
       </main>
     </div>
@@ -1417,29 +4713,87 @@ function NetworkRegistrationPage({ role }: { role: 'Developer' | 'PMC' | 'Archit
 }
 
 const frequentlyAskedQuestions = [
-  ['When should a society consider redevelopment?', 'A society can begin with a feasibility review when its building has structural, functional or long-term value concerns. The first step is understanding the property and member priorities, not selecting a developer immediately.'],
-  ['What information is needed to register a society?', 'Basic society details, location, member count, building age, property context, current documents and the services required are enough to begin.'],
-  ['How does RENOVA verify developers and professionals?', 'RENOVA reviews organisation details, registrations, relevant experience and supporting project information before presenting a profile as verified.'],
-  ['Does RENOVA replace a PMC, architect or legal advisor?', 'No. RENOVA organises requirements, discovery and connections. Societies should still appoint qualified independent professionals for technical and legal advice.'],
-  ['How are society details protected?', 'Sensitive documents and contact information should only be shared after permission and an approved introduction. Public listings use limited opportunity information.'],
-  ['Can developers search opportunities by location and stage?', 'Yes. The project directory is structured around location, status and redevelopment stage, with more filters added as verified listings grow.'],
+  [
+    "When should a society consider redevelopment?",
+    "A society can begin with a feasibility review when its building has structural, functional or long-term value concerns. The first step is understanding the property and member priorities, not selecting a developer immediately.",
+  ],
+  [
+    "What information is needed to register a society?",
+    "Basic society details, location, member count, building age, property context, current documents and the services required are enough to begin.",
+  ],
+  [
+    "How does RENOVA verify developers and professionals?",
+    "RENOVA reviews organisation details, registrations, relevant experience and supporting project information before presenting a profile as verified.",
+  ],
+  [
+    "Does RENOVA replace a PMC, architect or legal advisor?",
+    "No. RENOVA organises requirements, discovery and connections. Societies should still appoint qualified independent professionals for technical and legal advice.",
+  ],
+  [
+    "How are society details protected?",
+    "Sensitive documents and contact information should only be shared after permission and an approved introduction. Public listings use limited opportunity information.",
+  ],
+  [
+    "Can developers search opportunities by location and stage?",
+    "Yes. The project directory is structured around location, status and redevelopment stage, with more filters added as verified listings grow.",
+  ],
 ];
 
 function FaqPage() {
   const [openIndex, setOpenIndex] = useState(0);
-  const [search, setSearch] = useState('');
-  const visible = frequentlyAskedQuestions.filter(([question, answer]) => (question + ' ' + answer).toLowerCase().includes(search.toLowerCase()));
+  const [search, setSearch] = useState("");
+  const visible = frequentlyAskedQuestions.filter(([question, answer]) =>
+    (question + " " + answer).toLowerCase().includes(search.toLowerCase()),
+  );
   return (
     <div className="marketing-site public-content-page working-page">
       <PublicWorkingHeader />
       <main>
-        <section className="working-hero faq-hero"><div><p>Knowledge centre · FAQs</p><h1>Redevelopment questions, answered clearly.</h1><span>Search practical guidance for societies, developers and professionals.</span></div></section>
-        <section className="faq-shell">
-          <label className="faq-search"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search questions" /></label>
-          <div className="working-faq-list">
-            {visible.map(([question, answer], index) => <article key={question} className={openIndex === index ? 'open' : ''}><button type="button" onClick={() => setOpenIndex(openIndex === index ? -1 : index)} aria-expanded={openIndex === index}><span>{question}</span><ChevronDown size={19} /></button>{openIndex === index && <p>{answer}</p>}</article>)}
+        <section className="working-hero faq-hero">
+          <div>
+            <p>Knowledge centre · FAQs</p>
+            <h1>Redevelopment questions, answered clearly.</h1>
+            <span>
+              Search practical guidance for societies, developers and
+              professionals.
+            </span>
           </div>
-          {!visible.length && <div className="working-empty"><CircleHelp size={30} /><h2>No matching answer found.</h2><p>Try a broader term or contact the RENOVA team.</p><Link href="/contact">Ask RENOVA</Link></div>}
+        </section>
+        <section className="faq-shell">
+          <label className="faq-search">
+            <Search size={18} />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search questions"
+            />
+          </label>
+          <div className="working-faq-list">
+            {visible.map(([question, answer], index) => (
+              <article
+                key={question}
+                className={openIndex === index ? "open" : ""}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
+                  aria-expanded={openIndex === index}
+                >
+                  <span>{question}</span>
+                  <ChevronDown size={19} />
+                </button>
+                {openIndex === index && <p>{answer}</p>}
+              </article>
+            ))}
+          </div>
+          {!visible.length && (
+            <div className="working-empty">
+              <CircleHelp size={30} />
+              <h2>No matching answer found.</h2>
+              <p>Try a broader term or contact the RENOVA team.</p>
+              <Link href="/contact">Ask RENOVA</Link>
+            </div>
+          )}
         </section>
       </main>
     </div>
@@ -1452,33 +4806,66 @@ function PublicPage({ page }: { page: PublicPageData }) {
     <div className="marketing-site public-content-page">
       <header className="stitch-header public-page-header">
         <div className="stitch-header-inner">
-          <button className="stitch-menu" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+          <button
+            className="stitch-menu"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
           <Logo />
-          <PublicNavigation menuOpen={menuOpen} onNavigate={() => setMenuOpen(false)} />
-          <Link href="/assessment" className="public-header-cta">Post requirement <ArrowUpRight size={14} /></Link>
+          <PublicNavigation
+            menuOpen={menuOpen}
+            onNavigate={() => setMenuOpen(false)}
+          />
+          <Link href="/assessment" className="public-header-cta">
+            Post requirement <ArrowUpRight size={14} />
+          </Link>
         </div>
       </header>
       <main>
         <section className="public-page-hero">
           <div className="public-page-grid" aria-hidden="true" />
           <div className="public-page-hero-inner">
-            <Link href="/" className="public-page-back"><ArrowLeft size={14} /> RENOVA home</Link>
+            <Link href="/" className="public-page-back">
+              <ArrowLeft size={14} /> RENOVA home
+            </Link>
             <p>{page.eyebrow}</p>
             <h1>{page.title}</h1>
             <span>{page.intro}</span>
           </div>
         </section>
         <section className="public-page-highlights">
-          {page.highlights.map((item, index) => <article key={item.title}><small>{String(index + 1).padStart(2, '0')}</small><h2>{item.title}</h2><p>{item.detail}</p></article>)}
+          {page.highlights.map((item, index) => (
+            <article key={item.title}>
+              <small>{String(index + 1).padStart(2, "0")}</small>
+              <h2>{item.title}</h2>
+              <p>{item.detail}</p>
+            </article>
+          ))}
         </section>
         <section className="public-page-cta">
-          <div><p>Move forward with clarity.</p><h2>Bring your next redevelopment step to RENOVA.</h2></div>
-          <Link href={page.ctaHref} className="stitch-primary-button">{page.ctaLabel} <ArrowUpRight size={15} /></Link>
+          <div>
+            <p>Move forward with clarity.</p>
+            <h2>Bring your next redevelopment step to RENOVA.</h2>
+          </div>
+          <Link href={page.ctaHref} className="stitch-primary-button">
+            {page.ctaLabel} <ArrowUpRight size={15} />
+          </Link>
         </section>
       </main>
       <footer className="stitch-footer">
-        <div><Logo /><p>Renew. Connect. Redevelop.</p></div>
-        <div><Link href="/projects">Projects</Link><Link href="/knowledge-centre">Knowledge centre</Link><Link href="/about">About RENOVA</Link><Link href="/contact">Contact</Link></div>
+        <div>
+          <Logo />
+          <p>Renew. Connect. Redevelop.</p>
+        </div>
+        <div>
+          <Link href="/projects">Projects</Link>
+          <Link href="/knowledge-centre">Knowledge centre</Link>
+          <Link href="/about">About RENOVA</Link>
+          <Link href="/contact">Contact</Link>
+        </div>
         <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
       </footer>
     </div>
@@ -1486,31 +4873,72 @@ function PublicPage({ page }: { page: PublicPageData }) {
 }
 
 function WorkspaceRouter() {
-  return <Switch><Route path="/workspace" component={Overview} /><Route path="/assessment" component={Assessment} /><Route path="/project/:id" component={ProjectDetail} /><Route path="/professionals" component={Professionals} /><Route path="/regulations" component={Regulations} /><Route component={NotFound} /></Switch>;
+  return (
+    <Switch>
+      <Route path="/workspace" component={Overview} />
+      <Route path="/assessment" component={Assessment} />
+      <Route path="/project/:id" component={ProjectDetail} />
+      <Route path="/professionals" component={Professionals} />
+      <Route path="/regulations" component={Regulations} />
+      <Route component={NotFound} />
+    </Switch>
+  );
 }
 
 function Router() {
   const [location] = useLocation();
-  const pathname = location.split('?')[0];
-  if (pathname === '/') return <MarketingHome />;
-  if (pathname === '/platform/live') return <Suspense fallback={<LoadingPage label="Opening your RENOVA workspace" />}><LiveWorkspace /></Suspense>;
-  if (pathname === '/platform' || pathname.startsWith('/platform/') || pathname.startsWith('/dashboard/')) return <Suspense fallback={<LoadingPage label="Preparing the RENOVA platform" />}><PlatformRouter /></Suspense>;
-  if (pathname === '/assessment') return <Assessment />;
-  if (pathname.startsWith('/projects')) return <ProjectsDirectory />;
-  if (pathname.startsWith('/ecosystem/')) return <OrganizationProfilePage />;
-  if (pathname === '/ecosystem') return <EcosystemDirectory />;
-  if (pathname === '/join/developer') return <NetworkRegistrationPage role="Developer" />;
-  if (pathname === '/join/pmc') return <NetworkRegistrationPage role="PMC" />;
-  if (pathname === '/join/architect') return <NetworkRegistrationPage role="Architect" />;
-  if (pathname === '/contact') return <NetworkRegistrationPage role="Contact" />;
-  if (pathname === '/knowledge-centre/faqs') return <FaqPage />;
+  const pathname = location.split("?")[0];
+  if (pathname === "/") return <MarketingHome />;
+  if (pathname === "/platform/live")
+    return (
+      <Suspense
+        fallback={<LoadingPage label="Opening your RENOVA workspace" />}
+      >
+        <LiveWorkspace />
+      </Suspense>
+    );
+  if (
+    pathname === "/platform" ||
+    pathname.startsWith("/platform/") ||
+    pathname.startsWith("/dashboard/")
+  )
+    return (
+      <Suspense
+        fallback={<LoadingPage label="Preparing the RENOVA platform" />}
+      >
+        <PlatformRouter />
+      </Suspense>
+    );
+  if (pathname === "/assessment") return <Assessment />;
+  if (pathname.startsWith("/projects")) return <ProjectsDirectory />;
+  if (pathname.startsWith("/ecosystem/")) return <OrganizationProfilePage />;
+  if (pathname === "/ecosystem") return <EcosystemDirectory />;
+  if (pathname === "/join/developer")
+    return <NetworkRegistrationPage role="Developer" />;
+  if (pathname === "/join/pmc") return <NetworkRegistrationPage role="PMC" />;
+  if (pathname === "/join/architect")
+    return <NetworkRegistrationPage role="Architect" />;
+  if (pathname === "/contact")
+    return <NetworkRegistrationPage role="Contact" />;
+  if (pathname === "/knowledge-centre/faqs") return <FaqPage />;
   const publicPage = publicPageMap[pathname];
   if (publicPage) return <PublicPage page={publicPage} />;
-  return <AppShell><WorkspaceRouter /></AppShell>;
+  return (
+    <AppShell>
+      <WorkspaceRouter />
+    </AppShell>
+  );
 }
 
 function App() {
-  return <QueryClientProvider client={queryClient}><TooltipProvider><Router /><Toaster /></TooltipProvider></QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router />
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;

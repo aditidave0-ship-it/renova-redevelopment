@@ -8,6 +8,13 @@
       "when": 1790664611534,
       "tag": "0000_real_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791224612177,
+      "tag": "0001_bright_hedge_knight",
+      "breakpoints": true
     }
   ]
 }

@@ -1,12 +1,12 @@
 # RENOVA beta readiness report
 
-Updated: 5 October 2026 (Asia/Calcutta)
+Updated: 6 October 2026 (Asia/Calcutta)
 
 ## Release decision
 
 **NOT READY FOR EXTERNAL BETA**
 
-Public registration is fail-closed. Controlled acceptance can continue through the private registration-test token, but external users must not be invited until every P0/P1 item below passes with production evidence.
+Public registration is fail-closed. The private registration-test token does not bypass verification or activation. External users must not be invited until every P0/P1 item below passes with production evidence.
 
 ## Evidence baseline
 
@@ -17,9 +17,9 @@ Public registration is fail-closed. Controlled acceptance can continue through t
 | PostgreSQL connectivity | PASS | `/api/readyz` returns `200 {"status":"ready"}` after executing `select 1`. |
 | Database schema | PASS | The production opportunities query returns schema-backed data; production API builds run the checked-in Drizzle migration. |
 | Public registration release gate | PASS | `/api/auth/register` returns `503 Registration is not open yet` unless the private test-token path is used. Public release additionally requires `RENOVA_BETA_RELEASE_APPROVED=true`. |
-| Email verification | FAIL (P1) | No verification-token schema, send/resend endpoint, verification endpoint, or production delivery integration exists. Registration previously activated and signed in users immediately. |
-| Forgot/reset password | FAIL (P1) | No forgot-password, reset-token, or reset-password endpoint/UI exists. |
-| Public enquiry storage | FAIL (P1) | The contact/network form stores submissions only in browser `localStorage`; RENOVA administrators cannot reliably receive or review them. |
+| Email verification | IMPLEMENTED / DELIVERY BLOCKED | Hashed 24-hour single-use tokens, send/resend API, browser verification flow, and provider abstraction are implemented. External delivery is waiting for an approved final sender domain. |
+| Forgot/reset password | IMPLEMENTED / DELIVERY BLOCKED | Hashed one-hour single-use reset tokens, UI/API flow, password update, and all-session invalidation are implemented. External delivery is waiting for the sender. |
+| Public enquiry storage | IMPLEMENTED / DEPLOYMENT PENDING | The form posts to a validated, rate-protected API, persists in PostgreSQL, and is available only to an authenticated ADMIN. |
 
 ## Workflow matrix
 
@@ -27,9 +27,9 @@ Public registration is fail-closed. Controlled acceptance can continue through t
 | --- | --- | --- |
 | Registration validation | BLOCKED | Resume after verification lifecycle exists; public registration remains closed. |
 | Production verification email | BLOCKED | Requires a transactional email provider, sender identity, and real test inbox. |
-| Resend / expired / invalid / reused verification link | BLOCKED | Token lifecycle is not implemented. |
-| Forgot/reset password | FAIL (P1) | Missing implementation. |
-| Enquiry/contact | FAIL (P1) | Current success state is local-only and can be mistaken for server acceptance. |
+| Resend / expired / invalid / reused verification link | LOCAL PASS / PRODUCTION BLOCKED | Token lifecycle and unit tests pass; real delivery and browser evidence require the final sender. |
+| Forgot/reset password | LOCAL PASS / PRODUCTION BLOCKED | Reset lifecycle and session invalidation are implemented; real inbox delivery is pending. |
+| Enquiry/contact | LOCAL PASS / DEPLOYMENT PENDING | Server persistence and ADMIN authorization are implemented and require production migration verification. |
 | Society end-to-end | BLOCKED | Must begin with verified registration. |
 | Developer end-to-end | BLOCKED | Must begin with verified registration. |
 | PMC end-to-end | BLOCKED | Must begin with verified registration; PMC-specific experience also requires review. |
@@ -40,13 +40,11 @@ Public registration is fail-closed. Controlled acceptance can continue through t
 
 ## Required P1 work before controlled beta
 
-1. Provision a transactional email provider and verified sender (or an explicitly approved test sender).
-2. Add hashed, expiring, single-use email-verification and password-reset tokens.
-3. Prevent unverified accounts from authenticating; implement verification, resend, forgot-password, and reset-password UI/API flows.
-4. Store enquiries in PostgreSQL, add server-side validation and rate protection, and expose them only to RENOVA administrators.
-5. Run the private multi-role acceptance suite with clearly labelled test records, then remove those records after approval.
-6. Repeat the browser journey on desktop and mobile using a real inbox, recording delivery time and every required negative case.
+1. Approve and verify the final sender domain, then configure the provider without exposing its API key.
+2. Deploy the new migration and verify enquiry persistence plus ADMIN isolation in production.
+3. Run the private multi-role acceptance suite with clearly labelled, email-verified test records, then remove those records after approval.
+4. Repeat the browser journey on desktop and mobile using a real inbox, recording delivery time and every required negative case.
 
 ## External dependency blocker
 
-Production email cannot be truthfully verified until RENOVA has an approved transactional email provider configuration, sender address/domain, and a real inbox controlled by the tester. Do not mark email, registration, or beta readiness as PASS before an actual production message arrives and its link succeeds.
+**BLOCKED — WAITING FOR FINAL DOMAIN.** Production email cannot be truthfully verified until the product has an approved sender address/domain and a real inbox controlled by the tester. No domain purchase, DNS change, or permanent sender configuration is part of this release. Do not mark email, registration, or beta readiness as PASS before an actual production message arrives and its link succeeds.
