@@ -7,8 +7,11 @@ import {
   LoaderCircle,
   LogOut,
   MapPin,
+  Plus,
   Send,
   ShieldCheck,
+  Trash2,
+  UserRound,
 } from "lucide-react";
 import { Link } from "wouter";
 import "./live-workspace.css";
@@ -31,15 +34,26 @@ type Opportunity = {
   siteArea: string | null;
   status: string;
   publishedAt: string | null;
+  interestStatus?: string | null;
+  society?: Record<string, unknown> | null;
 };
 type Interest = {
   id: string;
   opportunityTitle: string;
   organizationName: string;
   message: string | null;
-  status: string;
+  reviewStatus: string;
+  organizationId?: string;
+  role?: string;
+  organizationLocation?: string | null;
+  opportunityId?: string;
+  location?: string;
   createdAt: string;
 };
+type Completion = { completed: number; total: number; percent: number };
+type PortfolioEntry = { title: string; location?: string | null; description?: string | null; completionYear?: number | null; projectType?: string | null };
+type Credential = { name: string; issuer?: string | null; reference?: string | null; isPublic?: boolean };
+type Profile = Record<string, unknown> & { role: Role; organizationName: string; location?: string | null; portfolio?: PortfolioEntry[]; credentials?: Credential[] };
 type Enquiry = {
   id: string;
   reference: string;
@@ -369,6 +383,112 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
   );
 }
 
+function listValue(value: unknown): string {
+  return Array.isArray(value) ? value.join(", ") : "";
+}
+
+function parseList(value: FormDataEntryValue | null): string[] {
+  return String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+}
+
+function nullableNumber(value: FormDataEntryValue | null): number | null {
+  return value === null || value === "" ? null : Number(value);
+}
+
+function ProfileEditor({ role }: { role: "SOCIETY" | "DEVELOPER" | "PMC" }) {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [completion, setCompletion] = useState<Completion | null>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioEntry[]>([]);
+  const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [preview, setPreview] = useState<Record<string, unknown> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    void api<{ profile: Profile; completion: Completion }>("/profiles/me")
+      .then((result) => { setProfile(result.profile); setCompletion(result.completion); setPortfolio(result.profile.portfolio ?? []); setCredentials(result.profile.credentials ?? []); })
+      .catch((cause) => setError(cause instanceof Error ? cause.message : "Unable to load your profile."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function updatePortfolio(index: number, field: keyof PortfolioEntry, value: string) {
+    setPortfolio((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: field === "completionYear" ? (value ? Number(value) : null) : value } : item));
+  }
+
+  function updateCredential(index: number, field: keyof Credential, value: string | boolean) {
+    setCredentials((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
+  }
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const common = { organizationName: form.get("organizationName"), location: form.get("location") || null, marketplaceVisible: form.get("marketplaceVisible") === "on" };
+    const payload = role === "SOCIETY" ? { ...common, address: form.get("address") || null, city: form.get("city") || "Mumbai",
+      contactName: form.get("contactName") || null, contactEmail: form.get("contactEmail") || null, contactPhone: form.get("contactPhone") || null,
+      numberBuildings: nullableNumber(form.get("numberBuildings")), numberWings: nullableNumber(form.get("numberWings")),
+      unitCount: nullableNumber(form.get("unitCount")), memberCount: nullableNumber(form.get("memberCount")), buildingAge: nullableNumber(form.get("buildingAge")),
+      propertyType: form.get("propertyType") || null, landArea: form.get("landArea") || null,
+      redevelopmentStatus: form.get("redevelopmentStatus") || null, description: form.get("description") || null }
+      : { ...common, logoUrl: form.get("logoUrl") || null, description: form.get("description") || null, website: form.get("website") || null,
+        publicEmail: form.get("publicEmail") || null, publicPhone: form.get("publicPhone") || null, officeLocation: form.get("officeLocation") || null,
+        specializations: parseList(form.get("specializations")), teamInformation: form.get("teamInformation") || null,
+        portfolio: portfolio.filter((item) => item.title.trim()), credentials: credentials.filter((item) => item.name.trim()),
+        ...(role === "DEVELOPER" ? { areasServed: parseList(form.get("areasServed")) } : { locationsServed: parseList(form.get("locationsServed")), services: parseList(form.get("services")) }) };
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const result = await api<{ profile: Profile; completion: Completion }>("/profiles/me", { method: "PUT", body: JSON.stringify(payload) });
+      setProfile(result.profile); setCompletion(result.completion); setNotice("Profile draft saved."); setPreview(null);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to save your profile."); }
+    finally { setBusy(false); }
+  }
+
+  async function showPreview() {
+    setBusy(true); setError(""); setNotice("");
+    try { const result = await api<{ profile: Record<string, unknown> | null }>("/profiles/me/preview"); if (result.profile) setPreview(result.profile); else setNotice("Marketplace visibility is off. Enable it and save before previewing public fields."); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to preview your profile."); }
+    finally { setBusy(false); }
+  }
+
+  if (loading) return <section className="live-panel"><p className="live-muted">Loading your profile…</p></section>;
+  if (!profile) return <section className="live-panel"><p role="alert" className="live-error">{error || "Profile not found."}</p></section>;
+
+  return <section className="live-panel live-profile-panel">
+    <div className="live-panel-intro"><span>{role.toLowerCase()} profile</span><h2>Complete your factual organization profile</h2><p>Save a draft at any time. Only fields in Preview are visible to permitted marketplace participants.</p></div>
+    <div className="live-completion"><div><strong>{completion?.percent ?? 0}% complete</strong><span>{completion?.completed ?? 0} of {completion?.total ?? 0} core fields</span></div><i><span style={{ width: `${completion?.percent ?? 0}%` }} /></i></div>
+    <form className="live-form" onSubmit={save} key={`${role}-${profile.organizationName}`}>
+      <div className="live-field-row"><Field label={role === "SOCIETY" ? "Society name" : "Organization name"}><input name="organizationName" required minLength={2} maxLength={220} defaultValue={profile.organizationName} /></Field><Field label="Primary location"><input name="location" maxLength={160} defaultValue={String(profile.location ?? "")} /></Field></div>
+      {role === "SOCIETY" ? <>
+        <Field label="Address (private)"><textarea name="address" rows={2} maxLength={1000} defaultValue={String(profile.address ?? "")} /></Field>
+        <div className="live-field-row"><Field label="City"><input name="city" required defaultValue={String(profile.city ?? "Mumbai")} /></Field><Field label="Redevelopment status"><input name="redevelopmentStatus" defaultValue={String(profile.redevelopmentStatus ?? "")} placeholder="Exploring / committee review" /></Field></div>
+        <div className="live-field-row"><Field label="Contact name (private)"><input name="contactName" defaultValue={String(profile.contactName ?? "")} /></Field><Field label="Contact email (private)"><input name="contactEmail" type="email" defaultValue={String(profile.contactEmail ?? "")} /></Field></div>
+        <Field label="Contact phone (private)"><input name="contactPhone" defaultValue={String(profile.contactPhone ?? "")} /></Field>
+        <div className="live-field-row"><Field label="Buildings"><input name="numberBuildings" type="number" min={1} defaultValue={String(profile.numberBuildings ?? "")} /></Field><Field label="Wings"><input name="numberWings" type="number" min={1} defaultValue={String(profile.numberWings ?? "")} /></Field></div>
+        <div className="live-field-row"><Field label="Units"><input name="unitCount" type="number" min={1} defaultValue={String(profile.unitCount ?? "")} /></Field><Field label="Members"><input name="memberCount" type="number" min={1} defaultValue={String(profile.memberCount ?? "")} /></Field></div>
+        <div className="live-field-row"><Field label="Building age"><input name="buildingAge" type="number" min={0} defaultValue={String(profile.buildingAge ?? "")} /></Field><Field label="Property type"><input name="propertyType" defaultValue={String(profile.propertyType ?? "")} /></Field></div>
+        <Field label="Land / site area"><input name="landArea" defaultValue={String(profile.landArea ?? "")} /></Field>
+      </> : <>
+        <div className="live-field-row"><Field label="Website"><input name="website" type="url" defaultValue={String(profile.website ?? "")} /></Field><Field label="Logo URL"><input name="logoUrl" type="url" defaultValue={String(profile.logoUrl ?? "")} /></Field></div>
+        <div className="live-field-row"><Field label="Public contact email"><input name="publicEmail" type="email" defaultValue={String(profile.publicEmail ?? "")} /></Field><Field label="Public contact phone"><input name="publicPhone" defaultValue={String(profile.publicPhone ?? "")} /></Field></div>
+        <Field label="Office location"><input name="officeLocation" defaultValue={String(profile.officeLocation ?? "")} /></Field>
+        {role === "DEVELOPER" ? <Field label="Areas served (comma separated)"><input name="areasServed" defaultValue={listValue(profile.areasServed)} /></Field> : <><Field label="Locations served (comma separated)"><input name="locationsServed" defaultValue={listValue(profile.locationsServed)} /></Field><Field label="Services (comma separated)"><input name="services" defaultValue={listValue(profile.services)} /></Field></>}
+        <Field label="Specializations (comma separated)"><input name="specializations" defaultValue={listValue(profile.specializations)} /></Field>
+        <Field label="Team / company information"><textarea name="teamInformation" rows={3} defaultValue={String(profile.teamInformation ?? "")} /></Field>
+        <div className="live-nested-heading"><div><strong>Project portfolio</strong><span>Factual entries supplied by your organization</span></div><button type="button" onClick={() => setPortfolio((items) => [...items, { title: "" }])}><Plus size={15} /> Add project</button></div>
+        {portfolio.map((item, index) => <div className="live-nested-card" key={`portfolio-${index}`}><div className="live-field-row"><Field label="Project title"><input value={item.title} onChange={(event) => updatePortfolio(index, "title", event.target.value)} /></Field><Field label="Location"><input value={item.location ?? ""} onChange={(event) => updatePortfolio(index, "location", event.target.value)} /></Field></div><Field label="Description"><textarea rows={2} value={item.description ?? ""} onChange={(event) => updatePortfolio(index, "description", event.target.value)} /></Field><button type="button" className="live-remove" onClick={() => setPortfolio((items) => items.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={14} /> Remove</button></div>)}
+        <div className="live-nested-heading"><div><strong>Credentials</strong><span>Choose explicitly which entries may be public</span></div><button type="button" onClick={() => setCredentials((items) => [...items, { name: "", isPublic: false }])}><Plus size={15} /> Add credential</button></div>
+        {credentials.map((item, index) => <div className="live-nested-card" key={`credential-${index}`}><div className="live-field-row"><Field label="Credential name"><input value={item.name} onChange={(event) => updateCredential(index, "name", event.target.value)} /></Field><Field label="Issuer"><input value={item.issuer ?? ""} onChange={(event) => updateCredential(index, "issuer", event.target.value)} /></Field></div><label className="live-check"><input type="checkbox" checked={Boolean(item.isPublic)} onChange={(event) => updateCredential(index, "isPublic", event.target.checked)} /><span>Show this credential in marketplace preview</span></label><button type="button" className="live-remove" onClick={() => setCredentials((items) => items.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={14} /> Remove</button></div>)}
+      </>}
+      <Field label={role === "SOCIETY" ? "Property / society description" : "Organization description"}><textarea name="description" rows={4} maxLength={5000} defaultValue={String(profile.description ?? "")} /></Field>
+      <label className="live-check"><input name="marketplaceVisible" type="checkbox" defaultChecked={profile.marketplaceVisible !== false} /><span>Include approved public fields in marketplace views</span></label>
+      {error && <p role="alert" className="live-error">{error}</p>}{notice && <p role="status" className="live-success"><CheckCircle2 size={17} /> {notice}</p>}
+      <div className="live-actions"><button className="live-primary" disabled={busy} type="submit">{busy ? "Saving…" : "Save draft"}</button><button type="button" disabled={busy} onClick={() => void showPreview()}>Preview marketplace profile</button></div>
+    </form>
+    {preview && <div className="live-profile-preview"><div><UserRound size={20} /><strong>Marketplace preview</strong><button type="button" onClick={() => setPreview(null)}>Close</button></div>{Object.entries(preview).map(([key, value]) => value === null || value === "" || (Array.isArray(value) && !value.length) ? null : <p key={key}><span>{key.replace(/([A-Z])/g, " $1")}</span><strong>{typeof value === "object" ? JSON.stringify(value) : String(value)}</strong></p>)}</div>}
+  </section>;
+}
+
 function SocietyView() {
   const [interests, setInterests] = useState<Interest[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -376,6 +496,8 @@ function SocietyView() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<Record<string, unknown> | null>(null);
+  const [profileLoadingId, setProfileLoadingId] = useState<string | null>(null);
   const load = useCallback(async () => {
     try {
       const [interestData, opportunityData] = await Promise.all([
@@ -437,8 +559,23 @@ function SocietyView() {
     }
   }
 
+  async function openOrganizationProfile(interest: Interest) {
+    if (!interest.organizationId) return;
+    setProfileLoadingId(interest.id); setError("");
+    try { const result = await api<{ profile: Record<string, unknown> }>(`/marketplace/organizations/${interest.organizationId}`); setSelectedProfile(result.profile); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load organization profile."); }
+    finally { setProfileLoadingId(null); }
+  }
+
+  async function updateInterest(interestId: string, status: string) {
+    setBusy(true); setError("");
+    try { await api(`/societies/me/interests/${interestId}`, { method: "PATCH", body: JSON.stringify({ status }) }); await load(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to update interest."); }
+    finally { setBusy(false); }
+  }
+
   return (
-    <div className="live-grid">
+    <><ProfileEditor role="SOCIETY" /><div className="live-metrics"><article><span>Opportunities</span><strong>{opportunities.length}</strong></article><article><span>Published</span><strong>{opportunities.filter((item) => item.status === "PUBLISHED").length}</strong></article><article><span>Incoming interests</span><strong>{interests.length}</strong></article></div><div className="live-grid">
       <section className="live-panel">
         <div className="live-panel-intro">
           <span>Society workspace</span>
@@ -553,44 +690,50 @@ function SocietyView() {
           {interests.map((interest) => (
             <article className="live-list-card" key={interest.id}>
               <small>{interest.opportunityTitle}</small>
-              <h3>{interest.organizationName}</h3>
+              <h3>{interest.organizationName} · {interest.role}</h3>
+              {interest.organizationLocation && <span><MapPin size={14} /> {interest.organizationLocation}</span>}
               <p>{interest.message || "No message provided."}</p>
               <span>
-                {interest.status} ·{" "}
+                {interest.reviewStatus} ·{" "}
                 {new Date(interest.createdAt).toLocaleDateString()}
               </span>
+              <div className="live-card-actions"><button type="button" disabled={profileLoadingId === interest.id} onClick={() => void openOrganizationProfile(interest)}>{profileLoadingId === interest.id ? "Loading…" : "View profile"}</button><select aria-label={`Review status for ${interest.organizationName}`} value={interest.reviewStatus} disabled={busy} onChange={(event) => void updateInterest(interest.id, event.target.value)}><option value="RECEIVED">Received</option><option value="REVIEWING">Reviewing</option><option value="SHORTLISTED">Shortlisted</option><option value="DECLINED">Declined</option></select></div>
             </article>
           ))}
+          {selectedProfile && <div className="live-profile-preview"><div><UserRound size={20} /><strong>Organization profile</strong><button type="button" onClick={() => setSelectedProfile(null)}>Close</button></div>{Object.entries(selectedProfile).map(([key, value]) => value === null || value === "" || (Array.isArray(value) && !value.length) ? null : <p key={key}><span>{key.replace(/([A-Z])/g, " $1")}</span><strong>{typeof value === "object" ? JSON.stringify(value) : String(value)}</strong></p>)}</div>}
         </section>
       </div>
-    </div>
+    </div></>
   );
 }
 
 function DiscoveryView({ role }: { role: Role }) {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [interests, setInterests] = useState<Interest[]>([]);
+  const [selected, setSelected] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [submitted, setSubmitted] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
-  useEffect(() => {
-    void api<{ opportunities: Opportunity[] }>("/opportunities")
-      .then((data) => setOpportunities(data.opportunities))
-      .catch((cause) =>
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Unable to load opportunities.",
-        ),
-      )
-      .finally(() => setLoading(false));
+
+  const load = useCallback(async (query = "", place = "") => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("q", query.trim());
+      if (place.trim()) params.set("location", place.trim());
+      const [opportunityData, interestData] = await Promise.all([
+        api<{ opportunities: Opportunity[] }>(`/opportunities${params.size ? `?${params}` : ""}`),
+        api<{ interests: Interest[] }>("/organizations/me/interests"),
+      ]);
+      setOpportunities(opportunityData.opportunities); setInterests(interestData.interests); setError("");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load opportunities."); }
+    finally { setLoading(false); }
   }, []);
-  const visible = opportunities.filter((opportunity) =>
-    `${opportunity.title} ${opportunity.location} ${opportunity.description}`
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   async function expressInterest(id: string) {
     setBusyId(id);
@@ -600,7 +743,7 @@ function DiscoveryView({ role }: { role: Role }) {
         method: "POST",
         body: JSON.stringify({}),
       });
-      setSubmitted((current) => [...current, id]);
+      await load(search, location);
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Unable to submit interest.",
@@ -610,8 +753,15 @@ function DiscoveryView({ role }: { role: Role }) {
     }
   }
 
+  async function openOpportunity(id: string) {
+    setBusyId(id); setError("");
+    try { const result = await api<{ opportunity: Opportunity }>(`/opportunities/${id}`); setSelected(result.opportunity); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to open opportunity."); }
+    finally { setBusyId(null); }
+  }
+
   return (
-    <section className="live-panel">
+    <><ProfileEditor role={role as "DEVELOPER" | "PMC"} /><div className="live-metrics"><article><span>Available opportunities</span><strong>{opportunities.length}</strong></article><article><span>Interests submitted</span><strong>{interests.length}</strong></article><article><span>Under review / shortlisted</span><strong>{interests.filter((item) => ["REVIEWING", "SHORTLISTED"].includes(item.reviewStatus)).length}</strong></article></div><section className="live-panel">
       <div className="live-panel-intro">
         <span>{role === "PMC" ? "PMC discovery" : "Developer discovery"}</span>
         <h2>Published society opportunities</h2>
@@ -620,26 +770,20 @@ function DiscoveryView({ role }: { role: Role }) {
           a connection.
         </p>
       </div>
-      <Field label="Search opportunities">
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search location or project"
-        />
-      </Field>
+      <form className="live-filter-row" onSubmit={(event) => { event.preventDefault(); void load(search, location); }}><Field label="Search opportunities"><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Society, project or description" /></Field><Field label="Location filter"><input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="e.g. Andheri" /></Field><button className="live-primary" type="submit">Apply filters</button></form>
       {error && (
         <p role="alert" className="live-error">
           {error}
         </p>
       )}
       {loading && <p className="live-muted">Loading opportunities…</p>}
-      {!loading && visible.length === 0 && (
+      {!loading && opportunities.length === 0 && (
         <p className="live-muted">
           No published opportunities match your search yet.
         </p>
       )}
       <div className="live-opportunities">
-        {visible.map((item) => (
+        {opportunities.map((item) => (
           <article key={item.id} className="live-list-card">
             <small>{item.status}</small>
             <h3>{item.title}</h3>
@@ -654,14 +798,14 @@ function DiscoveryView({ role }: { role: Role }) {
               )}
               {item.siteArea && <span>{item.siteArea}</span>}
             </div>
-            <button
+            <div className="live-card-actions"><button type="button" disabled={busyId === item.id} onClick={() => void openOpportunity(item.id)}>View details</button><button
               type="button"
-              disabled={busyId === item.id || submitted.includes(item.id)}
+              disabled={busyId === item.id || Boolean(item.interestStatus)}
               onClick={() => void expressInterest(item.id)}
             >
-              {submitted.includes(item.id) ? (
+              {item.interestStatus ? (
                 <>
-                  <CheckCircle2 size={16} /> Interest submitted
+                  <CheckCircle2 size={16} /> {item.interestStatus}
                 </>
               ) : busyId === item.id ? (
                 "Submitting…"
@@ -670,11 +814,15 @@ function DiscoveryView({ role }: { role: Role }) {
                   <Send size={16} /> Express interest
                 </>
               )}
-            </button>
+            </button></div>
           </article>
         ))}
       </div>
-    </section>
+      {selected && <div className="live-profile-preview"><div><Building2 size={20} /><strong>{selected.title}</strong><button type="button" onClick={() => setSelected(null)}>Close</button></div><p><span>Location</span><strong>{selected.location}</strong></p><p><span>Description</span><strong>{selected.description}</strong></p>{selected.society && Object.entries(selected.society).map(([key, value]) => value === null || value === "" ? null : <p key={key}><span>{key.replace(/([A-Z])/g, " $1")}</span><strong>{String(value)}</strong></p>)}</div>}
+      <div className="live-panel-intro live-section-spacer"><span>Your activity</span><h2>Interest tracking</h2></div>
+      {!interests.length && !loading && <p className="live-muted">You have not expressed interest in an opportunity yet.</p>}
+      {interests.map((interest) => <article className="live-list-card" key={interest.id}><small>{interest.reviewStatus}</small><h3>{interest.opportunityTitle}</h3><span><MapPin size={14} /> {interest.location}</span><p>{interest.message || "No message supplied."}</p><span>Submitted {new Date(interest.createdAt).toLocaleDateString()}</span></article>)}
+    </section></>
   );
 }
 

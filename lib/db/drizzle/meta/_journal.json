@@ -15,6 +15,13 @@
       "when": 1791224612177,
       "tag": "0001_bright_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791227498511,
+      "tag": "0002_glossy_veda",
+      "breakpoints": true
     }
   ]
 }

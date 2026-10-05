@@ -4889,7 +4889,7 @@ function Router() {
   const [location] = useLocation();
   const pathname = location.split("?")[0];
   if (pathname === "/") return <MarketingHome />;
-  if (pathname === "/platform/live")
+  if (pathname === "/platform/live" || pathname.startsWith("/dashboard/"))
     return (
       <Suspense
         fallback={<LoadingPage label="Opening your RENOVA workspace" />}
@@ -4899,8 +4899,7 @@ function Router() {
     );
   if (
     pathname === "/platform" ||
-    pathname.startsWith("/platform/") ||
-    pathname.startsWith("/dashboard/")
+    pathname.startsWith("/platform/")
   )
     return (
       <Suspense

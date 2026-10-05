@@ -22,6 +22,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -74,6 +75,21 @@ const timestamps = {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+};
+
+export type PortfolioEntry = {
+  title: string;
+  location?: string | null;
+  description?: string | null;
+  completionYear?: number | null;
+  projectType?: string | null;
+};
+
+export type ProfileCredential = {
+  name: string;
+  issuer?: string | null;
+  reference?: string | null;
+  isPublic?: boolean;
 };
 
 export const users = pgTable(
@@ -136,6 +152,53 @@ export const societies = pgTable("societies", {
   memberCount: integer("member_count"),
   buildingAge: integer("building_age"),
   redevelopmentStatus: varchar("redevelopment_status", { length: 120 }),
+  contactName: varchar("contact_name", { length: 160 }),
+  contactEmail: varchar("contact_email", { length: 320 }),
+  contactPhone: varchar("contact_phone", { length: 40 }),
+  numberBuildings: integer("number_buildings"),
+  numberWings: integer("number_wings"),
+  unitCount: integer("unit_count"),
+  propertyType: varchar("property_type", { length: 120 }),
+  landArea: varchar("land_area", { length: 120 }),
+  description: text("description"),
+  marketplaceVisible: boolean("marketplace_visible").default(true).notNull(),
+  ...timestamps,
+});
+
+export const developerProfiles = pgTable("developer_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  organizationId: uuid("organization_id").notNull().unique().references(() => organizations.id, { onDelete: "cascade" }),
+  logoUrl: varchar("logo_url", { length: 1000 }),
+  description: text("description"),
+  website: varchar("website", { length: 500 }),
+  publicEmail: varchar("public_email", { length: 320 }),
+  publicPhone: varchar("public_phone", { length: 40 }),
+  officeLocation: varchar("office_location", { length: 220 }),
+  areasServed: jsonb("areas_served").$type<string[]>().default([]).notNull(),
+  specializations: jsonb("specializations").$type<string[]>().default([]).notNull(),
+  teamInformation: text("team_information"),
+  portfolio: jsonb("portfolio").$type<PortfolioEntry[]>().default([]).notNull(),
+  credentials: jsonb("credentials").$type<ProfileCredential[]>().default([]).notNull(),
+  marketplaceVisible: boolean("marketplace_visible").default(true).notNull(),
+  ...timestamps,
+});
+
+export const pmcProfiles = pgTable("pmc_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  organizationId: uuid("organization_id").notNull().unique().references(() => organizations.id, { onDelete: "cascade" }),
+  logoUrl: varchar("logo_url", { length: 1000 }),
+  description: text("description"),
+  website: varchar("website", { length: 500 }),
+  publicEmail: varchar("public_email", { length: 320 }),
+  publicPhone: varchar("public_phone", { length: 40 }),
+  officeLocation: varchar("office_location", { length: 220 }),
+  locationsServed: jsonb("locations_served").$type<string[]>().default([]).notNull(),
+  services: jsonb("services").$type<string[]>().default([]).notNull(),
+  specializations: jsonb("specializations").$type<string[]>().default([]).notNull(),
+  teamInformation: text("team_information"),
+  portfolio: jsonb("portfolio").$type<PortfolioEntry[]>().default([]).notNull(),
+  credentials: jsonb("credentials").$type<ProfileCredential[]>().default([]).notNull(),
+  marketplaceVisible: boolean("marketplace_visible").default(true).notNull(),
   ...timestamps,
 });
 
@@ -177,6 +240,7 @@ export const opportunityInterests = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     message: text("message"),
     status: interestStatus("status").default("PENDING").notNull(),
+    reviewStatus: varchar("review_status", { length: 32 }).default("RECEIVED").notNull(),
     ...timestamps,
   },
   (table) => [
