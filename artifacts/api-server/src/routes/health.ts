@@ -14,9 +14,11 @@ router.get("/readyz", async (_req, res) => {
   try {
     const database = requireDb();
     await Promise.all([
-      database.execute(sql`select email_verified_at from users limit 0`),
+      database.execute(sql`select email_verified_at, credential_version from users limit 0`),
+      database.execute(sql`select credential_version from auth_sessions limit 0`),
       database.execute(sql`select id from auth_tokens limit 0`),
       database.execute(sql`select id from enquiries limit 0`),
+      database.execute(sql`select id from feasibility_requests limit 0`),
     ]);
     res.json({ status: "ready" });
   } catch {

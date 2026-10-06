@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "@workspace/api-zod";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import {
   getDb,
   clearSession,
@@ -130,14 +130,12 @@ async function replaceAuthToken(
           isNull(authTokens.usedAt),
         ),
       );
-    await tx
-      .insert(authTokens)
-      .values({
-        userId,
-        purpose,
-        tokenHash: issued.tokenHash,
-        expiresAt: issued.expiresAt,
-      });
+    await tx.insert(authTokens).values({
+      userId,
+      purpose,
+      tokenHash: issued.tokenHash,
+      expiresAt: issued.expiresAt,
+    });
   });
   return issued.token;
 }
@@ -291,12 +289,10 @@ router.post("/auth/resend-verification", async (request, response, next) => {
         });
       }
     }
-    return response
-      .status(202)
-      .json({
-        message:
-          "If an unverified account exists, a new verification email has been sent",
-      });
+    return response.status(202).json({
+      message:
+        "If an unverified account exists, a new verification email has been sent",
+    });
   } catch (error) {
     return next(error);
   }
@@ -327,17 +323,20 @@ router.post("/auth/forgot-password", async (request, response, next) => {
       );
       if (token) {
         const brand = getEmailBrand();
-        await getEmailProvider(brand).send({
-          to: user.email,
-          ...passwordResetEmail(brand, token),
-        });
+        try {
+          await getEmailProvider(brand).send({
+            to: user.email,
+            ...passwordResetEmail(brand, token),
+          });
+        } catch {
+          // Provider failures must not reveal which email addresses have accounts.
+          // The same neutral response is returned; no tokens/provider payloads logged.
+        }
       }
     }
-    return response
-      .status(202)
-      .json({
-        message: "If the account exists, a password reset email has been sent",
-      });
+    return response.status(202).json({
+      message: "If the account exists, a password reset email has been sent",
+    });
   } catch (error) {
     return next(error);
   }
@@ -378,11 +377,25 @@ router.post("/auth/reset-password", async (request, response, next) => {
       if (!updated.length) return false;
       await tx
         .update(users)
-        .set({ passwordHash: hashPassword(input.password), updatedAt: now })
+        .set({
+          passwordHash: hashPassword(input.password),
+          credentialVersion: sql`${users.credentialVersion} + 1`,
+          updatedAt: now,
+        })
         .where(eq(users.id, record.userId));
       await tx
         .delete(authSessions)
         .where(eq(authSessions.userId, record.userId));
+      await tx
+        .update(authTokens)
+        .set({ usedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, record.userId),
+            eq(authTokens.purpose, "PASSWORD_RESET"),
+            isNull(authTokens.usedAt),
+          ),
+        );
       return true;
     });
     if (!changed)
@@ -428,7 +441,14 @@ router.post("/auth/login", async (request, response, next) => {
       return response
         .status(401)
         .json({ error: "Email or password is incorrect" });
-    await createSession(database, row.user.id, response);
+    // Persist the credential snapshot used to verify the password. A reset that
+    // commits before or after this insert makes a stale session unusable.
+    await createSession(
+      database,
+      row.user.id,
+      response,
+      row.user.credentialVersion,
+    );
     return response.json({ user: publicUser(row.user, row.organizationId) });
   } catch (error) {
     return next(error);

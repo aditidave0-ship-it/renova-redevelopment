@@ -3727,6 +3727,7 @@ const publicPageMap: Record<string, PublicPageData> = {
     intro:
       "RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.",
     highlights: [
+      { title: "Founder", detail: "Aziz Parihar — Founder, RENOVA" },
       {
         title: "Our purpose",
         detail:

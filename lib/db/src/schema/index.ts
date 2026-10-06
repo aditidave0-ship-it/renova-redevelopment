@@ -82,6 +82,7 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     email: varchar("email", { length: 320 }).notNull().unique(),
     passwordHash: text("password_hash").notNull(),
+    credentialVersion: integer("credential_version").default(0).notNull(),
     displayName: varchar("display_name", { length: 160 }).notNull(),
     role: accountRole("role").notNull(),
     isActive: boolean("is_active").default(true).notNull(),
@@ -196,6 +197,7 @@ export const authSessions = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     tokenHash: varchar("token_hash", { length: 128 }).notNull().unique(),
+    credentialVersion: integer("credential_version").default(0).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     ...timestamps,
   },
@@ -272,6 +274,22 @@ export const auditLogs = pgTable(
     index("audit_logs_entity_idx").on(table.entityType, table.entityId),
   ],
 );
+
+export const feasibilityRequests = pgTable("feasibility_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  societyId: uuid("society_id").notNull().references(() => societies.id, { onDelete: "cascade" }),
+  submittedByUserId: uuid("submitted_by_user_id").notNull().references(() => users.id),
+  propertyAddress: text("property_address").notNull(),
+  siteArea: varchar("site_area", { length: 80 }),
+  memberCount: integer("member_count"),
+  buildingAge: integer("building_age"),
+  requirement: text("requirement").notNull(),
+  status: varchar("status", { length: 40 }).default("SUBMITTED").notNull(),
+  assessmentNotes: text("assessment_notes"),
+  reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  ...timestamps,
+}, table => [index("feasibility_society_idx").on(table.societyId), index("feasibility_status_idx").on(table.status)]);
 
 export const organizationRelations = relations(
   organizations,

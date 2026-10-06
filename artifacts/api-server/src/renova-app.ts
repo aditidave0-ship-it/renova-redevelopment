@@ -59,7 +59,7 @@ const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   const responseStatus = isValidationError ? 400 : status;
 
   if (responseStatus >= 500) {
-    req.log?.error({ err: error }, "Unhandled API error");
+    req.log?.error({ statusCode: responseStatus }, "API request failed; sensitive details withheld");
   }
 
   res.status(responseStatus).json({
