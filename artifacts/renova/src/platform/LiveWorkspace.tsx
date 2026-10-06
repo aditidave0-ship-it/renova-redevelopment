@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import "./live-workspace.css";
+import { WorkspaceFoundation } from "./WorkspaceFoundation";
 
 type Role = "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL" | "ADMIN";
 type Account = {
@@ -370,6 +371,8 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
 }
 
 function SocietyView() {
+  const [editing, setEditing] = useState<Opportunity | null>(null);
+  const [preview, setPreview] = useState(false);
   const [interests, setInterests] = useState<Interest[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -405,28 +408,35 @@ function SocietyView() {
     setError("");
     setMessage("");
     try {
-      await api("/opportunities", {
-        method: "POST",
-        body: JSON.stringify({
-          title: form.get("title"),
-          location: form.get("location"),
-          description: form.get("description"),
-          memberCount: form.get("memberCount")
-            ? Number(form.get("memberCount"))
-            : undefined,
-          buildingAge: form.get("buildingAge")
-            ? Number(form.get("buildingAge"))
-            : undefined,
-          siteArea: form.get("siteArea") || undefined,
-          publish: form.get("publish") === "on",
-        }),
-      });
+      await api(
+        editing
+          ? `/societies/me/opportunities/${editing.id}`
+          : "/opportunities",
+        {
+          method: editing ? "PATCH" : "POST",
+          body: JSON.stringify({
+            title: form.get("title"),
+            location: form.get("location"),
+            description: form.get("description"),
+            memberCount: form.get("memberCount")
+              ? Number(form.get("memberCount"))
+              : undefined,
+            buildingAge: form.get("buildingAge")
+              ? Number(form.get("buildingAge"))
+              : undefined,
+            siteArea: form.get("siteArea") || undefined,
+            publish: form.get("publish") === "on",
+          }),
+        },
+      );
       setMessage(
         form.get("publish") === "on"
           ? "Opportunity published. Developers and PMCs can now discover it."
           : "Draft saved privately.",
       );
       formElement.reset();
+      setEditing(null);
+      setPreview(false);
       void load();
     } catch (cause) {
       setError(
@@ -442,16 +452,40 @@ function SocietyView() {
       <section className="live-panel">
         <div className="live-panel-intro">
           <span>Society workspace</span>
-          <h2>Create a redevelopment opportunity</h2>
+          <h2>
+            {editing
+              ? "Edit society draft"
+              : "Create a redevelopment opportunity"}
+          </h2>
           <p>
             Share a clear, factual brief. Publishing makes these details visible
             to developers and PMCs.
           </p>
         </div>
-        <form className="live-form" onSubmit={create}>
+        {preview && editing && (
+          <article className="live-list-card" aria-label="Saved draft preview">
+            <h3>{editing.title}</h3>
+            <p>{editing.location}</p>
+            <p>{editing.description}</p>
+            <p>
+              {editing.memberCount ?? "Not provided"} members · Site area:{" "}
+              {editing.siteArea || "Not provided"}
+            </p>
+            <p>
+              Private saved draft. Changes below must be saved before previewing
+              them.
+            </p>
+          </article>
+        )}
+        <form
+          key={editing?.id || "new"}
+          className="live-form"
+          onSubmit={create}
+        >
           <Field label="Opportunity title">
             <input
               name="title"
+              defaultValue={editing?.title || ""}
               required
               minLength={3}
               maxLength={220}
@@ -461,6 +495,7 @@ function SocietyView() {
           <Field label="Location">
             <input
               name="location"
+              defaultValue={editing?.location || ""}
               required
               minLength={2}
               maxLength={180}
@@ -470,6 +505,7 @@ function SocietyView() {
           <Field label="Description">
             <textarea
               name="description"
+              defaultValue={editing?.description || ""}
               required
               minLength={20}
               maxLength={5000}
@@ -479,15 +515,28 @@ function SocietyView() {
           </Field>
           <div className="live-field-row">
             <Field label="Number of members">
-              <input name="memberCount" type="number" min={1} max={100000} />
+              <input
+                name="memberCount"
+                defaultValue={editing?.memberCount ?? ""}
+                type="number"
+                min={1}
+                max={100000}
+              />
             </Field>
             <Field label="Building age (years)">
-              <input name="buildingAge" type="number" min={0} max={200} />
+              <input
+                name="buildingAge"
+                defaultValue={editing?.buildingAge ?? ""}
+                type="number"
+                min={0}
+                max={200}
+              />
             </Field>
           </div>
           <Field label="Approximate site area">
             <input
               name="siteArea"
+              defaultValue={editing?.siteArea || ""}
               maxLength={80}
               placeholder="e.g. 1,200 sq m"
             />
@@ -509,6 +558,18 @@ function SocietyView() {
           <button className="live-primary" disabled={busy} type="submit">
             {busy ? "Saving…" : "Save opportunity"} <ArrowRight size={16} />
           </button>
+          {editing && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setEditing(null);
+                setPreview(false);
+              }}
+            >
+              Cancel editing
+            </button>
+          )}
         </form>
       </section>
       <div className="live-aside">
@@ -533,6 +594,31 @@ function SocietyView() {
               <span>
                 <MapPin size={14} /> {opportunity.location}
               </span>
+              {opportunity.status === "DRAFT" && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      setEditing(opportunity);
+                      setPreview(false);
+                      setMessage("");
+                    }}
+                  >
+                    Edit saved draft
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      setEditing(opportunity);
+                      setPreview(true);
+                    }}
+                  >
+                    Preview saved draft
+                  </button>
+                </>
+              )}
             </article>
           ))}
         </section>
@@ -575,8 +661,16 @@ function DiscoveryView({ role }: { role: Role }) {
   const [submitted, setSubmitted] = useState<string[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   useEffect(() => {
-    void api<{ opportunities: Opportunity[] }>("/opportunities")
-      .then((data) => setOpportunities(data.opportunities))
+    void Promise.all([
+      api<{ opportunities: Opportunity[] }>("/opportunities"),
+      api<{ interests: { opportunityId: string }[] }>(
+        "/organizations/me/interests",
+      ),
+    ])
+      .then(([data, interests]) => {
+        setOpportunities(data.opportunities);
+        setSubmitted(interests.interests.map((item) => item.opportunityId));
+      })
       .catch((cause) =>
         setError(
           cause instanceof Error
@@ -782,6 +876,7 @@ export function LiveWorkspace() {
               : "Create a secure account to publish an opportunity or discover a society brief."}
           </p>
         </div>
+        {!loading && account && <WorkspaceFoundation role={account.role} />}
         {loading ? (
           <p className="live-muted">Opening your workspace…</p>
         ) : account ? (
