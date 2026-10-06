@@ -33,6 +33,15 @@ export function getEmailBrand(): EmailBrand {
     process.env.RENOVA_APP_URL?.trim() || "http://localhost:5173"
   ).replace(/\/$/, "");
   const configuredFrom = process.env.RENOVA_EMAIL_FROM?.trim();
+  if (process.env.NODE_ENV === "production") {
+    let valid = false;
+    try { const url = new URL(appUrl); valid = Boolean(process.env.RENOVA_APP_URL) && url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash; } catch { /* Invalid configuration is unavailable. */ }
+    if (!valid || !configuredFrom) {
+      const error = new Error("Production email branding is not configured");
+      Object.assign(error, { status: 503, code: "EMAIL_DELIVERY_UNAVAILABLE" });
+      throw error;
+    }
+  }
   return {
     productName,
     appUrl,
@@ -82,6 +91,7 @@ class ResendEmailProvider implements EmailProvider {
   async send(message: EmailMessage): Promise<void> {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
+      signal: AbortSignal.timeout(10000),
       headers: {
         authorization: `Bearer ${this.apiKey}`,
         "content-type": "application/json",
