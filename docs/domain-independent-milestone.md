@@ -26,6 +26,8 @@ Existing opportunity draft/publish and interest tests remain in the suite. Exist
 
 ## Remaining gates
 
+Validation: 8 unit tests and 88 database-backed integration assertions PASS. Full workspace typecheck/build PASS. All 10 incremental GitHub blobs matched the tested checkout. Vercel frontend preview reached Ready. Desktop browser navigation confirmed eight role options (no ADMIN), Continue to account details, shared Sign in and Forgot password states. This is limited unauthenticated desktop UI evidence, not full authenticated/mobile QA.
+
 - BLOCKED: Production ledger/migrations and deployed multi-role testing.
 - BLOCKED: Real email delivery and link exercise, waiting for final brand/domain/sender plus an authorized test inbox.
 - CODE IMPLEMENTED: Separate role-selection/account-details steps, then existing email-verification flow and role-specific profile onboarding. Browser acceptance remains pending.
