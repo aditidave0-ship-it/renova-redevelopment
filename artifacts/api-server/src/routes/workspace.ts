@@ -216,7 +216,8 @@ router.post(
         .from(societies)
         .where(eq(societies.organizationId, req.auth!.organizationId!));
       if (!society) return res.status(404).json({ error: "Society not found" });
-      const [request] = await db
+      const request = await db.transaction(async (tx) => {
+      const [created] = await tx
         .insert(feasibilityRequests)
         .values({
           ...details,
@@ -225,6 +226,9 @@ router.post(
           submittedByUserId: req.auth!.userId,
         })
         .returning();
+      await tx.insert(auditLogs).values({ actorUserId: req.auth!.userId, action: "FEASIBILITY_STATUS", entityType: "feasibility_request", entityId: created.id, metadata: JSON.stringify({ from: null, status: created.status }) });
+      return created;
+      });
       return res.status(201).json({ request });
     } catch (error) {
       return next(error);
@@ -281,6 +285,7 @@ router.patch(
         })
         .parse(req.body);
       const request = await requireDb().transaction(async (tx) => {
+        const [previous] = await tx.select().from(feasibilityRequests).where(eq(feasibilityRequests.id, id)).for("update");
         const [updated] = await tx
           .update(feasibilityRequests)
           .set({
@@ -299,7 +304,7 @@ router.patch(
               action: "FEASIBILITY_REVIEW",
               entityType: "feasibility_request",
               entityId: id,
-              metadata: JSON.stringify({ status: input.status }),
+              metadata: JSON.stringify({ from: previous?.status, status: input.status }),
             });
         return updated;
       });
@@ -316,10 +321,25 @@ router.patch("/societies/me/feasibility/:id", requireAuth(), requireRole("SOCIET
     const { submit, ...details } = feasibilityInput.parse(req.body);
     const db = requireDb();
     const owned = db.select({ id: societies.id }).from(societies).where(eq(societies.organizationId, req.auth!.organizationId!));
-    const [request] = await db.update(feasibilityRequests).set({ ...details, status: submit ? "SUBMITTED" : "DRAFT", updatedAt: new Date() })
-      .where(and(eq(feasibilityRequests.id, id), inArray(feasibilityRequests.societyId, owned), inArray(feasibilityRequests.status, ["DRAFT", "MORE_INFORMATION_REQUIRED"]))).returning();
+    const request = await db.transaction(async (tx) => {
+      const [previous] = await tx.select().from(feasibilityRequests).where(and(eq(feasibilityRequests.id, id), inArray(feasibilityRequests.societyId, owned))).for("update");
+      if (!previous || !["DRAFT", "MORE_INFORMATION_REQUIRED"].includes(previous.status)) return null;
+      const [updated] = await tx.update(feasibilityRequests).set({ ...details, status: submit ? "SUBMITTED" : "DRAFT", updatedAt: new Date() }).where(eq(feasibilityRequests.id, id)).returning();
+      await tx.insert(auditLogs).values({ actorUserId: req.auth!.userId, action: "FEASIBILITY_STATUS", entityType: "feasibility_request", entityId: id, metadata: JSON.stringify({ from: previous.status, status: updated.status }) });
+      return updated;
+    });
     if (!request) return res.status(404).json({ error: "Editable request not found" });
     return res.json({ request });
+  } catch (error) { return next(error); }
+});
+router.get("/societies/me/feasibility/:id/history", requireAuth(), requireRole("SOCIETY"), async (req, res, next) => {
+  try {
+    const id = idInput.parse(req.params.id);
+    const db = requireDb();
+    const [owned] = await db.select({ id: feasibilityRequests.id }).from(feasibilityRequests).innerJoin(societies, eq(societies.id, feasibilityRequests.societyId)).where(and(eq(feasibilityRequests.id, id), eq(societies.organizationId, req.auth!.organizationId!)));
+    if (!owned) return res.status(404).json({ error: "Request not found" });
+    const rows = await db.select({ metadata: auditLogs.metadata, createdAt: auditLogs.createdAt }).from(auditLogs).where(and(eq(auditLogs.entityType, "feasibility_request"), eq(auditLogs.entityId, id), inArray(auditLogs.action, ["FEASIBILITY_STATUS", "FEASIBILITY_REVIEW"]))).orderBy(auditLogs.createdAt, auditLogs.id);
+    return res.json({ history: rows.map(row => ({ ...JSON.parse(row.metadata || "{}"), createdAt: row.createdAt })) });
   } catch (error) { return next(error); }
 });
 export default router;
