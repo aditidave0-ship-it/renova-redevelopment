@@ -2608,6 +2608,44 @@ html {
   line-height: 1.05;
 }
 
+.public-page-cta-copy > span {
+  display: block;
+  max-width: 700px;
+  margin-top: 18px;
+  color: rgba(241, 248, 252, 0.84);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.public-page-cta-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.public-page-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  color: #fff;
+  border: 1px solid rgba(225, 240, 249, 0.48);
+  border-radius: 3px;
+  background: rgba(5, 27, 49, 0.36);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: 0.075em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.public-page-cta-secondary:hover {
+  color: #03101f;
+  background: #dff4ff;
+}
+
 @media (max-width: 1240px) {
   .public-header-cta {
     display: none;
@@ -2706,6 +2744,10 @@ html {
     margin: 0 18px 38px;
     padding: 30px 24px;
     border-radius: 18px;
+  }
+  .public-page-cta-actions,
+  .public-page-cta-actions > a {
+    width: 100%;
   }
 }
 

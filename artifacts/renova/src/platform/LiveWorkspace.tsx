@@ -144,6 +144,7 @@ type Enquiry = {
   actorType: string;
   experienceYears: number | null;
   message: string;
+  source: string;
   status: string;
   createdAt: string;
 };
@@ -1813,8 +1814,9 @@ function AdminView() {
           <span>Admin intake</span>
           <h2>Website enquiries</h2>
           <p>
-            Requests submitted through the public contact and organization forms
-            are stored in PostgreSQL and visible only to administrators.
+            Requests submitted through the public contact, organization and
+            feasibility forms are stored in PostgreSQL and visible only to
+            administrators.
           </p>
         </div>
         {error && (
@@ -1829,7 +1831,7 @@ function AdminView() {
         {items.map((item) => (
           <article className="live-list-card" key={item.id}>
             <small>
-              {item.reference} · {item.status}
+              {item.reference} · {item.status} · {item.source}
             </small>
             <h3>
               {item.name} · {item.organizationName}

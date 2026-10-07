@@ -3160,9 +3160,17 @@ type PublicPageData = {
   title: string;
   intro: string;
   highlights: Array<{ title: string; detail: string }>;
+  ctaEyebrow?: string;
+  ctaTitle?: string;
+  ctaDetail?: string;
   ctaLabel: string;
   ctaHref: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
 };
+
+const renovaContactEmail =
+  import.meta.env.VITE_RENOVA_CONTACT_EMAIL?.trim() || "contact@renova.example";
 
 const publicPageMap: Record<string, PublicPageData> = {
   "/feasibility": {
@@ -3192,8 +3200,14 @@ const publicPageMap: Record<string, PublicPageData> = {
           "When ready, your Society can choose what permitted information becomes a redevelopment opportunity.",
       },
     ],
-    ctaLabel: "Check Feasibility",
-    ctaHref: "/dashboard/society#get-your-society-feasibility",
+    ctaEyebrow: "Society support",
+    ctaTitle: "Not sure where to start?",
+    ctaDetail:
+      "Share your society details or ask us a question. RENOVA will help coordinate the next steps.",
+    ctaLabel: "Raise a Feasibility Enquiry",
+    ctaHref: "/feasibility/enquiry",
+    secondaryCtaLabel: "Email Us",
+    secondaryCtaHref: `mailto:${renovaContactEmail}?subject=${encodeURIComponent("Society Feasibility Enquiry")}`,
   },
   "/projects": {
     eyebrow: "RENOVA project directory",
@@ -4544,13 +4558,20 @@ const registrationCopy: Record<
     detail:
       "Share a few details and the RENOVA team will understand the right next conversation.",
   },
+  Feasibility: {
+    eyebrow: "Society feasibility enquiry",
+    title: "Share your society details.",
+    detail:
+      "Tell RENOVA what you know about your society and the question you would like help with. No technical redevelopment knowledge is required.",
+  },
 };
 
 function NetworkRegistrationPage({
   role,
 }: {
-  role: "Developer" | "PMC" | "Architect" | "Contact";
+  role: "Developer" | "PMC" | "Architect" | "Contact" | "Feasibility";
 }) {
+  const isFeasibilityEnquiry = role === "Feasibility";
   const copy = registrationCopy[role];
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -4562,7 +4583,8 @@ function NetworkRegistrationPage({
     phone: "",
     city: "Mumbai",
     experience: "",
-    interest: role === "Contact" ? "Housing Society" : role,
+    interest:
+      role === "Contact" || isFeasibilityEnquiry ? "Housing Society" : role,
     message: "",
     consent: false,
   });
@@ -4583,10 +4605,19 @@ function NetworkRegistrationPage({
           email: form.email,
           phone: form.phone,
           city: form.city,
-          actorType: role === "Contact" ? form.interest : role,
-          experienceYears: role === "Contact" ? null : Number(form.experience),
+          actorType:
+            role === "Contact"
+              ? form.interest
+              : isFeasibilityEnquiry
+                ? "Housing Society"
+                : role,
+          experienceYears:
+            role === "Contact" || isFeasibilityEnquiry
+              ? null
+              : Number(form.experience),
           message: form.message,
           consent: form.consent,
+          source: isFeasibilityEnquiry ? "FEASIBILITY" : "WEBSITE",
         }),
       });
       const result = await response.json().catch(() => null);
@@ -4616,14 +4647,26 @@ function NetworkRegistrationPage({
           <span>
             <CheckCircle2 size={34} />
           </span>
-          <p>Details received</p>
+          <p>
+            {isFeasibilityEnquiry
+              ? "Feasibility enquiry received"
+              : "Details received"}
+          </p>
           <h1>Thank you, {form.name}.</h1>
           <div>
             Your RENOVA reference is <strong>{submitted}</strong>. Your
-            information has been saved and is ready for review.
+            {isFeasibilityEnquiry
+              ? " feasibility enquiry has been saved securely and is ready for RENOVA Admin review."
+              : " information has been saved and is ready for review."}
           </div>
-          <Link href="/" className="stitch-primary-button">
-            Return to RENOVA home <ArrowUpRight size={15} />
+          <Link
+            href={isFeasibilityEnquiry ? "/feasibility" : "/"}
+            className="stitch-primary-button"
+          >
+            {isFeasibilityEnquiry
+              ? "Return to Society Feasibility"
+              : "Return to RENOVA home"}{" "}
+            <ArrowUpRight size={15} />
           </Link>
         </main>
       </div>
@@ -4651,13 +4694,15 @@ function NetworkRegistrationPage({
             <h2>
               {role === "Contact"
                 ? "Start a conversation"
-                : "Create your profile"}
+                : isFeasibilityEnquiry
+                  ? "Raise a feasibility enquiry"
+                  : "Create your profile"}
             </h2>
             <p>Complete the details below. Fields marked * are required.</p>
           </div>
           <div className="working-form-grid">
             <label>
-              Full name *
+              {isFeasibilityEnquiry ? "Contact person" : "Full name"} *
               <input
                 required
                 value={form.name}
@@ -4666,7 +4711,8 @@ function NetworkRegistrationPage({
               />
             </label>
             <label>
-              Organisation / Society *
+              {isFeasibilityEnquiry ? "Society name" : "Organisation / Society"}{" "}
+              *
               <input
                 required
                 value={form.organisation}
@@ -4674,7 +4720,7 @@ function NetworkRegistrationPage({
                   setField("organisation", event.target.value)
                 }
                 placeholder={
-                  role === "Contact"
+                  role === "Contact" || isFeasibilityEnquiry
                     ? "Society or company name"
                     : "Registered organisation name"
                 }
@@ -4702,7 +4748,10 @@ function NetworkRegistrationPage({
               />
             </label>
             <label>
-              City / Primary market *
+              {isFeasibilityEnquiry
+                ? "Society location"
+                : "City / Primary market"}{" "}
+              *
               <input
                 required
                 value={form.city}
@@ -4724,7 +4773,7 @@ function NetworkRegistrationPage({
                   <option>Legal / Other Professional</option>
                 </select>
               </label>
-            ) : (
+            ) : isFeasibilityEnquiry ? null : (
               <label>
                 Years of relevant experience *
                 <input
@@ -4740,13 +4789,20 @@ function NetworkRegistrationPage({
               </label>
             )}
             <label className="working-field-wide">
-              How can RENOVA help? *
+              {isFeasibilityEnquiry
+                ? "Your question or message"
+                : "How can RENOVA help?"}{" "}
+              *
               <textarea
                 required
                 rows={5}
                 value={form.message}
                 onChange={(event) => setField("message", event.target.value)}
-                placeholder="Tell us about your projects, requirement or the opportunity you are looking for."
+                placeholder={
+                  isFeasibilityEnquiry
+                    ? "Tell us what you know about the property and what you would like RENOVA to help you understand."
+                    : "Tell us about your projects, requirement or the opportunity you are looking for."
+                }
               />
             </label>
             <label className="working-consent working-field-wide">
@@ -4768,7 +4824,12 @@ function NetworkRegistrationPage({
             className="stitch-primary-button"
             disabled={submitting}
           >
-            {submitting ? "Submitting…" : "Submit to RENOVA"} <Send size={15} />
+            {submitting
+              ? "Submitting…"
+              : isFeasibilityEnquiry
+                ? "Raise Feasibility Enquiry"
+                : "Submit to RENOVA"}{" "}
+            <Send size={15} />
           </button>
         </form>
       </main>
@@ -4910,13 +4971,27 @@ function PublicPage({ page }: { page: PublicPageData }) {
           ))}
         </section>
         <section className="public-page-cta">
-          <div>
-            <p>Move forward with clarity.</p>
-            <h2>Bring your next redevelopment step to RENOVA.</h2>
+          <div className="public-page-cta-copy">
+            <p>{page.ctaEyebrow || "Move forward with clarity."}</p>
+            <h2>
+              {page.ctaTitle || "Bring your next redevelopment step to RENOVA."}
+            </h2>
+            {page.ctaDetail && <span>{page.ctaDetail}</span>}
           </div>
-          <Link href={page.ctaHref} className="stitch-primary-button">
-            {page.ctaLabel} <ArrowUpRight size={15} />
-          </Link>
+          <div className="public-page-cta-actions">
+            <Link href={page.ctaHref} className="stitch-primary-button">
+              {page.ctaLabel} <ArrowUpRight size={15} />
+            </Link>
+            {page.secondaryCtaLabel && page.secondaryCtaHref && (
+              <a
+                href={page.secondaryCtaHref}
+                className="public-page-cta-secondary"
+                aria-label={`${page.secondaryCtaLabel}: ${renovaContactEmail}`}
+              >
+                {page.secondaryCtaLabel} <Send size={15} />
+              </a>
+            )}
+          </div>
         </section>
       </main>
       <footer className="stitch-footer">
@@ -4980,6 +5055,8 @@ function Router() {
     return <NetworkRegistrationPage role="Architect" />;
   if (pathname === "/contact")
     return <NetworkRegistrationPage role="Contact" />;
+  if (pathname === "/feasibility/enquiry")
+    return <NetworkRegistrationPage role="Feasibility" />;
   if (pathname === "/knowledge-centre/faqs") return <FaqPage />;
   const publicPage = publicPageMap[pathname];
   if (publicPage) return <PublicPage page={publicPage} />;

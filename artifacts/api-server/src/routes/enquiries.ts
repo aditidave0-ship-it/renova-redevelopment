@@ -6,7 +6,7 @@ import { enquiries, requireDb } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/session";
 
 const router: IRouter = Router();
-const enquirySchema = z.object({
+export const enquirySchema = z.object({
   name: z.string().trim().min(2).max(160),
   organizationName: z.string().trim().min(2).max(220),
   email: z
@@ -28,6 +28,7 @@ const enquirySchema = z.object({
   experienceYears: z.number().int().min(0).max(100).nullable().optional(),
   message: z.string().trim().min(10).max(5000),
   consent: z.literal(true),
+  source: z.enum(["WEBSITE", "FEASIBILITY"]).default("WEBSITE"),
 });
 
 function fingerprint(request: { ip?: string }, email: string): string {
@@ -70,6 +71,7 @@ router.post("/enquiries", async (request, response, next) => {
       actorType: input.actorType,
       experienceYears: input.experienceYears ?? null,
       message: input.message,
+      source: input.source,
       requestFingerprint,
     });
     return response.status(201).json({ reference: enquiryReference });
@@ -97,6 +99,7 @@ router.get(
           actorType: enquiries.actorType,
           experienceYears: enquiries.experienceYears,
           message: enquiries.message,
+          source: enquiries.source,
           status: enquiries.status,
           createdAt: enquiries.createdAt,
         })
