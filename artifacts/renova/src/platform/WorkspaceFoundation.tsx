@@ -73,6 +73,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
   } | null>(null);
   const [metrics, setMetrics] = useState<Record<string, number | string>>({});
   const [requests, setRequests] = useState<Request[]>([]);
+  const [histories, setHistories] = useState<Record<string, { status: string; createdAt: string }[]>>({});
   const [editing, setEditing] = useState<Request | null>(null);
   const [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(true),
@@ -300,6 +301,10 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
           <h3>{item.propertyAddress}</h3>
           <p>{item.requirement}</p>
           <p>{item.assessmentNotes || "Assessment not yet provided."}</p>
+          {role === "SOCIETY" && <>
+            <button type="button" onClick={async () => { try { const data = await request<{ history: { status: string; createdAt: string }[] }>(`/societies/me/feasibility/${item.id}/history`); setHistories(current => ({ ...current, [item.id]: data.history })); } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load history"); } }}>View status history</button>
+            {histories[item.id] && <ol aria-label="Feasibility status history">{histories[item.id].map((entry, index) => <li key={index}>{entry.status} · {new Date(entry.createdAt).toLocaleString()}</li>)}</ol>}
+          </>}
           {role === "SOCIETY" && ["DRAFT", "MORE_INFORMATION_REQUIRED"].includes(item.status) && <button onClick={() => { setEditing(item); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Edit / review request</button>}
           {role === "ADMIN" && (
             <form
