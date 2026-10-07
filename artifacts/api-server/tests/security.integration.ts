@@ -406,6 +406,19 @@ try {
     "IN_REVIEW",
   );
   checks++;
+  for (const status of ["MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY"]) {
+    assert.equal((await request(`/admin/feasibility/${feasibility.id}`, "PATCH", adminCookie, { status, assessmentNotes: "TEST ONLY assessment; no regulatory conclusions" })).status, 200); checks++;
+    if (status === "MORE_INFORMATION_REQUIRED") {
+      assert.equal((await request(`/societies/me/feasibility/${feasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY updated property", requirement: "TEST ONLY additional information provided", submit: true })).status, 200); checks++;
+    }
+  }
+  const history = await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", a.cookie);
+  assert.equal(history.status, 200); checks++;
+  assert.deepEqual(((await history.json()) as any).history.map((entry: any) => entry.status), ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "SUBMITTED", "ASSESSMENT_READY"]); checks++;
+  assert.equal((await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", b.cookie)).status, 404); checks++;
+  const finalResult = ((await (await request("/societies/me/feasibility", "GET", a.cookie)).json()) as any).requests.find((r: any) => r.id === feasibility.id);
+  assert.equal(finalResult.status, "ASSESSMENT_READY"); checks++;
+  assert.equal(finalResult.assessmentNotes, "TEST ONLY assessment; no regulatory conclusions"); checks++;
   const enquiry = await request("/enquiries", "POST", "", {
     name: "TEST ONLY person",
     organizationName: "TEST ONLY society",
