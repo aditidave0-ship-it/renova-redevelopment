@@ -3690,6 +3690,10 @@ html {
   font-weight: 620;
   letter-spacing: -0.045em;
 }
+.public-page-hero h1,
+.working-hero h1 {
+  color: #fff;
+}
 .public-page-hero-inner > span,
 .working-hero > div > span,
 .working-form-intro > span {
