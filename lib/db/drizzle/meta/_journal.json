@@ -29,6 +29,7 @@
       "when": 1791266400001,
       "tag": "0003_feasibility_foundation",
       "breakpoints": true
-    }
+    },
+    { "idx": 4, "version": "7", "when": 1791357000000, "tag": "0004_participant_feasibility", "breakpoints": true }
   ]
 }
