@@ -32,6 +32,7 @@ for (const file of [
   "0001_bright_hedge_knight",
   "0002_credential_versions",
   "0003_feasibility_foundation",
+  "0004_participant_feasibility",
 ]) {
   await engine.exec(await readFile(`../../lib/db/drizzle/${file}.sql`, "utf8"));
 }
@@ -56,7 +57,7 @@ async function request(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
-async function account(role: "SOCIETY" | "DEVELOPER" | "PMC", n: number) {
+async function account(role: "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL", n: number) {
   const [user] = await db
     .insert(users)
     .values({
@@ -89,6 +90,13 @@ async function account(role: "SOCIETY" | "DEVELOPER" | "PMC", n: number) {
   };
 }
 try {
+  const professional = await account("PROFESSIONAL", 1);
+  for (const specialization of ["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"]) {
+    const saved = await request("/organizations/me", "PUT", professional.cookie, { name: "TEST ONLY professional", location: "Mumbai", description: "TEST ONLY practice", website: "", specialization, services: "TEST ONLY services", credentials: "Self-reported test record", portfolio: "TEST ONLY portfolio" });
+    assert.equal(saved.status, 200); checks++;
+    assert.equal(((await (await request("/organizations/me", "GET", professional.cookie)).json()) as any).organization.specialization, specialization); checks++;
+  }
+  assert.equal((await request("/societies/me/opportunities", "GET", professional.cookie)).status, 403); checks++;
   const a = await account("SOCIETY", 1),
     b = await account("SOCIETY", 2),
     dev = await account("DEVELOPER", 1),
@@ -309,6 +317,19 @@ try {
     checks++;
   }
   const feasible = await request(
+    "/societies/me/feasibility", "POST", a.cookie,
+    { propertyAddress: "", requirement: "", submit: false },
+  );
+  assert.equal(feasible.status, 201); checks++;
+  const draftFeasibility = ((await feasible.json()) as any).request;
+  assert.equal(draftFeasibility.status, "DRAFT"); checks++;
+  for (const actor of [b, dev, pmc]) {
+    assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", actor.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: true })).status, actor === b ? 404 : 403); checks++;
+  }
+  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: false })).status, 200); checks++;
+  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: true })).status, 200); checks++;
+  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: false })).status, 404); checks++;
+  const submittedFeasible = await request(
     "/societies/me/feasibility",
     "POST",
     a.cookie,
@@ -317,9 +338,9 @@ try {
       requirement: "TEST ONLY request for professional review",
     },
   );
-  assert.equal(feasible.status, 201);
+  assert.equal(submittedFeasible.status, 201);
   checks++;
-  const feasibility = ((await feasible.json()) as any).request;
+  const feasibility = ((await submittedFeasible.json()) as any).request;
   assert.equal(feasibility.status, "SUBMITTED");
   assert.equal(feasibility.assessmentNotes, null);
   checks++;
@@ -381,7 +402,7 @@ try {
   checks++;
   const reviewed = await request("/societies/me/feasibility", "GET", a.cookie);
   assert.equal(
-    ((await reviewed.json()) as any).requests[0].status,
+    ((await reviewed.json()) as any).requests.find((r: any) => r.id === feasibility.id).status,
     "IN_REVIEW",
   );
   checks++;
