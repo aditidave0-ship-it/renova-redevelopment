@@ -46,6 +46,7 @@ const registrationSchema = z.object({
   password: passwordSchema,
   displayName: z.string().trim().min(2).max(160),
   role: roleSchema,
+  specialization: z.enum(["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"]).optional(),
   organizationName: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160).optional(),
 });
@@ -181,6 +182,7 @@ router.post("/auth/register", async (request, response, next) => {
         .values({
           name: input.organizationName,
           kind: input.role,
+          specialization: input.role === "PROFESSIONAL" ? input.specialization ?? "OTHER" : null,
           location: input.location ?? null,
         })
         .returning({ id: organizations.id });
