@@ -65,7 +65,7 @@ import {
   useListProjects,
   useListRegulations,
 } from "@workspace/api-client-react";
-import { Link, Route, Switch, useLocation, useParams } from "wouter";
+import { Link, Route, Switch, Redirect, useLocation, useParams } from "wouter";
 import {
   ErrorBoundary,
   type ErrorFallbackProps,
@@ -4890,6 +4890,9 @@ function Router() {
   const [location] = useLocation();
   const pathname = location.split("?")[0];
   if (pathname === "/") return <MarketingHome />;
+  // Legacy dashboard URLs enter the one server-authorized workspace.
+  // Never trust a URL role or reuse demonstration dashboard data for accounts.
+  if (pathname.startsWith("/dashboard/")) return <Redirect to="/platform/live" />;
   if (pathname === "/platform/live")
     return (
       <Suspense
