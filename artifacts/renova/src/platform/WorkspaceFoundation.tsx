@@ -5,6 +5,10 @@ type Organization = {
   location: string | null;
   website: string | null;
   description: string | null;
+  specialization: string | null;
+  services: string | null;
+  credentials: string | null;
+  portfolio: string | null;
 };
 type Society = {
   address: string | null;
@@ -19,6 +23,11 @@ type Request = {
   requirement: string;
   status: string;
   assessmentNotes: string | null;
+  siteArea?: string | null;
+  memberCount?: number | null;
+  buildingAge?: number | null;
+  propertyInformation?: string | null;
+  regulatoryInformation?: string | null;
 };
 async function request<T>(
   path: string,
@@ -64,6 +73,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
   } | null>(null);
   const [metrics, setMetrics] = useState<Record<string, number | string>>({});
   const [requests, setRequests] = useState<Request[]>([]);
+  const [editing, setEditing] = useState<Request | null>(null);
   const [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
@@ -105,6 +115,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
     const form = event.currentTarget;
     const data = new FormData(form);
     const payload: Record<string, unknown> = Object.fromEntries(data.entries());
+    if (kind === "feasibility") payload.submit = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value") !== "draft";
     if (kind === "society" || kind === "feasibility")
       for (const key of ["memberCount", "buildingAge"]) {
         if (payload[key] === "") delete payload[key];
@@ -121,7 +132,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
           ? "Feasibility request saved for review. No assessment has been made yet."
           : "Saved successfully.",
       );
-      if (kind === "feasibility") form.reset();
+      if (kind === "feasibility") { form.reset(); setEditing(null); }
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to save");
@@ -175,6 +186,8 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
               void submit(e, "/organizations/me", "PUT", "organization")
             }
           >
+            <h3>{role === "PROFESSIONAL" ? "Professional onboarding" : `${role.toLowerCase()} onboarding`}</h3>
+            {role === "PROFESSIONAL" && <label className="live-field"><span>Specialization</span><select name="specialization" defaultValue={profile.organization.specialization || "OTHER"}><option value="LEGAL">Advocate / Legal</option><option value="ARCHITECT">Architect</option><option value="STRUCTURAL">Structural Consultant</option><option value="FINANCE_VALUATION">Finance / Valuation</option><option value="OTHER">Other Professional</option></select></label>}
             {field(
               "Organization name",
               "name",
@@ -184,6 +197,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
             )}
             {field("Location", "location", profile.organization.location)}
             {field("Website", "website", profile.organization.website, "url")}
+            {role !== "SOCIETY" && <>{field("Services", "services", profile.organization.services)}{field("Credentials (self-reported; not verified)", "credentials", profile.organization.credentials)}{field("Portfolio information (self-reported)", "portfolio", profile.organization.portfolio)}</>}
             {field(
               role === "PMC"
                 ? "PMC services and practice description"
@@ -243,8 +257,9 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
       {role === "SOCIETY" && (
         <form
           className="live-form"
+          key={editing?.id || "new-feasibility"}
           onSubmit={(e) =>
-            void submit(e, "/societies/me/feasibility", "POST", "feasibility")
+            void submit(e, editing ? `/societies/me/feasibility/${editing.id}` : "/societies/me/feasibility", editing ? "PATCH" : "POST", "feasibility")
           }
         >
           <h3>Get Your Society Feasibility</h3>
@@ -253,21 +268,25 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
             request does not establish FSI, permissible height, costs, returns
             or regulatory eligibility.
           </p>
-          {field("Property address", "propertyAddress", "", "text", true)}
-          {field("Site area (include unit; optional)", "siteArea")}
-          {field("Members (optional)", "memberCount", null, "number")}
-          {field("Building age (optional)", "buildingAge", null, "number")}
+          {field("Property address", "propertyAddress", editing?.propertyAddress)}
+          {field("Site area (include unit; optional)", "siteArea", editing?.siteArea)}
+          {field("Members (optional)", "memberCount", editing?.memberCount, "number")}
+          {field("Building age (optional)", "buildingAge", editing?.buildingAge, "number")}
+          {field("Available property information (optional)", "propertyInformation", editing?.propertyInformation)}
+          {field("Available regulatory information (unverified; optional)", "regulatoryInformation", editing?.regulatoryInformation)}
+          <p>Document uploads are not yet supported. Review the details below before submitting; regulatory information requires professional assessment.</p>
           <label className="live-field">
             <span>Requirement</span>
             <textarea
               name="requirement"
-              required
-              minLength={20}
+              defaultValue={editing?.requirement || ""}
               maxLength={5000}
               rows={4}
             />
           </label>
-          <button className="live-primary" disabled={busy}>
+          <button className="live-secondary" value="draft" disabled={busy}>Save draft</button>
+          {editing && <button type="button" onClick={() => setEditing(null)}>Cancel editing</button>}
+          <button className="live-primary" value="submit" disabled={busy}>
             Submit feasibility request
           </button>
         </form>
@@ -281,6 +300,7 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
           <h3>{item.propertyAddress}</h3>
           <p>{item.requirement}</p>
           <p>{item.assessmentNotes || "Assessment not yet provided."}</p>
+          {role === "SOCIETY" && ["DRAFT", "MORE_INFORMATION_REQUIRED"].includes(item.status) && <button onClick={() => { setEditing(item); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Edit / review request</button>}
           {role === "ADMIN" && (
             <form
               className="live-form"
@@ -302,8 +322,9 @@ export function WorkspaceFoundation({ role }: { role: Role }) {
                   }
                 >
                   <option>IN_REVIEW</option>
-                  <option>NEEDS_INFORMATION</option>
-                  <option>ASSESSED</option>
+                  <option>MORE_INFORMATION_REQUIRED</option>
+                  <option>ASSESSMENT_READY</option>
+                  <option>CLOSED</option>
                 </select>
               </label>
               <label className="live-field">
