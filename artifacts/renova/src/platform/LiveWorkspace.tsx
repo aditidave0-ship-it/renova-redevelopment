@@ -112,6 +112,8 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
     "register" | "login" | "forgot" | "resend" | "reset" | "verify"
   >(verificationToken ? "verify" : resetToken ? "reset" : "register");
   const [role, setRole] = useState<Role>("SOCIETY");
+  const [participant, setParticipant] = useState("SOCIETY");
+  const [detailsStep, setDetailsStep] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -162,6 +164,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             password: form.get("password"),
             displayName: form.get("displayName"),
             role,
+            specialization: role === "PROFESSIONAL" ? participant : undefined,
             organizationName: form.get("organizationName"),
             location: form.get("location"),
           }),
@@ -202,8 +205,18 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
     }
   }
 
+  if (mode === "register" && !detailsStep) return <section className="live-panel live-auth">
+    <h2>Create account — choose your role</h2>
+    <p>Your selected role determines your onboarding and workspace. Public registration remains subject to release approval.</p>
+    <Field label="I am joining as"><select value={participant} onChange={(event) => { const value = event.target.value; setParticipant(value); setRole((["SOCIETY", "DEVELOPER", "PMC"].includes(value) ? value : "PROFESSIONAL") as Role); }}>
+      <option value="SOCIETY">Society / Property Owner</option><option value="DEVELOPER">Developer</option><option value="PMC">PMC</option><option value="LEGAL">Advocate / Legal Professional</option><option value="ARCHITECT">Architect</option><option value="STRUCTURAL">Structural Consultant</option><option value="FINANCE_VALUATION">Financial / Valuation Professional</option><option value="OTHER">Other Redevelopment Professional</option>
+    </select></Field>
+    <button className="live-primary" onClick={() => setDetailsStep(true)}>Continue to account details</button>
+    <button className="live-secondary" onClick={() => setMode("login")}>Already have an account? Sign in</button>
+  </section>;
   return (
     <section className="live-panel live-auth">
+      {mode === "register" && <button type="button" onClick={() => setDetailsStep(false)}>Back to role selection</button>}
       <div className="live-panel-intro">
         <span>RENOVA account</span>
         <h2>
@@ -253,13 +266,17 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
           <>
             <Field label="I represent">
               <select
-                value={role}
-                onChange={(event) => setRole(event.target.value as Role)}
+                value={participant}
+                onChange={(event) => { const value = event.target.value; setParticipant(value); setRole((["SOCIETY", "DEVELOPER", "PMC"].includes(value) ? value : "PROFESSIONAL") as Role); }}
               >
-                <option value="SOCIETY">Housing society</option>
+                <option value="SOCIETY">Society / Property Owner</option>
                 <option value="DEVELOPER">Developer</option>
                 <option value="PMC">PMC</option>
-                <option value="PROFESSIONAL">Other professional</option>
+                <option value="LEGAL">Advocate / Legal Professional</option>
+                <option value="ARCHITECT">Architect</option>
+                <option value="STRUCTURAL">Structural Consultant</option>
+                <option value="FINANCE_VALUATION">Financial / Valuation Professional</option>
+                <option value="OTHER">Other Redevelopment Professional</option>
               </select>
             </Field>
             <Field label="Your name">
