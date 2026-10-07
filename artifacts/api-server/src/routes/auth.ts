@@ -28,12 +28,18 @@ import {
   authTokens,
   organizationMembers,
   organizations,
+  professionalProfiles,
   societies,
   users,
 } from "@workspace/db";
+import {
+  dashboardPath,
+  REGISTRATION_PARTICIPANTS,
+  registrationIdentity,
+} from "../lib/role-policy";
 
 const router: IRouter = Router();
-const roleSchema = z.enum(["SOCIETY", "DEVELOPER", "PMC", "PROFESSIONAL"]);
+const participantSchema = z.enum(REGISTRATION_PARTICIPANTS);
 const emailSchema = z
   .string()
   .trim()
@@ -45,7 +51,7 @@ const registrationSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   displayName: z.string().trim().min(2).max(160),
-  role: roleSchema,
+  participantType: participantSchema,
   organizationName: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160).optional(),
 });
@@ -67,6 +73,9 @@ function publicUser(
     displayName: user.displayName,
     role: user.role,
     organizationId,
+    dashboardPath: dashboardPath(
+      user.role as "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL" | "ADMIN",
+    ),
   };
 }
 
@@ -130,14 +139,12 @@ async function replaceAuthToken(
           isNull(authTokens.usedAt),
         ),
       );
-    await tx
-      .insert(authTokens)
-      .values({
-        userId,
-        purpose,
-        tokenHash: issued.tokenHash,
-        expiresAt: issued.expiresAt,
-      });
+    await tx.insert(authTokens).values({
+      userId,
+      purpose,
+      tokenHash: issued.tokenHash,
+      expiresAt: issued.expiresAt,
+    });
   });
   return issued.token;
 }
@@ -151,6 +158,7 @@ router.post("/auth/register", async (request, response, next) => {
         .json({ error: "Registration is not open yet" });
     ensureEmailDeliveryConfigured();
     const input = registrationSchema.parse(request.body);
+    const identity = registrationIdentity(input.participantType);
     const database = getDb();
     const existing = await database
       .select({ id: users.id })
@@ -168,7 +176,7 @@ router.post("/auth/register", async (request, response, next) => {
           email: input.email,
           passwordHash: hashPassword(input.password),
           displayName: input.displayName,
-          role: input.role,
+          role: identity.role,
           isActive: false,
           emailVerifiedAt: null,
         })
@@ -182,15 +190,24 @@ router.post("/auth/register", async (request, response, next) => {
         .insert(organizations)
         .values({
           name: input.organizationName,
-          kind: input.role,
+          kind: identity.role,
           location: input.location ?? null,
         })
         .returning({ id: organizations.id });
       await tx
         .insert(organizationMembers)
-        .values({ organizationId: organization.id, userId: user.id });
-      if (input.role === "SOCIETY")
+        .values({
+          organizationId: organization.id,
+          userId: user.id,
+          role: identity.role,
+        });
+      if (identity.role === "SOCIETY")
         await tx.insert(societies).values({ organizationId: organization.id });
+      if (identity.role === "PROFESSIONAL" && identity.professionalType)
+        await tx.insert(professionalProfiles).values({
+          organizationId: organization.id,
+          specialization: identity.professionalType,
+        });
       return { user, organizationId: organization.id };
     });
     const token = await replaceAuthToken(
@@ -291,12 +308,10 @@ router.post("/auth/resend-verification", async (request, response, next) => {
         });
       }
     }
-    return response
-      .status(202)
-      .json({
-        message:
-          "If an unverified account exists, a new verification email has been sent",
-      });
+    return response.status(202).json({
+      message:
+        "If an unverified account exists, a new verification email has been sent",
+    });
   } catch (error) {
     return next(error);
   }
@@ -333,11 +348,9 @@ router.post("/auth/forgot-password", async (request, response, next) => {
         });
       }
     }
-    return response
-      .status(202)
-      .json({
-        message: "If the account exists, a password reset email has been sent",
-      });
+    return response.status(202).json({
+      message: "If the account exists, a password reset email has been sent",
+    });
   } catch (error) {
     return next(error);
   }
@@ -408,7 +421,10 @@ router.post("/auth/login", async (request, response, next) => {
     const input = loginSchema.parse(request.body);
     const database = requireDb();
     const rows = await database
-      .select({ user: users, organizationId: organizations.id })
+      .select({
+        user: users,
+        organizationId: organizations.id,
+      })
       .from(users)
       .leftJoin(organizationMembers, eq(organizationMembers.userId, users.id))
       .leftJoin(
@@ -449,7 +465,9 @@ router.get("/auth/me", async (request, response, next) => {
     const auth = await readSession(request);
     if (!auth)
       return response.status(401).json({ error: "Authentication required" });
-    return response.json({ user: auth });
+    return response.json({
+      user: { ...auth, dashboardPath: dashboardPath(auth.role) },
+    });
   } catch (error) {
     return next(error);
   }

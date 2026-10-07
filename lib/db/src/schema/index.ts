@@ -67,6 +67,29 @@ export const enquiryStatus = pgEnum("enquiry_status", [
   "CONTACTED",
   "CLOSED",
 ]);
+export const feasibilityStatus = pgEnum("feasibility_status", [
+  "DRAFT",
+  "SUBMITTED",
+  "IN_REVIEW",
+  "MORE_INFORMATION_REQUIRED",
+  "ASSESSMENT_READY",
+  "CLOSED",
+]);
+export const feasibilityDocumentStatus = pgEnum("feasibility_document_status", [
+  "PENDING_UPLOAD",
+  "AVAILABLE",
+  "REMOVED",
+]);
+export const professionalSpecialization = pgEnum(
+  "professional_specialization",
+  [
+    "ADVOCATE_LEGAL",
+    "ARCHITECT",
+    "STRUCTURAL_CONSULTANT",
+    "VALUATION_FINANCE",
+    "OTHER",
+  ],
+);
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -131,6 +154,7 @@ export const organizationMembers = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    role: accountRole("role"),
     ...timestamps,
   },
   (table) => [
@@ -167,7 +191,10 @@ export const societies = pgTable("societies", {
 
 export const developerProfiles = pgTable("developer_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organization_id").notNull().unique().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .unique()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   logoUrl: varchar("logo_url", { length: 1000 }),
   description: text("description"),
   website: varchar("website", { length: 500 }),
@@ -175,30 +202,68 @@ export const developerProfiles = pgTable("developer_profiles", {
   publicPhone: varchar("public_phone", { length: 40 }),
   officeLocation: varchar("office_location", { length: 220 }),
   areasServed: jsonb("areas_served").$type<string[]>().default([]).notNull(),
-  specializations: jsonb("specializations").$type<string[]>().default([]).notNull(),
+  specializations: jsonb("specializations")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
   teamInformation: text("team_information"),
   portfolio: jsonb("portfolio").$type<PortfolioEntry[]>().default([]).notNull(),
-  credentials: jsonb("credentials").$type<ProfileCredential[]>().default([]).notNull(),
+  credentials: jsonb("credentials")
+    .$type<ProfileCredential[]>()
+    .default([])
+    .notNull(),
   marketplaceVisible: boolean("marketplace_visible").default(true).notNull(),
   ...timestamps,
 });
 
 export const pmcProfiles = pgTable("pmc_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organization_id").notNull().unique().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .unique()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   logoUrl: varchar("logo_url", { length: 1000 }),
   description: text("description"),
   website: varchar("website", { length: 500 }),
   publicEmail: varchar("public_email", { length: 320 }),
   publicPhone: varchar("public_phone", { length: 40 }),
   officeLocation: varchar("office_location", { length: 220 }),
-  locationsServed: jsonb("locations_served").$type<string[]>().default([]).notNull(),
+  locationsServed: jsonb("locations_served")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
   services: jsonb("services").$type<string[]>().default([]).notNull(),
-  specializations: jsonb("specializations").$type<string[]>().default([]).notNull(),
+  specializations: jsonb("specializations")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
   teamInformation: text("team_information"),
   portfolio: jsonb("portfolio").$type<PortfolioEntry[]>().default([]).notNull(),
-  credentials: jsonb("credentials").$type<ProfileCredential[]>().default([]).notNull(),
+  credentials: jsonb("credentials")
+    .$type<ProfileCredential[]>()
+    .default([])
+    .notNull(),
   marketplaceVisible: boolean("marketplace_visible").default(true).notNull(),
+  ...timestamps,
+});
+
+export const professionalProfiles = pgTable("professional_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .unique()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  specialization: professionalSpecialization("specialization").notNull(),
+  description: text("description"),
+  publicEmail: varchar("public_email", { length: 320 }),
+  publicPhone: varchar("public_phone", { length: 40 }),
+  website: varchar("website", { length: 500 }),
+  services: jsonb("services").$type<string[]>().default([]).notNull(),
+  credentials: jsonb("credentials")
+    .$type<ProfileCredential[]>()
+    .default([])
+    .notNull(),
+  marketplaceVisible: boolean("marketplace_visible").default(false).notNull(),
   ...timestamps,
 });
 
@@ -240,7 +305,9 @@ export const opportunityInterests = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     message: text("message"),
     status: interestStatus("status").default("PENDING").notNull(),
-    reviewStatus: varchar("review_status", { length: 32 }).default("RECEIVED").notNull(),
+    reviewStatus: varchar("review_status", { length: 32 })
+      .default("RECEIVED")
+      .notNull(),
     ...timestamps,
   },
   (table) => [
@@ -319,6 +386,172 @@ export const enquiries = pgTable(
   ],
 );
 
+export const feasibilityRequests = pgTable(
+  "feasibility_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reference: varchar("reference", { length: 40 }).notNull().unique(),
+    societyId: uuid("society_id")
+      .notNull()
+      .references(() => societies.id, { onDelete: "cascade" }),
+    createdByUserId: uuid("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    assignedReviewerUserId: uuid("assigned_reviewer_user_id").references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    status: feasibilityStatus("status").default("DRAFT").notNull(),
+    societyName: varchar("society_name", { length: 220 }).notNull(),
+    propertyAddress: text("property_address").notNull(),
+    locality: varchar("locality", { length: 180 }).notNull(),
+    city: varchar("city", { length: 120 }).notNull(),
+    pinCode: varchar("pin_code", { length: 12 }).notNull(),
+    contactPerson: varchar("contact_person", { length: 160 }).notNull(),
+    contactEmail: varchar("contact_email", { length: 320 }).notNull(),
+    contactPhone: varchar("contact_phone", { length: 40 }).notNull(),
+    missingInformation: text("missing_information"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("feasibility_requests_society_idx").on(table.societyId),
+    index("feasibility_requests_status_idx").on(table.status),
+  ],
+);
+
+export const feasibilityPropertyData = pgTable(
+  "feasibility_property_data",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id")
+      .notNull()
+      .unique()
+      .references(() => feasibilityRequests.id, { onDelete: "cascade" }),
+    plotArea: varchar("plot_area", { length: 160 }),
+    numberBuildings: integer("number_buildings"),
+    numberWings: integer("number_wings"),
+    existingFloors: varchar("existing_floors", { length: 160 }),
+    residentialUnits: integer("residential_units"),
+    commercialUnits: integer("commercial_units"),
+    existingBuiltUpInformation: text("existing_built_up_information"),
+    approximateBuildingAge: integer("approximate_building_age"),
+    existingParking: text("existing_parking"),
+    existingAmenities: text("existing_amenities"),
+    ctsSurveyInformation: text("cts_survey_information"),
+    existingApprovedPlans: text("existing_approved_plans"),
+    propertyCardInformation: text("property_card_information"),
+    conveyanceInformation: text("conveyance_information"),
+    existingFsiInformation: text("existing_fsi_information"),
+    roadWidth: varchar("road_width", { length: 160 }),
+    reservationsRestrictions: text("reservations_restrictions"),
+    otherPropertyInformation: text("other_property_information"),
+    unknownFields: jsonb("unknown_fields")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [index("feasibility_property_request_idx").on(table.requestId)],
+);
+
+export const feasibilityDocuments = pgTable(
+  "feasibility_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => feasibilityRequests.id, { onDelete: "cascade" }),
+    uploadedByUserId: uuid("uploaded_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    category: varchar("category", { length: 80 }).notNull(),
+    fileName: varchar("file_name", { length: 500 }).notNull(),
+    contentType: varchar("content_type", { length: 160 }).notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    storageProvider: varchar("storage_provider", { length: 80 }).notNull(),
+    storageKey: varchar("storage_key", { length: 1000 }).notNull().unique(),
+    checksumSha256: varchar("checksum_sha256", { length: 64 }),
+    status: feasibilityDocumentStatus("status")
+      .default("PENDING_UPLOAD")
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [index("feasibility_documents_request_idx").on(table.requestId)],
+);
+
+export const feasibilityAssessments = pgTable("feasibility_assessments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  requestId: uuid("request_id")
+    .notNull()
+    .unique()
+    .references(() => feasibilityRequests.id, { onDelete: "cascade" }),
+  preparedByUserId: uuid("prepared_by_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  existingProperty: text("existing_property"),
+  plotInformation: text("plot_information"),
+  existingBuiltUpArea: text("existing_built_up_area"),
+  applicablePlanningInputs: text("applicable_planning_inputs"),
+  potentialDevelopmentInputs: text("potential_development_inputs"),
+  rehabilitationRequirement: text("rehabilitation_requirement"),
+  potentialSaleComponent: text("potential_sale_component"),
+  parkingAmenityConsiderations: text("parking_amenity_considerations"),
+  keyConstraints: text("key_constraints"),
+  professionalNotes: text("professional_notes"),
+  documentsReviewed: jsonb("documents_reviewed")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
+  assessmentDate: timestamp("assessment_date", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  ...timestamps,
+});
+
+export const feasibilityAssumptions = pgTable(
+  "feasibility_assumptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    assessmentId: uuid("assessment_id")
+      .notNull()
+      .references(() => feasibilityAssessments.id, { onDelete: "cascade" }),
+    statement: text("statement").notNull(),
+    createdByUserId: uuid("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("feasibility_assumptions_assessment_idx").on(table.assessmentId),
+  ],
+);
+
+export const feasibilityStatusHistory = pgTable(
+  "feasibility_status_history",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => feasibilityRequests.id, { onDelete: "cascade" }),
+    fromStatus: feasibilityStatus("from_status"),
+    toStatus: feasibilityStatus("to_status").notNull(),
+    changedByUserId: uuid("changed_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("feasibility_status_history_request_idx").on(
+      table.requestId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const auditLogs = pgTable(
   "audit_logs",
   {
@@ -350,6 +583,7 @@ export const societyRelations = relations(societies, ({ one, many }) => ({
     references: [organizations.id],
   }),
   opportunities: many(opportunities),
+  feasibilityRequests: many(feasibilityRequests),
 }));
 export const opportunityRelations = relations(
   opportunities,

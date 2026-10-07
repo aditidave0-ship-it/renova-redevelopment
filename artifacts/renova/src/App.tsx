@@ -2898,6 +2898,27 @@ function MarketingHome() {
         </section>
 
         <section
+          className="stitch-section stitch-feasibility-cta"
+          aria-labelledby="feasibility-entry-title"
+        >
+          <div>
+            <p>Society feasibility</p>
+            <h2 id="feasibility-entry-title">GET YOUR SOCIETY FEASIBILITY</h2>
+            <span>
+              Understand the redevelopment potential of your society before
+              taking the next step.
+            </span>
+            <small>
+              Structured for authorized professional review. No unverified
+              regulatory or financial conclusions.
+            </small>
+          </div>
+          <Link href="/feasibility" className="stitch-primary-button">
+            Check Feasibility <ArrowUpRight size={16} />
+          </Link>
+        </section>
+
+        <section
           className="stitch-section stitch-opportunities"
           id="opportunities"
         >
@@ -3033,6 +3054,14 @@ function MarketingHome() {
               Open knowledge centre <BookOpenText size={16} />
             </Link>
           </div>
+          <aside className="stitch-founder" aria-label="RENOVA founder">
+            <span>Founder</span>
+            <h3>Aziz Parihar</h3>
+            <p>Founder, RENOVA</p>
+            <strong>
+              Building the digital infrastructure for redevelopment.
+            </strong>
+          </aside>
         </section>
       </main>
 
@@ -3136,6 +3165,36 @@ type PublicPageData = {
 };
 
 const publicPageMap: Record<string, PublicPageData> = {
+  "/feasibility": {
+    eyebrow: "Society feasibility",
+    title: "Get Your Society Feasibility",
+    intro:
+      "Understand the redevelopment potential of your society before taking the next step. Submit what you know, mark technical details you do not know, and let an authorized reviewer structure the assessment.",
+    highlights: [
+      {
+        title: "Start with ordinary property details",
+        detail:
+          "Society name, address and contact details are enough to begin a private draft.",
+      },
+      {
+        title: "Add information and documents where available",
+        detail:
+          "Technical and regulatory fields are optional and support “I don't know”.",
+      },
+      {
+        title: "Receive a professional assessment",
+        detail:
+          "RENOVA records reviewed inputs, assumptions, constraints and professional notes without inventing conclusions.",
+      },
+      {
+        title: "Move into the RENOVA ecosystem",
+        detail:
+          "When ready, your Society can choose what permitted information becomes a redevelopment opportunity.",
+      },
+    ],
+    ctaLabel: "Check Feasibility",
+    ctaHref: "/dashboard/society#get-your-society-feasibility",
+  },
   "/projects": {
     eyebrow: "RENOVA project directory",
     title: "Redevelopment opportunities, clearly organised.",
@@ -3741,6 +3800,11 @@ const publicPageMap: Record<string, PublicPageData> = {
         title: "Our principle",
         detail:
           "Support informed decisions without replacing independent professional advice.",
+      },
+      {
+        title: "Founder — Aziz Parihar",
+        detail:
+          "Founder, RENOVA. Building the digital infrastructure for redevelopment.",
       },
     ],
     ctaLabel: "See how RENOVA works",
@@ -4897,10 +4961,7 @@ function Router() {
         <LiveWorkspace />
       </Suspense>
     );
-  if (
-    pathname === "/platform" ||
-    pathname.startsWith("/platform/")
-  )
+  if (pathname === "/platform" || pathname.startsWith("/platform/"))
     return (
       <Suspense
         fallback={<LoadingPage label="Preparing the RENOVA platform" />}
