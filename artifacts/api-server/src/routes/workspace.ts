@@ -16,6 +16,10 @@ const organizationInput = z.object({
   name: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160),
   description: z.string().trim().max(5000),
+  specialization: z.enum(["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"]).nullable().optional(),
+  services: z.string().trim().max(5000).optional(),
+  credentials: z.string().trim().max(5000).optional(),
+  portfolio: z.string().trim().max(5000).optional(),
   website: z.union([
     z.literal(""),
     z
@@ -33,11 +37,17 @@ const societyInput = z.object({
   redevelopmentStatus: z.string().trim().min(2).max(120),
 });
 const feasibilityInput = z.object({
-  propertyAddress: z.string().trim().min(5).max(2000),
+  propertyAddress: z.string().trim().max(2000),
   siteArea: z.string().trim().max(80).optional(),
   memberCount: z.number().int().min(1).max(100000).optional(),
   buildingAge: z.number().int().min(0).max(200).optional(),
-  requirement: z.string().trim().min(20).max(5000),
+  requirement: z.string().trim().max(5000),
+  propertyInformation: z.string().trim().max(10000).optional(),
+  regulatoryInformation: z.string().trim().max(10000).optional(),
+  submit: z.boolean().default(true),
+}).superRefine((input, ctx) => {
+  if (input.submit && (input.propertyAddress.length < 5 || input.requirement.length < 20))
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Provide an address and requirement before submission" });
 });
 const idInput = z.string().uuid();
 
@@ -88,6 +98,7 @@ router.put(
         .update(organizations)
         .set({
           ...input,
+          specialization: req.auth!.role === "PROFESSIONAL" ? input.specialization : undefined,
           website: input.website || null,
           updatedAt: new Date(),
         })
@@ -198,6 +209,7 @@ router.post(
   async (req, res, next) => {
     try {
       const input = feasibilityInput.parse(req.body);
+      const { submit, ...details } = input;
       const db = requireDb();
       const [society] = await db
         .select({ id: societies.id })
@@ -207,7 +219,8 @@ router.post(
       const [request] = await db
         .insert(feasibilityRequests)
         .values({
-          ...input,
+          ...details,
+          status: submit ? "SUBMITTED" : "DRAFT",
           societyId: society.id,
           submittedByUserId: req.auth!.userId,
         })
@@ -245,6 +258,7 @@ router.get(
       const requests = await requireDb()
         .select()
         .from(feasibilityRequests)
+        .where(inArray(feasibilityRequests.status, ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY", "CLOSED"]))
         .orderBy(desc(feasibilityRequests.createdAt))
         .limit(250);
       return res.json({ requests });
@@ -262,7 +276,7 @@ router.patch(
       const id = idInput.parse(req.params.id);
       const input = z
         .object({
-          status: z.enum(["IN_REVIEW", "NEEDS_INFORMATION", "ASSESSED"]),
+          status: z.enum(["IN_REVIEW", "MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY", "CLOSED"]),
           assessmentNotes: z.string().trim().min(20).max(10000),
         })
         .parse(req.body);
@@ -275,7 +289,7 @@ router.patch(
             reviewedAt: new Date(),
             updatedAt: new Date(),
           })
-          .where(eq(feasibilityRequests.id, id))
+          .where(and(eq(feasibilityRequests.id, id), inArray(feasibilityRequests.status, ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY"])))
           .returning();
         if (updated)
           await tx
@@ -296,4 +310,16 @@ router.patch(
     }
   },
 );
+router.patch("/societies/me/feasibility/:id", requireAuth(), requireRole("SOCIETY"), async (req, res, next) => {
+  try {
+    const id = idInput.parse(req.params.id);
+    const { submit, ...details } = feasibilityInput.parse(req.body);
+    const db = requireDb();
+    const owned = db.select({ id: societies.id }).from(societies).where(eq(societies.organizationId, req.auth!.organizationId!));
+    const [request] = await db.update(feasibilityRequests).set({ ...details, status: submit ? "SUBMITTED" : "DRAFT", updatedAt: new Date() })
+      .where(and(eq(feasibilityRequests.id, id), inArray(feasibilityRequests.societyId, owned), inArray(feasibilityRequests.status, ["DRAFT", "MORE_INFORMATION_REQUIRED"]))).returning();
+    if (!request) return res.status(404).json({ error: "Editable request not found" });
+    return res.json({ request });
+  } catch (error) { return next(error); }
+});
 export default router;
