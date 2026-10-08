@@ -2321,100 +2321,11 @@ function Regulations() {
   );
 }
 
-const publicNav = [
-  {
-    href: "/",
-    label: "Home",
-    items: [
-      { href: "/#top", label: "Hero" },
-      { href: "/#about", label: "What is RENOVA?" },
-      { href: "/#listings", label: "Who Are You?" },
-      { href: "/#opportunities", label: "Featured Opportunities" },
-      { href: "/#how-it-works", label: "How RENOVA Works" },
-      { href: "/#why-renova", label: "Why RENOVA" },
-      { href: "/#requirement", label: "CTA" },
-    ],
-  },
-  {
-    href: "/projects",
-    label: "Projects",
-    items: [
-      { href: "/projects", label: "All Projects" },
-      { href: "/projects/current", label: "Current Opportunities" },
-      { href: "/projects/ongoing", label: "Ongoing Projects" },
-      { href: "/projects/upcoming", label: "Upcoming Projects" },
-      { href: "/projects/completed", label: "Completed Projects" },
-    ],
-  },
-  {
-    href: "/ecosystem",
-    label: "Ecosystem",
-    items: [
-      { href: "/ecosystem", label: "Explore Directory" },
-      { href: "/ecosystem?category=Developers", label: "Developers" },
-      { href: "/ecosystem?category=PMC", label: "PMCs" },
-      { href: "/ecosystem?category=Architects", label: "Architects" },
-      { href: "/ecosystem?category=Legal", label: "Legal & Specialists" },
-    ],
-  },
-  { href: "/platform", label: "Platform" },
-  {
-    href: "/societies",
-    label: "For Societies",
-    items: [
-      { href: "/societies", label: "Why RENOVA" },
-      { href: "/societies/how-it-works", label: "How It Works" },
-      { href: "/assessment", label: "Register Society" },
-    ],
-  },
-  {
-    href: "/developers",
-    label: "For Developers",
-    items: [
-      { href: "/projects/current", label: "Find Opportunities" },
-      { href: "/developers", label: "Developer Benefits" },
-      { href: "/join/developer", label: "Register Developer" },
-    ],
-  },
-  {
-    href: "/professionals",
-    label: "Professionals",
-    items: [
-      { href: "/professionals/pmcs", label: "PMCs" },
-      { href: "/professionals/architects", label: "Architects" },
-      { href: "/professionals/legal", label: "Legal" },
-      { href: "/professionals/others", label: "Other Professionals" },
-    ],
-  },
-  {
-    href: "/join",
-    label: "Join RENOVA",
-    items: [
-      { href: "/assessment", label: "Society Registration" },
-      { href: "/join/developer", label: "Developer Registration" },
-      { href: "/join/pmc", label: "PMC Registration" },
-      { href: "/join/architect", label: "Architect Registration" },
-    ],
-  },
-  {
-    href: "/knowledge-centre",
-    label: "Knowledge Centre",
-    items: [
-      {
-        href: "/knowledge-centre/redevelopment-guide",
-        label: "Redevelopment Guide",
-      },
-      { href: "/regulations", label: "DCPR" },
-      { href: "/knowledge-centre/society-process", label: "Society Process" },
-      {
-        href: "/knowledge-centre/developer-selection",
-        label: "Developer Selection",
-      },
-      { href: "/knowledge-centre/faqs", label: "FAQs" },
-    ],
-  },
-  { href: "/success-stories", label: "Success Stories" },
-  { href: "/about", label: "About RENOVA" },
+const publicNav: { href: string; label: string; items?: { href: string; label: string }[] }[] = [
+  { href: "/", label: "Home" },
+  { href: "/societies", label: "For Societies" },
+  { href: "/ecosystem", label: "Developers & Professionals" },
+  { href: "/knowledge-centre", label: "Knowledge Centre" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -2429,7 +2340,7 @@ function PublicNavLink({
   onClick?: () => void;
   className?: string;
 }) {
-  if (href.startsWith("#"))
+  if (href.includes("#"))
     return (
       <a href={href} onClick={onClick} className={className}>
         {children}
@@ -2496,31 +2407,10 @@ function PublicNavigation({
 }
 
 const stakeholderCards = [
-  {
-    title: "Find a Developer",
-    detail: "Explore public developer profiles and their documented services.",
-    icon: Building2,
-    href: "/ecosystem?category=Developers",
-  },
-  {
-    title: "Explore Societies",
-    detail:
-      "See how structured redevelopment opportunities can appear on RENOVA.",
-    icon: Landmark,
-    href: "#opportunities",
-  },
-  {
-    title: "Find a PMC",
-    detail: "Bring structure, evaluation and oversight to your redevelopment.",
-    icon: ClipboardCheck,
-    href: "/ecosystem?category=PMC",
-  },
-  {
-    title: "Find an Architect",
-    detail: "Explore architecture practices across the ecosystem.",
-    icon: Compass,
-    href: "/ecosystem?category=Architects",
-  },
+  { title: "I represent a society", detail: "Understand the process and find your society’s next step.", icon: Landmark, href: "/societies" },
+  { title: "I am a developer", detail: "Learn how to discover redevelopment opportunities on RENOVA.", icon: Building2, href: "/developers" },
+  { title: "I am a PMC or professional", detail: "Explore specialist services and public organization profiles.", icon: Compass, href: "/ecosystem" },
+  { title: "I already have an account", detail: "Sign in to your existing workspace. New registration remains closed.", icon: LayoutDashboard, href: "/platform/live" },
 ];
 
 const featuredOpportunities = [
@@ -2797,11 +2687,11 @@ function MarketingHome() {
               clear, professional redevelopment process.
             </p>
             <div className="stitch-hero-actions">
-              <Link href="/assessment" className="stitch-primary-button">
-                Post a requirement <ArrowUpRight size={15} />
+              <Link href="#listings" className="stitch-primary-button">
+                Find my next step <ArrowUpRight size={15} />
               </Link>
-              <a href="#opportunities" className="stitch-secondary-button">
-                View opportunities <ArrowUpRight size={15} />
+              <a href="/contact" className="stitch-secondary-button">
+                Talk to RENOVA <ArrowUpRight size={15} />
               </a>
             </div>
           </div>
@@ -2823,55 +2713,11 @@ function MarketingHome() {
         </section>
 
         <section
-          className="stitch-platform-definition"
-          aria-labelledby="platform-definition-title"
-        >
-          <div>
-            <p>More than a directory</p>
-            <h2 id="platform-definition-title">
-              The digital infrastructure
-              <br />
-              for redevelopment.
-            </h2>
-          </div>
-          <div className="stitch-platform-definition-copy">
-            <p>
-              RENOVA helps societies, developers and PMCs move from discovery to
-              a shared, permission-controlled project workspace—without losing
-              proposals, documents or decisions across fragmented channels.
-            </p>
-            <Link href="/platform">
-              Explore the RENOVA platform <ArrowUpRight size={15} />
-            </Link>
-          </div>
-          <div
-            className="stitch-platform-flow"
-            aria-label="RENOVA redevelopment workflow"
-          >
-            {[
-              "Discover",
-              "Verify",
-              "Connect",
-              "Opportunity",
-              "Proposal",
-              "Compare",
-              "Select",
-              "Collaborate",
-              "Track",
-            ].map((item, index) => (
-              <span key={item}>
-                <small>{String(index + 1).padStart(2, "0")}</small>
-                <strong>{item}</strong>
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <section
           className="stitch-actions"
           id="listings"
-          aria-label="Explore RENOVA"
+          aria-label="Choose your starting point"
         >
+          <div className="renova-start-heading"><p>Start here</p><h2>What brings you to RENOVA?</h2><p>Choose the option that describes you. Each path explains what you can do next.</p></div>
           <div className="stitch-action-grid">
             {stakeholderCards.map(({ title, detail, icon: Icon, href }) =>
               href.startsWith("/") ? (
