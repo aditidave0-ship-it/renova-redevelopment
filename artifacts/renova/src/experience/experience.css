@@ -945,3 +945,31 @@
     margin-left: 0;
   }
 }
+
+.renova-public-experience .working-hero {
+  color: #14223b;
+  background: #f0eae1;
+  padding-top: 55px;
+}
+.renova-public-experience .working-hero h1 {
+  color: #14223b;
+  font-size: clamp(32px, 5vw, 64px);
+  line-height: 1.12;
+}
+.renova-public-experience .working-hero p {
+  color: #715b37;
+}
+.renova-public-experience .working-hero span {
+  color: #536075;
+}
+.renova-public-experience .organization-profile-content article,
+.renova-public-experience .organization-profile-aside > div {
+  background: #fffdf9;
+}
+.renova-public-experience .organization-claim-card > p {
+  color: #e2e9f2;
+  font-family: inherit;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}

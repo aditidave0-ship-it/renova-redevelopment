@@ -3186,7 +3186,7 @@ const publicPageMap: Record<string, PublicPageData> = {
       {
         title: "Our role",
         detail:
-          "Create structured requirements, verified discovery and clearer connections.",
+          "Create structured requirements, source-backed discovery and clearer connections.",
       },
       {
         title: "Our principle",
