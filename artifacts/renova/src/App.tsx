@@ -2577,7 +2577,7 @@ type PublicPageData = {
   eyebrow: string;
   title: string;
   intro: string;
-  highlights: Array<{ title: string; detail: string }>;
+  highlights: Array<{ title: string; detail: string; href?: string }>;
   ctaLabel: string;
   ctaHref: string;
 };
@@ -3005,25 +3005,30 @@ const publicPageMap: Record<string, PublicPageData> = {
       {
         title: "Redevelopment Guide",
         detail: "A stage-by-stage orientation from first intent to possession.",
+        href: "/knowledge-centre/redevelopment-guide",
       },
       {
         title: "DCPR",
+        href: "/regulations",
         detail:
           "Understand the planning routes and terms that may shape project potential.",
       },
       {
         title: "Society Process",
+        href: "/knowledge-centre/society-process",
         detail:
           "Learn the resolutions, documents and committee actions involved.",
       },
       {
         title: "Developer Selection",
+        href: "/knowledge-centre/developer-selection",
         detail:
           "Compare capability, commercial terms and execution safeguards.",
       },
       {
         title: "FAQs",
         detail: "Practical answers to common redevelopment questions.",
+        href: "/knowledge-centre/faqs",
       },
     ],
     ctaLabel: "Open DCPR guidance",
@@ -4244,6 +4249,7 @@ function PublicPage({ page }: { page: PublicPageData }) {
             <article key={item.title}>
               <h3>{item.title}</h3>
               <p>{item.detail}</p>
+              {item.href && <Link href={item.href}>Read {item.title} →</Link>}
             </article>
           ))}
         </div>
