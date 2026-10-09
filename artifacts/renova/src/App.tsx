@@ -2687,9 +2687,9 @@ function MarketingHome() {
               clear, professional redevelopment process.
             </p>
             <div className="stitch-hero-actions">
-              <Link href="#listings" className="stitch-primary-button">
+              <a href="#listings" className="stitch-primary-button">
                 Find my next step <ArrowUpRight size={15} />
-              </Link>
+              </a>
               <a href="/contact" className="stitch-secondary-button">
                 Talk to RENOVA <ArrowUpRight size={15} />
               </a>
@@ -2976,7 +2976,7 @@ type PublicPageData = {
   eyebrow: string;
   title: string;
   intro: string;
-  highlights: Array<{ title: string; detail: string }>;
+  highlights: Array<{ title: string; detail: string; href?: string }>;
   ctaLabel: string;
   ctaHref: string;
 };
@@ -3117,7 +3117,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Bring project information and expectations into one consistent process.",
       },
     ],
-    ctaLabel: "Register your society",
+    ctaLabel: "Prepare society details",
     ctaHref: "/assessment",
   },
   "/societies/how-it-works": {
@@ -3144,7 +3144,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Use a structured workspace to follow decisions and milestones.",
       },
     ],
-    ctaLabel: "Start society registration",
+    ctaLabel: "Prepare society details",
     ctaHref: "/assessment",
   },
   "/developers": {
@@ -3169,7 +3169,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Present capabilities, experience and project fit within a verified network.",
       },
     ],
-    ctaLabel: "Register as a developer",
+    ctaLabel: "Send a developer enquiry",
     ctaHref: "/join/developer",
   },
   "/professionals": {
@@ -3403,25 +3403,30 @@ const publicPageMap: Record<string, PublicPageData> = {
     highlights: [
       {
         title: "Redevelopment Guide",
+        href: "/knowledge-centre/redevelopment-guide",
         detail: "A stage-by-stage orientation from first intent to possession.",
       },
       {
         title: "DCPR",
+        href: "/regulations",
         detail:
           "Understand the planning routes and terms that may shape project potential.",
       },
       {
         title: "Society Process",
+        href: "/knowledge-centre/society-process",
         detail:
           "Learn the resolutions, documents and committee actions involved.",
       },
       {
         title: "Developer Selection",
+        href: "/knowledge-centre/developer-selection",
         detail:
           "Compare capability, commercial terms and execution safeguards.",
       },
       {
         title: "FAQs",
+        href: "/knowledge-centre/faqs",
         detail: "Practical answers to common redevelopment questions.",
       },
     ],
@@ -3482,7 +3487,7 @@ const publicPageMap: Record<string, PublicPageData> = {
         detail: "Review agreements, guarantees, timelines and reporting.",
       },
     ],
-    ctaLabel: "Register your society",
+    ctaLabel: "Prepare society details",
     ctaHref: "/assessment",
   },
   "/knowledge-centre/developer-selection": {
@@ -4687,7 +4692,7 @@ function PublicPage({ page }: { page: PublicPageData }) {
           {page.highlights.map((item, index) => (
             <article key={item.title}>
               <small>{String(index + 1).padStart(2, "0")}</small>
-              <h2>{item.title}</h2>
+              <h2>{item.href ? <Link href={item.href}>{item.title} <ArrowUpRight size={16} /></Link> : item.title}</h2>
               <p>{item.detail}</p>
             </article>
           ))}
