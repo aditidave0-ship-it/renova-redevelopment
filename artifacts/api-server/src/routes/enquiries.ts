@@ -28,7 +28,14 @@ export const enquirySchema = z.object({
   experienceYears: z.number().int().min(0).max(100).nullable().optional(),
   message: z.string().trim().min(10).max(5000),
   consent: z.literal(true),
-  source: z.enum(["WEBSITE", "FEASIBILITY"]).default("WEBSITE"),
+  source: z
+    .enum([
+      "WEBSITE",
+      "FEASIBILITY",
+      "FEASIBILITY_PRELIMINARY",
+      "FEASIBILITY_DETAILED",
+    ])
+    .default("WEBSITE"),
 });
 
 function fingerprint(request: { ip?: string }, email: string): string {

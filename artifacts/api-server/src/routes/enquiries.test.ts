@@ -48,6 +48,19 @@ test("feasibility enquiries are tagged for the admin list", () => {
   assert.equal(result.source, "FEASIBILITY");
 });
 
+test("feasibility package enquiries retain the selected package", () => {
+  for (const source of [
+    "FEASIBILITY_PRELIMINARY",
+    "FEASIBILITY_DETAILED",
+  ] as const) {
+    const result = enquirySchema.parse({
+      ...validEnquiry,
+      source,
+    });
+    assert.equal(result.source, source);
+  }
+});
+
 test("unknown enquiry sources are rejected", () => {
   const result = enquirySchema.safeParse({
     ...validEnquiry,

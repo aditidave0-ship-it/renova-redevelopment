@@ -16,7 +16,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BadgeCheck,
-  Bell,
   BookOpenText,
   Building2,
   CalendarDays,
@@ -2321,79 +2320,36 @@ function Regulations() {
   );
 }
 
-const publicNav = [
-  {
-    href: "/",
-    label: "Home",
-    items: [
-      { href: "/#top", label: "Hero" },
-      { href: "/#about", label: "What is RENOVA?" },
-      { href: "/#listings", label: "Who Are You?" },
-      { href: "/#opportunities", label: "Featured Opportunities" },
-      { href: "/#how-it-works", label: "How RENOVA Works" },
-      { href: "/#why-renova", label: "Why RENOVA" },
-      { href: "/#requirement", label: "CTA" },
-    ],
-  },
-  {
-    href: "/projects",
-    label: "Projects",
-    items: [
-      { href: "/projects", label: "All Projects" },
-      { href: "/projects/current", label: "Current Opportunities" },
-      { href: "/projects/ongoing", label: "Ongoing Projects" },
-      { href: "/projects/upcoming", label: "Upcoming Projects" },
-      { href: "/projects/completed", label: "Completed Projects" },
-    ],
-  },
-  {
-    href: "/ecosystem",
-    label: "Ecosystem",
-    items: [
-      { href: "/ecosystem", label: "Explore Directory" },
-      { href: "/ecosystem?category=Developers", label: "Developers" },
-      { href: "/ecosystem?category=PMC", label: "PMCs" },
-      { href: "/ecosystem?category=Architects", label: "Architects" },
-      { href: "/ecosystem?category=Legal", label: "Legal & Specialists" },
-    ],
-  },
-  { href: "/platform", label: "Platform" },
+type PublicNavSection = {
+  href: string;
+  label: string;
+  items?: Array<{ href?: string; label: string; status?: string }>;
+};
+
+const publicNav: PublicNavSection[] = [
+  { href: "/", label: "Home" },
   {
     href: "/societies",
     label: "For Societies",
     items: [
-      { href: "/societies", label: "Why RENOVA" },
-      { href: "/societies/how-it-works", label: "How It Works" },
-      { href: "/assessment", label: "Register Society" },
+      { href: "/feasibility", label: "Get Society Feasibility" },
+      { href: "/societies", label: "How RENOVA Helps Societies" },
+      {
+        label: "Society Profile & Opportunity",
+        status: "Controlled beta",
+      },
     ],
   },
   {
-    href: "/developers",
-    label: "For Developers",
+    href: "/ecosystem",
+    label: "Developers & Professionals",
     items: [
-      { href: "/projects/current", label: "Find Opportunities" },
-      { href: "/developers", label: "Developer Benefits" },
-      { href: "/join/developer", label: "Register Developer" },
-    ],
-  },
-  {
-    href: "/professionals",
-    label: "Professionals",
-    items: [
-      { href: "/professionals/pmcs", label: "PMCs" },
-      { href: "/professionals/architects", label: "Architects" },
-      { href: "/professionals/legal", label: "Legal" },
-      { href: "/professionals/others", label: "Other Professionals" },
-    ],
-  },
-  {
-    href: "/join",
-    label: "Join RENOVA",
-    items: [
-      { href: "/assessment", label: "Society Registration" },
-      { href: "/join/developer", label: "Developer Registration" },
-      { href: "/join/pmc", label: "PMC Registration" },
-      { href: "/join/architect", label: "Architect Registration" },
+      { href: "/ecosystem", label: "Explore Public Profiles" },
+      { href: "/projects/current", label: "Opportunity Preview" },
+      {
+        label: "Interests & Connections",
+        status: "Controlled beta",
+      },
     ],
   },
   {
@@ -2404,18 +2360,10 @@ const publicNav = [
         href: "/knowledge-centre/redevelopment-guide",
         label: "Redevelopment Guide",
       },
-      { href: "/regulations", label: "DCPR" },
-      { href: "/knowledge-centre/society-process", label: "Society Process" },
-      {
-        href: "/knowledge-centre/developer-selection",
-        label: "Developer Selection",
-      },
+      { href: "/regulations", label: "Regulations" },
       { href: "/knowledge-centre/faqs", label: "FAQs" },
     ],
   },
-  { href: "/success-stories", label: "Success Stories" },
-  { href: "/about", label: "About RENOVA" },
-  { href: "/contact", label: "Contact" },
 ];
 
 function PublicNavLink({
@@ -2469,16 +2417,23 @@ function PublicNavigation({
               <ChevronDown size={12} />
             </PublicNavLink>
             <div className="public-nav-dropdown">
-              {section.items.map((item) => (
-                <PublicNavLink
-                  href={item.href}
-                  onClick={onNavigate}
-                  key={item.href + item.label}
-                >
-                  {item.label}
-                  <ChevronRight size={13} />
-                </PublicNavLink>
-              ))}
+              {section.items.map((item) =>
+                item.href ? (
+                  <PublicNavLink
+                    href={item.href}
+                    onClick={onNavigate}
+                    key={item.href + item.label}
+                  >
+                    {item.label}
+                    <ChevronRight size={13} />
+                  </PublicNavLink>
+                ) : (
+                  <span className="public-nav-unavailable" key={item.label}>
+                    <span>{item.label}</span>
+                    <small>{item.status}</small>
+                  </span>
+                ),
+              )}
             </div>
           </div>
         ) : (
@@ -2491,35 +2446,59 @@ function PublicNavigation({
           </PublicNavLink>
         ),
       )}
+      <div className="public-mobile-actions">
+        <Link href="/contact" onClick={onNavigate}>
+          Contact
+        </Link>
+        <Link href="/platform" onClick={onNavigate}>
+          Login
+        </Link>
+      </div>
     </nav>
+  );
+}
+
+function PublicHeaderActions() {
+  return (
+    <div className="public-header-actions">
+      <Link href="/contact" className="public-header-contact">
+        Contact
+      </Link>
+      <Link href="/platform" className="public-header-login">
+        Login <ArrowUpRight size={14} />
+      </Link>
+    </div>
   );
 }
 
 const stakeholderCards = [
   {
-    title: "Find a Developer",
-    detail: "Explore public developer profiles and their documented services.",
-    icon: Building2,
-    href: "/ecosystem?category=Developers",
-  },
-  {
-    title: "Explore Societies",
+    title: "For Societies",
     detail:
-      "See how structured redevelopment opportunities can appear on RENOVA.",
+      "Start with a feasibility enquiry, then structure your society profile and opportunity.",
     icon: Landmark,
-    href: "#opportunities",
+    href: "/feasibility",
   },
   {
-    title: "Find a PMC",
-    detail: "Bring structure, evaluation and oversight to your redevelopment.",
-    icon: ClipboardCheck,
-    href: "/ecosystem?category=PMC",
+    title: "For Developers & Professionals",
+    detail:
+      "Explore profiles and illustrative opportunities before controlled access opens.",
+    icon: Handshake,
+    href: "/ecosystem",
   },
   {
-    title: "Find an Architect",
-    detail: "Explore architecture practices across the ecosystem.",
-    icon: Compass,
-    href: "/ecosystem?category=Architects",
+    title: "Knowledge Centre",
+    detail:
+      "Read practical redevelopment guides and regulatory orientation in plain language.",
+    icon: BookOpenText,
+    href: "/knowledge-centre",
+  },
+  {
+    title: "Contact RENOVA",
+    detail:
+      "Ask a question when you are not sure which redevelopment step comes next.",
+    icon: Send,
+    href: "/contact",
   },
 ];
 
@@ -2680,7 +2659,6 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
 function MarketingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoReveal, setShowLogoReveal] = useState(true);
-  const [updatesOpen, setUpdatesOpen] = useState(false);
   const [activeOpportunityName, setActiveOpportunityName] = useState<
     string | null
   >(null);
@@ -2708,56 +2686,11 @@ function MarketingHome() {
             {menuOpen ? <X size={20} /> : <Compass size={20} />}
           </button>
           <Logo />
-          <button
-            className="stitch-notification"
-            onClick={() => setUpdatesOpen((open) => !open)}
-            aria-expanded={updatesOpen}
-            aria-label="RENOVA updates"
-          >
-            <Bell size={19} />
-            <span className="stitch-notification-dot" />
-          </button>
           <PublicNavigation
             menuOpen={menuOpen}
             onNavigate={() => setMenuOpen(false)}
           />
-          {updatesOpen && (
-            <div className="stitch-update-popover">
-              <div>
-                <span>RENOVA pulse</span>
-                <button
-                  type="button"
-                  onClick={() => setUpdatesOpen(false)}
-                  aria-label="Close updates"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <article>
-                <BadgeCheck size={17} />
-                <p>
-                  <strong>Verified network growing</strong>
-                  <span>
-                    New PMCs and architects are being reviewed for Mumbai
-                    societies.
-                  </span>
-                </p>
-              </article>
-              <article>
-                <Building2 size={17} />
-                <p>
-                  <strong>Opportunity preview available</strong>
-                  <span>
-                    Explore demonstration listings showing how society
-                    requirements can be structured.
-                  </span>
-                </p>
-              </article>
-              <Link href="/assessment" onClick={() => setUpdatesOpen(false)}>
-                Post your requirement <ArrowUpRight size={14} />
-              </Link>
-            </div>
-          )}
+          <PublicHeaderActions />
         </div>
       </header>
 
@@ -2797,12 +2730,12 @@ function MarketingHome() {
               clear, professional redevelopment process.
             </p>
             <div className="stitch-hero-actions">
-              <Link href="/assessment" className="stitch-primary-button">
-                Post a requirement <ArrowUpRight size={15} />
+              <Link href="/feasibility" className="stitch-primary-button">
+                Start as a Society <ArrowUpRight size={15} />
               </Link>
-              <a href="#opportunities" className="stitch-secondary-button">
-                View opportunities <ArrowUpRight size={15} />
-              </a>
+              <Link href="/ecosystem" className="stitch-secondary-button">
+                Developers & Professionals <ArrowUpRight size={15} />
+              </Link>
             </div>
           </div>
 
@@ -2817,7 +2750,7 @@ function MarketingHome() {
             <span>For developers</span>
             <span>For professionals</span>
             <span>
-              Explore RENOVA <ArrowUpRight size={14} />
+              Choose your path <ArrowUpRight size={14} />
             </span>
           </div>
         </section>
@@ -2927,9 +2860,7 @@ function MarketingHome() {
               <p>Product preview · demo data</p>
               <h2>Illustrative redevelopment opportunities</h2>
             </div>
-            <Link href="/assessment">
-              Post an opportunity <ArrowUpRight size={14} />
-            </Link>
+            <span className="stitch-feature-state">Controlled beta</span>
           </div>
           <p className="stitch-opportunity-disclaimer">
             These sample listings demonstrate the RENOVA experience. They do not
@@ -3032,8 +2963,8 @@ function MarketingHome() {
               <p>Ready to begin?</p>
               <h2>Start your society's redevelopment journey.</h2>
             </div>
-            <Link href="/assessment" className="stitch-primary-button">
-              Post your requirement <ArrowUpRight size={16} />
+            <Link href="/contact" className="stitch-primary-button">
+              Contact RENOVA <ArrowUpRight size={16} />
             </Link>
           </div>
         </section>
@@ -3167,7 +3098,28 @@ type PublicPageData = {
   ctaHref: string;
   secondaryCtaLabel?: string;
   secondaryCtaHref?: string;
+  packages?: typeof feasibilityPackages;
+  packageNote?: string;
 };
+
+const feasibilityPackages = [
+  {
+    id: "preliminary",
+    name: "Preliminary Feasibility",
+    price: "₹5,000",
+    detail:
+      "Initial review based on the society information and available property details.",
+    source: "FEASIBILITY_PRELIMINARY",
+  },
+  {
+    id: "detailed",
+    name: "Detailed Feasibility",
+    price: "₹10,000–₹15,000",
+    detail:
+      "More detailed professional assessment with explanations, assumptions and supporting information.",
+    source: "FEASIBILITY_DETAILED",
+  },
+] as const;
 
 const renovaContactEmail =
   import.meta.env.VITE_RENOVA_CONTACT_EMAIL?.trim() || "contact@renova.example";
@@ -3208,6 +3160,9 @@ const publicPageMap: Record<string, PublicPageData> = {
     ctaHref: "/feasibility/enquiry",
     secondaryCtaLabel: "Email Us",
     secondaryCtaHref: `mailto:${renovaContactEmail}?subject=${encodeURIComponent("Society Feasibility Enquiry")}`,
+    packages: feasibilityPackages,
+    packageNote:
+      "Illustrative pricing for now. Final scope and fees will be confirmed after reviewing your society’s details. Feasibility findings depend on available documents and professional assessment.",
   },
   "/projects": {
     eyebrow: "RENOVA project directory",
@@ -4572,6 +4527,13 @@ function NetworkRegistrationPage({
   role: "Developer" | "PMC" | "Architect" | "Contact" | "Feasibility";
 }) {
   const isFeasibilityEnquiry = role === "Feasibility";
+  const selectedPackage = isFeasibilityEnquiry
+    ? feasibilityPackages.find(
+        (item) =>
+          item.id ===
+          new URLSearchParams(window.location.search).get("package"),
+      )
+    : undefined;
   const copy = registrationCopy[role];
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -4617,7 +4579,9 @@ function NetworkRegistrationPage({
               : Number(form.experience),
           message: form.message,
           consent: form.consent,
-          source: isFeasibilityEnquiry ? "FEASIBILITY" : "WEBSITE",
+          source:
+            selectedPackage?.source ||
+            (isFeasibilityEnquiry ? "FEASIBILITY" : "WEBSITE"),
         }),
       });
       const result = await response.json().catch(() => null);
@@ -4699,6 +4663,19 @@ function NetworkRegistrationPage({
                   : "Create your profile"}
             </h2>
             <p>Complete the details below. Fields marked * are required.</p>
+            {selectedPackage && (
+              <div className="working-package-selection">
+                <span>Package enquiry</span>
+                <strong>
+                  {selectedPackage.name} · {selectedPackage.price}
+                </strong>
+                <small>
+                  Indicative only. RENOVA will confirm final scope and fees
+                  after reviewing your society details. No payment is collected
+                  here.
+                </small>
+              </div>
+            )}
           </div>
           <div className="working-form-grid">
             <label>
@@ -4944,9 +4921,7 @@ function PublicPage({ page }: { page: PublicPageData }) {
             menuOpen={menuOpen}
             onNavigate={() => setMenuOpen(false)}
           />
-          <Link href="/assessment" className="public-header-cta">
-            Post requirement <ArrowUpRight size={14} />
-          </Link>
+          <PublicHeaderActions />
         </div>
       </header>
       <main>
@@ -4970,6 +4945,45 @@ function PublicPage({ page }: { page: PublicPageData }) {
             </article>
           ))}
         </section>
+        {page.packages && (
+          <section
+            className="feasibility-packages"
+            aria-labelledby="feasibility-packages-title"
+          >
+            <div className="feasibility-packages-heading">
+              <p>Indicative options</p>
+              <h2 id="feasibility-packages-title">
+                Choose the level of review you want to discuss.
+              </h2>
+              <span>
+                No payment is collected online. Each option starts with an
+                enquiry and a review of your society details.
+              </span>
+            </div>
+            <div className="feasibility-package-grid">
+              {page.packages.map((item) => (
+                <article key={item.id}>
+                  <span>Enquiry only · No online payment</span>
+                  <h3>{item.name}</h3>
+                  <strong>{item.price}</strong>
+                  <p>{item.detail}</p>
+                  <Link
+                    href={`/feasibility/enquiry?package=${item.id}`}
+                    className="feasibility-package-action"
+                  >
+                    Enquire About This Package <ArrowUpRight size={15} />
+                  </Link>
+                </article>
+              ))}
+            </div>
+            {page.packageNote && (
+              <aside className="feasibility-package-note">
+                <ShieldCheck size={20} />
+                <p>{page.packageNote}</p>
+              </aside>
+            )}
+          </section>
+        )}
         <section className="public-page-cta">
           <div className="public-page-cta-copy">
             <p>{page.ctaEyebrow || "Move forward with clarity."}</p>

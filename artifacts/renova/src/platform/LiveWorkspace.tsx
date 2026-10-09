@@ -1831,7 +1831,8 @@ function AdminView() {
         {items.map((item) => (
           <article className="live-list-card" key={item.id}>
             <small>
-              {item.reference} · {item.status} · {item.source}
+              {item.reference} · {item.status} ·{" "}
+              {item.source.replaceAll("_", " ")}
             </small>
             <h3>
               {item.name} · {item.organizationName}
