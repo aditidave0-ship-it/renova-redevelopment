@@ -92,6 +92,17 @@ export class ErrorBoundary extends Component<
   }
 
   resetError = (): void => {
+    // A deployment can retire a chunk referenced by an already-open tab.
+    // React.lazy caches the failed import, so resetting boundary state alone
+    // cannot retry it. Reload only after the visitor chooses Try again.
+    if (
+      /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+        this.state.error?.message ?? '',
+      )
+    ) {
+      window.location.reload();
+      return;
+    }
     this.setState({ error: null });
   };
 
