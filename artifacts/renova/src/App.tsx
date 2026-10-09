@@ -89,11 +89,6 @@ import "./marketing.css";
 import "./requirement.css";
 
 const queryClient = new QueryClient();
-const PlatformRouter = lazy(() =>
-  import("@/platform/PlatformApp").then((module) => ({
-    default: module.PlatformRouter,
-  })),
-);
 const LiveWorkspace = lazy(() =>
   import("@/platform/LiveWorkspace").then((module) => ({
     default: module.LiveWorkspace,
@@ -4313,7 +4308,10 @@ function Router() {
       </Suspense>
     );
   if (pathname === "/professionals") return <EcosystemDirectory />;
-  if (pathname.startsWith("/ecosystem/")) return <OrganizationProfilePage />;
+  if (pathname.startsWith("/ecosystem/"))
+    return (
+      <Route path="/ecosystem/:slug" component={OrganizationProfilePage} />
+    );
   if (pathname === "/ecosystem") return <EcosystemDirectory />;
   if (pathname === "/contact") return <ContactPage />;
   if (pathname === "/knowledge-centre/faqs") return <FaqPage />;
