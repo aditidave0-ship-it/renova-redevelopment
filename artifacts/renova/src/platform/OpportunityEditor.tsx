@@ -108,6 +108,17 @@ export function OpportunityEditor({
           ? "Opportunity published. Developers and PMCs can discover this brief."
           : "Private draft saved to your society.",
       );
+      if (!selected) {
+        setDraft({
+          title: "",
+          location: "",
+          description: "",
+          memberCount: "",
+          buildingAge: "",
+          siteArea: "",
+        });
+        setStep(0);
+      }
       onSaved();
     } catch (cause) {
       setError(errorMessage(cause));

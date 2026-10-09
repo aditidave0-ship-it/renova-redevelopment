@@ -62,3 +62,15 @@ export function participantFor(id: string | null) {
 // This presentation gate stays closed until the production acceptance milestone is approved.
 // The server independently enforces registration eligibility; a URL or frontend flag cannot open it.
 export const publicSignupEnabled = false;
+
+export function professionalSpecialization(id: string) {
+  return (
+    {
+      legal: "LEGAL",
+      architect: "ARCHITECT",
+      structural: "STRUCTURAL",
+      finance: "FINANCE_VALUATION",
+      other: "OTHER",
+    } as Record<string, string>
+  )[id];
+}

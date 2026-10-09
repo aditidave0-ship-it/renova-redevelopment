@@ -1,19 +1,19 @@
-.workspace-experience {
+.live-workspace.workspace-experience {
   background: #faf7f1;
   color: #14223b;
   line-height: 1.6;
   min-height: 100vh;
 }
-.workspace-experience h1,
-.workspace-experience h2,
-.workspace-experience h3,
-.workspace-experience strong {
+.live-workspace.workspace-experience h1,
+.live-workspace.workspace-experience h2,
+.live-workspace.workspace-experience h3,
+.live-workspace.workspace-experience strong {
   color: #14223b;
 }
-.workspace-experience a {
+.live-workspace.workspace-experience a {
   color: #284c7a;
 }
-.workspace-experience .live-header {
+.live-workspace.workspace-experience .live-header {
   max-width: none;
   padding: 18px max(24px, calc((100vw - 1320px) / 2));
   height: auto;
@@ -21,15 +21,15 @@
   background: #faf7f1;
   border-bottom: 1px solid #e6e0d5;
 }
-.workspace-experience .live-header a,
-.workspace-experience .live-header button,
-.workspace-experience .live-header > span {
+.live-workspace.workspace-experience .live-header a,
+.live-workspace.workspace-experience .live-header button,
+.live-workspace.workspace-experience .live-header > span {
   color: #14223b;
   font-size: 13px;
   text-transform: none;
   letter-spacing: 0;
 }
-.workspace-experience .live-header .live-logo {
+.live-workspace.workspace-experience .live-header .live-logo {
   color: #14223b;
   flex-direction: column;
   gap: 4px;
@@ -49,7 +49,7 @@
   gap: 30px;
   padding: 0 24px;
 }
-.workspace-experience main {
+.live-workspace.workspace-experience main {
   padding: 0 0 30px;
   width: 100%;
   min-width: 0;
@@ -171,7 +171,7 @@
   background: #f8ead1;
   color: #785625;
 }
-.workspace-experience .live-panel {
+.live-workspace.workspace-experience .live-panel {
   background: #fffdf9;
   border: 1px solid #e6e0d7;
   border-radius: 18px;
@@ -180,29 +180,29 @@
   color: #14223b;
   min-width: 0;
 }
-.workspace-experience .live-panel h2 {
+.live-workspace.workspace-experience .live-panel h2 {
   font-size: 26px;
   line-height: 1.2;
   margin-bottom: 16px;
 }
-.workspace-experience .live-panel-intro > span {
+.live-workspace.workspace-experience .live-panel-intro > span {
   color: #65607c;
   letter-spacing: 0.12em;
 }
-.workspace-experience .live-panel-intro p,
-.workspace-experience .live-muted,
-.workspace-experience .live-note {
+.live-workspace.workspace-experience .live-panel-intro p,
+.live-workspace.workspace-experience .live-muted,
+.live-workspace.workspace-experience .live-note {
   color: #566174;
   font-size: 14px;
   line-height: 1.6;
 }
-.workspace-experience .live-field > span {
+.live-workspace.workspace-experience .live-field > span {
   color: #283449;
   font-size: 13px;
 }
-.workspace-experience .live-field input,
-.workspace-experience .live-field textarea,
-.workspace-experience .live-field select {
+.live-workspace.workspace-experience .live-field input,
+.live-workspace.workspace-experience .live-field textarea,
+.live-workspace.workspace-experience .live-field select {
   background: white;
   color: #14223b;
   border: 1px solid #cdd1d8;
@@ -211,12 +211,12 @@
   min-width: 0;
   width: 100%;
 }
-.workspace-experience input::placeholder,
-.workspace-experience textarea::placeholder {
+.live-workspace.workspace-experience input::placeholder,
+.live-workspace.workspace-experience textarea::placeholder {
   color: #6c7382;
   opacity: 1;
 }
-.workspace-experience .live-primary {
+.live-workspace.workspace-experience .live-primary {
   background: #14223b;
   color: white;
   text-decoration: none;
@@ -232,14 +232,14 @@
   font-weight: 600;
   cursor: pointer;
 }
-.workspace-experience button:disabled {
+.live-workspace.workspace-experience button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
-.workspace-experience .live-check span {
+.live-workspace.workspace-experience .live-check span {
   color: #37465e;
 }
-.workspace-experience .live-tabs {
+.live-workspace.workspace-experience .live-tabs {
   padding: 4px;
   background: #eeebf4;
   border: 0;
@@ -247,48 +247,48 @@
   display: flex;
   gap: 4px;
 }
-.workspace-experience .live-tabs button {
+.live-workspace.workspace-experience .live-tabs button {
   color: #3e4660;
   min-height: 44px;
   flex: 1;
   border-radius: 8px;
 }
-.workspace-experience .live-tabs button.active {
+.live-workspace.workspace-experience .live-tabs button.active {
   background: #14223b;
   color: white;
 }
-.workspace-experience .live-auth-links button {
+.live-workspace.workspace-experience .live-auth-links button {
   color: #284c7a;
 }
-.workspace-experience .live-metrics article {
+.live-workspace.workspace-experience .live-metrics article {
   background: #f1edf7;
   border: 1px solid #e2dbef;
 }
-.workspace-experience .live-metrics span {
+.live-workspace.workspace-experience .live-metrics span {
   color: #566174;
   font-size: 12px;
 }
-.workspace-experience .live-metrics strong {
+.live-workspace.workspace-experience .live-metrics strong {
   color: #14223b;
 }
-.workspace-experience .live-list-card {
+.live-workspace.workspace-experience .live-list-card {
   background: #fffdf9;
   border: 1px solid #ded8cd;
   color: #14223b;
   border-radius: 14px;
   padding: 20px;
 }
-.workspace-experience .live-list-card h3 {
+.live-workspace.workspace-experience .live-list-card h3 {
   color: #14223b;
   font-size: 19px;
   line-height: 1.35;
 }
-.workspace-experience .live-list-card p,
-.workspace-experience .live-list-card > span {
+.live-workspace.workspace-experience .live-list-card p,
+.live-workspace.workspace-experience .live-list-card > span {
   color: #566174;
   font-size: 14px;
 }
-.workspace-experience .live-list-card small {
+.live-workspace.workspace-experience .live-list-card small {
   color: #5d4c79;
   background: #efebf6;
   font-size: 11px;
@@ -296,46 +296,46 @@
   padding: 4px 9px;
   border-radius: 7px;
 }
-.workspace-experience .live-list-card button,
-.workspace-experience .live-actions > button:not(.live-primary) {
+.live-workspace.workspace-experience .live-list-card button,
+.live-workspace.workspace-experience .live-actions > button:not(.live-primary) {
   color: #27476e;
   background: #f0edf6;
   border: 1px solid #d7cfdf;
   min-height: 44px;
 }
-.workspace-experience .live-error {
+.live-workspace.workspace-experience .live-error {
   background: #fff0f1;
   color: #912835;
   border: 1px solid #e9c2c8;
 }
-.workspace-experience .live-success {
+.live-workspace.workspace-experience .live-success {
   background: #edf5ed;
   color: #30543a;
   border: 1px solid #c7dfc9;
 }
-.workspace-experience .live-profile-preview {
+.live-workspace.workspace-experience .live-profile-preview {
   background: #f3f0f8;
   border-color: #d9d0e5;
 }
-.workspace-experience .live-profile-preview p span {
+.live-workspace.workspace-experience .live-profile-preview p span {
   color: #566174;
   font-size: 13px;
 }
-.workspace-experience .live-profile-preview p strong {
+.live-workspace.workspace-experience .live-profile-preview p strong {
   color: #14223b;
   font-size: 14px;
 }
-.workspace-experience .live-nested-heading span {
+.live-workspace.workspace-experience .live-nested-heading span {
   color: #566174;
 }
-.workspace-experience .live-completion > div {
+.live-workspace.workspace-experience .live-completion > div {
   color: #566174;
 }
-.workspace-experience footer {
+.live-workspace.workspace-experience footer {
   color: #566174;
   border-top: 1px solid #e0d9cc;
 }
-.workspace-experience :focus-visible {
+.live-workspace.workspace-experience :focus-visible {
   outline: 3px solid #456caa;
   outline-offset: 3px;
 }
@@ -520,7 +520,7 @@
   .workspace-stepper {
     grid-template-columns: 1fr 1fr;
   }
-  .workspace-experience .live-header > span {
+  .live-workspace.workspace-experience .live-header > span {
     max-width: 50%;
     overflow-wrap: anywhere;
     text-align: center;
@@ -550,15 +550,15 @@
     max-width: 200px;
     padding: 10px 13px;
   }
-  .workspace-experience .live-header {
+  .live-workspace.workspace-experience .live-header {
     padding: 15px 20px;
     min-height: 76px;
     gap: 12px;
   }
-  .workspace-experience .live-header > span {
+  .live-workspace.workspace-experience .live-header > span {
     display: none;
   }
-  .workspace-experience main {
+  .live-workspace.workspace-experience main {
     padding: 0 0 70px;
   }
   .workspace-welcome {
@@ -589,30 +589,30 @@
   .workspace-feature-grid small {
     font-size: 11px;
   }
-  .workspace-experience .live-panel {
+  .live-workspace.workspace-experience .live-panel {
     padding: 22px 18px;
   }
-  .workspace-experience .live-panel h2 {
+  .live-workspace.workspace-experience .live-panel h2 {
     font-size: 24px;
   }
   .workspace-account-layout {
     margin: 26px auto;
     padding: 0 20px;
   }
-  .workspace-experience .live-filter-row {
+  .live-workspace.workspace-experience .live-filter-row {
     grid-template-columns: 1fr;
   }
-  .workspace-experience .live-metrics {
+  .live-workspace.workspace-experience .live-metrics {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
-  .workspace-experience .live-metrics article {
+  .live-workspace.workspace-experience .live-metrics article {
     padding: 14px 12px;
   }
-  .workspace-experience .live-metrics span {
+  .live-workspace.workspace-experience .live-metrics span {
     font-size: 11px;
   }
-  .workspace-experience .live-metrics strong {
+  .live-workspace.workspace-experience .live-metrics strong {
     font-size: 24px;
   }
   .workspace-bottom-nav {
@@ -649,28 +649,28 @@
   .workspace-bottom-nav a svg {
     flex-shrink: 0;
   }
-  .workspace-experience footer {
+  .live-workspace.workspace-experience footer {
     padding-bottom: 100px;
   }
   .workspace-review > div {
     grid-template-columns: 1fr;
     gap: 5px;
   }
-  .workspace-experience .live-field-row {
+  .live-workspace.workspace-experience .live-field-row {
     grid-template-columns: 1fr;
   }
   .workspace-service-error {
     margin: 20px !important;
   }
-  .workspace-experience .live-list-card {
+  .live-workspace.workspace-experience .live-list-card {
     padding: 18px;
   }
-  .workspace-experience .live-card-actions select {
+  .live-workspace.workspace-experience .live-card-actions select {
     max-width: 100%;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .workspace-experience * {
+  .live-workspace.workspace-experience * {
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;

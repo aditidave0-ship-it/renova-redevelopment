@@ -18,6 +18,7 @@ import {
   participantRoles,
   participantFor,
   publicSignupEnabled,
+  professionalSpecialization,
 } from "../experience/roles";
 import { workspaceApi as api, WorkspaceApiError } from "./workspace-api";
 import { OpportunityEditor } from "./OpportunityEditor";
@@ -200,6 +201,10 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             password: form.get("password"),
             displayName: form.get("displayName"),
             role,
+            specialization:
+              role === "PROFESSIONAL"
+                ? professionalSpecialization(participant.id)
+                : undefined,
             organizationName: form.get("organizationName"),
             location: form.get("location"),
           }),
@@ -431,6 +436,12 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             )}{" "}
             <ArrowRight size={17} />
           </button>
+        )}
+        {mode === "forgot" && (
+          <p className="live-note">
+            If an eligible account exists, a password reset email will be sent.
+            Check your inbox and spam folder.
+          </p>
         )}
         {mode === "login" && (
           <div className="live-auth-links">

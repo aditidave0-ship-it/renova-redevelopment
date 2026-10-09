@@ -879,3 +879,69 @@
     flex-wrap: wrap;
   }
 }
+
+/* Public directory typography must not inherit the old dark marketing hero. */
+.renova-public-experience .ecosystem-hero,
+.renova-public-experience .organization-profile-hero {
+  background: #f0eae1;
+  color: #14223b;
+  padding-top: 64px;
+}
+.renova-public-experience .ecosystem-hero-copy {
+  min-width: 0;
+}
+.renova-public-experience .ecosystem-hero h1,
+.renova-public-experience .organization-profile-heading h1 {
+  color: #14223b;
+  font-size: clamp(32px, 5.2vw, 72px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.renova-public-experience .ecosystem-hero h1 span {
+  color: #715b37;
+  -webkit-text-stroke: 0;
+}
+.renova-public-experience .ecosystem-hero-copy > p,
+.renova-public-experience .organization-profile-heading p {
+  color: #715b37;
+}
+.renova-public-experience .ecosystem-hero-copy > div,
+.renova-public-experience .ecosystem-hero-stat span,
+.renova-public-experience .organization-profile-heading > div > div,
+.renova-public-experience .organization-profile-disclaimer {
+  color: #536075;
+  font-size: 14px;
+}
+.renova-public-experience .organization-profile-layout {
+  background: #faf7f1;
+}
+.renova-public-experience .organization-profile-content article,
+.renova-public-experience .organization-profile-aside > div,
+.renova-public-experience .organization-list-link {
+  border-radius: 18px;
+}
+.renova-public-experience .organization-profile-content article > div,
+.renova-public-experience .organization-profile-aside p {
+  font-size: 14px;
+}
+.renova-public-experience .organization-claim-card h2 {
+  color: white;
+}
+.renova-public-experience .ecosystem-category-filters button {
+  min-height: 44px;
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .renova-public-experience .ecosystem-hero {
+    min-height: auto;
+    padding-top: 44px;
+  }
+  .renova-public-experience .organization-profile-heading {
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  .renova-public-experience .organization-profile-disclaimer {
+    margin-left: 0;
+  }
+}

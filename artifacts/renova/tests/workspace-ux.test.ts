@@ -4,6 +4,7 @@ import {
   participantRoles,
   participantFor,
   publicSignupEnabled,
+  professionalSpecialization,
 } from "../src/experience/roles";
 import { workspaceApi, WorkspaceApiError } from "../src/platform/workspace-api";
 test("public participant choices retain distinct roles and never grant ADMIN", () => {
@@ -17,6 +18,9 @@ test("public participant choices retain distinct roles and never grant ADMIN", (
   assert.equal(participantFor("pmc").role, "PMC");
   assert.equal(participantFor("ADMIN").role, "SOCIETY");
   assert.equal(publicSignupEnabled, false);
+  assert.equal(professionalSpecialization("architect"), "ARCHITECT");
+  assert.equal(professionalSpecialization("finance"), "FINANCE_VALUATION");
+  assert.equal(professionalSpecialization("developer"), undefined);
 });
 test("API requests retain same-origin cookies and surface only confirmed JSON success", async () => {
   const original = globalThis.fetch;
