@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-09",
+  "pr": 26,
+  "draft": true,
+  "preview": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/",
+  "production": "https://renova-lovat-mu.vercel.app",
+  "authorizedSessionAvailable": false,
+  "vercelAccess": {
+    "team": "aditi-dave-s-projects",
+    "linkedProjects": [],
+    "projectsReturned": []
+  },
+  "screenshots": {
+    "desktop": "Native browser 1348px viewport and 1024px same-origin iframe",
+    "mobile": "390px same-origin iframe; not physical device emulation",
+    "roleDashboards": "Unauthenticated access gates only; no fabricated dashboard screenshots"
+  },
+  "intro": {
+    "componentUnchanged": true,
+    "sha256": "c69721da150630c3a4295583c2883ccd14ed51cc0891474486b301e209837745",
+    "durationSeconds": 104.563,
+    "exitTransitionMs": 820,
+    "naturalCompletionObserved": true,
+    "skipDesktopAndMobileObserved": true
+  },
+  "safety": {
+    "productionMigrationsExecuted": false,
+    "authSettingsChanged": false,
+    "registrationOpened": false,
+    "verificationBypass": false,
+    "testAccountsCreated": false
+  }
+}

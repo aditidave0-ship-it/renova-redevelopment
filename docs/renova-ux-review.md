@@ -1,5 +1,7 @@
 # RENOVA UX implementation and readiness review
 
+Updated functional acceptance findings and fresh production probes: [9 October functional QA report](renova-functional-qa-20261009.md). This report is historical implementation evidence; the newer report governs release readiness.
+
 Date: 2026-10-09. Scope: PR #26, based on main `fc5f45438f0d9cfb418054352b88792cb1d06f96`.
 
 ## Result
