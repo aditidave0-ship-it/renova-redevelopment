@@ -44,6 +44,25 @@ test("API requests retain same-origin cookies and surface only confirmed JSON su
     globalThis.fetch = original;
   }
 });
+test("logout accepts the API's empty 204 response without leaving the client signed in", async () => {
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url, init) => {
+      assert.equal(url, "/api/auth/logout");
+      assert.equal(init?.method, "POST");
+      assert.equal(init?.credentials, "same-origin");
+      return new Response(null, { status: 204 });
+    };
+    assert.equal(await workspaceApi<void>("/auth/logout", { method: "POST" }), undefined);
+    globalThis.fetch = async () => new Response(null, { status: 401 });
+    await assert.rejects(
+      workspaceApi<void>("/auth/logout", { method: "POST" }),
+      (error) => error instanceof WorkspaceApiError && error.status === 401,
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
 test("missing, forbidden, unavailable and non-JSON services cannot be reported as success", async () => {
   const original = globalThis.fetch;
   try {

@@ -29,6 +29,8 @@ export async function workspaceApi<T>(
         : `Unable to complete this request (${response.status}).`,
       response.status,
     );
+  // Logout deliberately returns 204 after invalidating the server session.
+  if (response.status === 204) return undefined as T;
   if (!json || body === null)
     throw new WorkspaceApiError(
       "The account service is unavailable. Please try again later.",
