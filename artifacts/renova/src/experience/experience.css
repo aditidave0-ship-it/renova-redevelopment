@@ -1,0 +1,881 @@
+.renova-experience {
+  --cream: #faf7f1;
+  --ink: #14223b;
+  --muted: #566174;
+  --gold: #edd3a2;
+  --lavender: #eeebf7;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.renova-experience *,
+.experience-header * {
+  box-sizing: border-box;
+}
+.renova-experience h1,
+.renova-experience h2,
+.renova-experience h3 {
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  margin: 0 0 18px;
+}
+.renova-experience h1 {
+  font-size: clamp(40px, 5.1vw, 72px);
+  font-weight: 650;
+}
+.renova-experience h2 {
+  font-size: clamp(28px, 3.2vw, 43px);
+  font-weight: 600;
+}
+.renova-experience h3 {
+  font-size: 20px;
+}
+.renova-experience p {
+  color: var(--muted);
+  margin: 0 0 18px;
+  max-width: 65ch;
+}
+.renova-experience a {
+  color: inherit;
+  text-decoration: none;
+}
+.experience-container {
+  width: min(1200px, calc(100% - 64px));
+  margin: auto;
+}
+.experience-header {
+  background: rgba(250, 247, 241, 0.98);
+  color: #14223b;
+  border-bottom: 1px solid #e4dfd4;
+  position: relative;
+  z-index: 30;
+  font-family: Inter, system-ui, sans-serif;
+}
+.experience-header-inner {
+  width: min(1280px, calc(100% - 64px));
+  min-height: 88px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.experience-brand {
+  display: inline-flex !important;
+  flex-direction: column;
+  align-items: center;
+  font-size: 24px !important;
+  letter-spacing: 0.2em !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  color: #14223b !important;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.experience-brand small {
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  margin-top: 5px;
+  font-weight: 600;
+}
+.experience-header nav {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+}
+.experience-header nav a {
+  font-size: 13px;
+  font-weight: 600;
+  color: #14223b;
+  text-decoration: none;
+}
+.experience-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 23px;
+  border: 1px solid transparent !important;
+  border-radius: 12px;
+  background: #14223b !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.experience-button:hover {
+  background: #253c60 !important;
+  transform: translateY(-1px);
+}
+.experience-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.experience-menu {
+  display: none;
+  background: transparent;
+  border: 0;
+  color: #14223b;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.experience-skip {
+  position: absolute;
+  left: 10px;
+  top: -100px;
+  padding: 10px;
+  background: #14223b;
+  color: white;
+  z-index: 40;
+}
+.experience-skip:focus {
+  top: 8px;
+}
+.renova-experience :focus-visible,
+.experience-header :focus-visible {
+  outline: 3px solid #456caa;
+  outline-offset: 4px;
+}
+.experience-eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  margin-bottom: 22px;
+  color: #566174;
+}
+.experience-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 38px;
+  padding-top: 34px;
+  padding-bottom: 32px;
+  min-height: 640px;
+}
+.experience-hero-copy {
+  padding: 35px 0;
+}
+.experience-hero h1 em {
+  font-style: normal;
+  color: #62607f;
+}
+.experience-hero-copy > p:first-of-type {
+  font-size: 19px;
+  max-width: 440px;
+  margin-bottom: 30px;
+}
+.experience-hero .experience-hero-note {
+  font-size: 12px;
+  margin: 18px 0 0;
+  color: #566174;
+}
+.experience-tower {
+  height: 570px;
+  border-radius: 170px 170px 24px 24px;
+  position: relative;
+  background:
+    linear-gradient(0deg, rgba(5, 18, 38, 0.92), transparent 38%),
+    url("/renova-hero-tower-44.webp") center center/cover;
+  border: 1px solid #e0d9c9;
+  box-shadow: 0 24px 50px #26395018;
+  overflow: hidden;
+}
+.experience-tower:after {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border: 1px solid #dae4fa40;
+  border-radius: 150px 150px 10px 10px;
+  pointer-events: none;
+}
+.experience-tower-caption {
+  position: absolute;
+  bottom: 35px;
+  left: 30px;
+  right: 30px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: white;
+  line-height: 1.8;
+}
+.experience-section {
+  padding-top: 84px;
+  padding-bottom: 44px;
+  scroll-margin-top: 30px;
+}
+.experience-section-heading {
+  max-width: 670px;
+  margin-bottom: 32px;
+}
+.experience-section-heading .experience-eyebrow {
+  margin-bottom: 14px;
+}
+.experience-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  gap: 20px;
+}
+.experience-steps:before {
+  content: "";
+  position: absolute;
+  top: 37px;
+  left: 30px;
+  right: 30px;
+  border-top: 1px dashed #99acc8;
+  animation: blueprint-connect 4s ease-in-out infinite;
+  pointer-events: none;
+}
+.experience-steps button {
+  position: relative;
+  text-align: left;
+  background: #fffdf9;
+  border: 1px solid #e7e0d6;
+  border-radius: 18px;
+  padding: 22px;
+  color: #14223b;
+  cursor: pointer;
+  z-index: 1;
+  min-width: 0;
+}
+.experience-steps button.is-active {
+  border-color: #526b9c;
+  background: #f0eef8;
+  box-shadow: 0 8px 26px #2936500c;
+}
+.experience-step-number {
+  display: flex;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  background: #14223b;
+  color: white;
+  font-size: 11px;
+  margin-bottom: 25px;
+}
+.experience-steps svg {
+  margin-bottom: 20px;
+  color: #6b668d;
+}
+.experience-steps h3 {
+  font-size: 18px;
+}
+.experience-steps p {
+  font-size: 14px;
+  margin: 0;
+}
+.experience-step-detail {
+  background: #f0edf6;
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: none !important;
+  margin: 20px 0 0 !important;
+  font-size: 14px;
+  color: #3c4560 !important;
+}
+.experience-audiences {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.experience-audience {
+  padding: 28px 24px;
+  border: 1px solid #e7e0d6;
+  border-radius: 18px;
+  background: #fffdf9;
+  display: block;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.experience-audience:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px #29365012;
+}
+.experience-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  background: #ece7f8;
+  color: #655183;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+.experience-audience:nth-child(even) .experience-icon {
+  background: #f7ead2;
+  color: #825d23;
+}
+.experience-audience p {
+  font-size: 14px;
+  min-height: 70px;
+}
+.experience-audience > span:last-child {
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.experience-feasibility {
+  margin-top: 70px;
+  padding: 48px;
+  border-radius: 24px;
+  background: #172943;
+  color: white;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.experience-feasibility h2 {
+  color: #fff;
+}
+.experience-feasibility p,
+.experience-feasibility .experience-eyebrow {
+  color: #d8e0ee;
+}
+.experience-feasibility p {
+  font-size: 15px;
+}
+.experience-feasibility .experience-button {
+  background: #edd3a2 !important;
+  color: #14223b !important;
+}
+.experience-text-link {
+  display: block;
+  font-size: 13px;
+  margin-top: 18px;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+}
+.experience-feasibility-outline {
+  border: 1px solid #8dacc363;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, #b6d7f010 27px 28px),
+    repeating-linear-gradient(90deg, transparent 0 27px, #b6d7f010 27px 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 30px;
+  border-radius: 14px;
+  color: #bdd5ef;
+}
+.experience-feasibility-outline span {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.experience-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.experience-benefits article {
+  border-top: 1px solid #d8d0c4;
+  padding-top: 28px;
+}
+.experience-benefits svg {
+  color: #766389;
+  margin-bottom: 24px;
+}
+.experience-benefits p {
+  font-size: 15px;
+}
+.experience-about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 70px;
+  padding-top: 85px;
+  padding-bottom: 60px;
+}
+.experience-founder {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 28px;
+}
+.experience-founder-mark {
+  height: 54px;
+  width: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e7e1f1;
+  color: #504268;
+  font-size: 15px;
+}
+.experience-founder div {
+  display: flex;
+  flex-direction: column;
+}
+.experience-founder div span {
+  font-size: 13px;
+  color: #566174;
+}
+.experience-contact-section {
+  border-top: 1px solid #e3ddcf;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 70px;
+  padding-bottom: 85px;
+}
+.experience-contact-form {
+  background: #fffdf9;
+  border: 1px solid #e7e0d6;
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.experience-contact-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #14223b;
+}
+.experience-contact-form input,
+.experience-contact-form select,
+.experience-contact-form textarea {
+  border: 1px solid #d6d8dc;
+  border-radius: 9px;
+  padding: 12px;
+  color: #14223b;
+  background: white;
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  min-width: 0;
+}
+.experience-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.experience-contact-form .experience-consent {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  font-weight: 400;
+}
+.experience-consent input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #14223b;
+}
+.experience-error {
+  color: #9b2430 !important;
+  background: #fff0f1;
+  padding: 14px;
+  border: 1px solid #e7bac2;
+  border-radius: 10px;
+}
+.experience-confirmation {
+  background: #eeebf7;
+  padding: 35px;
+  border-radius: 20px;
+}
+.experience-confirmation svg {
+  color: #445a3f;
+  margin-bottom: 20px;
+}
+.experience-contact-page {
+  padding-top: 65px;
+  padding-bottom: 90px;
+  max-width: 760px;
+}
+.experience-footer {
+  background: #eee8df;
+  padding: 45px max(32px, calc((100vw - 1200px) / 2));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.experience-footer .experience-brand {
+  align-items: flex-start;
+}
+.experience-footer p {
+  font-size: 12px;
+  margin-top: 18px;
+}
+.experience-footer > p {
+  grid-column: 1/-1;
+}
+.experience-footer nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 16px;
+  font-size: 13px;
+}
+.renova-home-underlay {
+  transition: opacity 0.82s;
+}
+.renova-home-underlay[inert] {
+  visibility: hidden;
+  opacity: 0;
+}
+@keyframes blueprint-connect {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (max-width: 1100px) {
+  .experience-header nav {
+    gap: 15px;
+  }
+  .experience-header nav a {
+    font-size: 12px;
+  }
+  .experience-header-inner {
+    gap: 15px;
+  }
+  .experience-header .experience-button {
+    padding: 10px 14px;
+  }
+  .experience-hero {
+    min-height: 550px;
+  }
+  .experience-tower {
+    height: 480px;
+  }
+  .experience-audiences,
+  .experience-steps {
+    gap: 12px;
+  }
+  .experience-audience {
+    padding: 22px 16px;
+  }
+  .experience-contact-section {
+    gap: 35px;
+  }
+}
+@media (max-width: 900px) {
+  .experience-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .experience-header nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #faf7f1;
+    border-bottom: 1px solid #ddd4c5;
+    padding: 24px 32px;
+    box-shadow: 0 10px 20px #14223b18;
+  }
+  .experience-header nav.is-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .experience-header nav a {
+    padding: 12px;
+    font-size: 14px;
+  }
+  .experience-header-inner {
+    min-height: 76px;
+  }
+  .experience-audiences,
+  .experience-steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .experience-steps:before {
+    display: none;
+  }
+  .experience-contact-section {
+    grid-template-columns: 1fr;
+  }
+  .experience-about {
+    gap: 35px;
+  }
+  .experience-feasibility {
+    padding: 32px;
+    grid-template-columns: 1fr 0.7fr;
+  }
+  .experience-benefits {
+    gap: 25px;
+  }
+  .experience-tower {
+    height: 440px;
+  }
+  .experience-hero {
+    gap: 25px;
+  }
+}
+@media (max-width: 600px) {
+  .experience-container,
+  .experience-header-inner {
+    width: calc(100% - 40px);
+  }
+  .experience-hero {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding-top: 20px;
+  }
+  .experience-hero-copy {
+    padding: 20px 0 4px;
+  }
+  .experience-hero h1 {
+    font-size: 44px;
+  }
+  .experience-hero-copy > p:first-of-type {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .experience-hero .experience-eyebrow {
+    font-size: 10px;
+    margin-bottom: 20px;
+  }
+  .experience-hero .experience-button {
+    width: 100%;
+  }
+  .experience-tower {
+    height: 365px;
+    border-radius: 90px 90px 20px 20px;
+    background-position: center 58%;
+  }
+  .experience-tower:after {
+    border-radius: 70px 70px 10px 10px;
+  }
+  .experience-tower-caption {
+    left: 25px;
+    bottom: 26px;
+  }
+  .experience-section {
+    padding-top: 55px;
+    padding-bottom: 20px;
+  }
+  .experience-steps button {
+    padding: 18px 16px;
+  }
+  .experience-steps h3 {
+    font-size: 16px;
+  }
+  .experience-steps p {
+    font-size: 13px;
+  }
+  .experience-step-number {
+    margin-bottom: 18px;
+  }
+  .experience-steps svg {
+    margin-bottom: 15px;
+  }
+  .experience-step-detail {
+    padding: 18px;
+  }
+  .experience-audience {
+    padding: 22px 16px;
+  }
+  .experience-audience h3 {
+    font-size: 18px;
+  }
+  .experience-audience p {
+    font-size: 13px;
+    min-height: 90px;
+  }
+  .experience-audience > span:last-child {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .experience-audience > span:last-child svg {
+    flex-shrink: 0;
+  }
+  .experience-feasibility {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+    margin-top: 40px;
+    gap: 20px;
+  }
+  .experience-feasibility-outline {
+    display: none;
+  }
+  .experience-feasibility .experience-button {
+    font-size: 12px !important;
+    padding: 12px 15px;
+    width: 100%;
+  }
+  .experience-benefits {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .experience-benefits article {
+    padding-top: 22px;
+  }
+  .experience-benefits svg {
+    margin-bottom: 15px;
+  }
+  .experience-about {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding-top: 55px;
+    padding-bottom: 45px;
+  }
+  .experience-contact-section {
+    gap: 10px;
+    padding-bottom: 50px;
+  }
+  .experience-form-row {
+    grid-template-columns: 1fr;
+  }
+  .experience-contact-form {
+    padding: 22px 18px;
+  }
+  .experience-footer {
+    padding: 35px 20px;
+    grid-template-columns: 1fr;
+  }
+  .experience-footer nav {
+    font-size: 12px;
+  }
+  .experience-contact-page {
+    padding-top: 40px;
+    padding-bottom: 55px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .experience-steps:before {
+    animation: none;
+  }
+  .renova-experience * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+  .experience-audience:hover,
+  .experience-button:hover {
+    transform: none;
+  }
+}
+.experience-info-page {
+  padding-top: 65px;
+  padding-bottom: 90px;
+}
+.experience-info-page h1 {
+  font-size: clamp(34px, 4vw, 56px);
+  max-width: 900px;
+}
+.experience-info-page .experience-benefits {
+  margin: 40px 0;
+}
+.renova-public-experience {
+  background: #faf7f1 !important;
+  color: #14223b !important;
+}
+.renova-public-experience .ecosystem-card {
+  border-radius: 18px;
+  background: #fffdf9;
+  border-color: #dfd8cc;
+}
+.renova-public-experience .ecosystem-card-title p,
+.renova-public-experience .ecosystem-card-title > span,
+.renova-public-experience .ecosystem-card dd,
+.renova-public-experience .ecosystem-card dt,
+.renova-public-experience .ecosystem-card-actions a,
+.renova-public-experience .ecosystem-tags span {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.renova-public-experience .ecosystem-card-title h2 {
+  font-size: 22px;
+}
+.renova-public-experience .ecosystem-status {
+  font-size: 10px;
+  background: #eeebf6;
+  border-color: #d8cfe1;
+  color: #504268;
+  border-radius: 7px;
+}
+.renova-public-experience .ecosystem-tags span {
+  border-radius: 7px;
+  background: #f1edf7;
+  border-color: #ddd3e6;
+  color: #504268;
+}
+.renova-public-experience .ecosystem-card-actions a:first-child {
+  border-radius: 10px;
+  background: #14223b;
+  color: white;
+  min-height: 44px;
+}
+.renova-public-experience .ecosystem-search input,
+.renova-public-experience .ecosystem-filter select {
+  font-size: 14px;
+  color: #14223b;
+}
+.renova-public-experience .organization-detail-card {
+  border-radius: 18px;
+  background: #fffdf9;
+}
+.renova-public-experience .organization-detail-card p,
+.renova-public-experience .organization-detail-card li,
+.renova-public-experience .organization-detail-card a,
+.renova-public-experience .organization-detail-card dt,
+.renova-public-experience .organization-detail-card dd {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.renova-public-experience .working-faq-list article {
+  border-radius: 14px;
+  background: #fffdf9;
+}
+.renova-public-experience .working-faq-list p,
+.renova-public-experience .working-faq-list button {
+  font-size: 15px;
+  color: #14223b;
+  line-height: 1.6;
+}
+.renova-public-experience :focus-visible {
+  outline: 3px solid #456caa;
+  outline-offset: 3px;
+}
+.renova-public-experience .ecosystem-footer {
+  color: #14223b;
+  background: #eee8df;
+}
+.renova-public-experience .ecosystem-footer a {
+  color: #14223b;
+}
+.renova-public-experience .ecosystem-filter-label,
+.renova-public-experience .ecosystem-results,
+.renova-public-experience .ecosystem-source-note span {
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .experience-info-page {
+    padding-top: 40px;
+    padding-bottom: 60px;
+  }
+  .experience-info-page .experience-benefits {
+    gap: 25px;
+  }
+  .renova-public-experience .ecosystem-card-actions {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
