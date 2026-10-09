@@ -1,0 +1,176 @@
+{
+  "checkedAt": "2026-10-09T11:34:52.059801+00:00",
+  "origin": "https://renova-lovat-mu.vercel.app",
+  "results": [
+    {
+      "method": "GET",
+      "path": "/api/healthz",
+      "http": 200,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "status": "ok"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/readyz",
+      "http": 200,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "status": "ready"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/societies/me/opportunities",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/opportunities",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/societies/me/interests",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/organizations/me/interests",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/me",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/organizations/me",
+      "http": 404,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Not found"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/societies/me/feasibility",
+      "http": 404,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Not found"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/feasibility",
+      "http": 404,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Not found"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "http": 503,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Registration is not open yet"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/forgot-password",
+      "http": 503,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Email delivery is not configured yet"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/resend-verification",
+      "http": 503,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Email delivery is not configured yet"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/verify-email",
+      "http": 400,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Validation failed"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/reset-password",
+      "http": 400,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Validation failed"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/opportunities/00000000-0000-0000-0000-000000000000/interests",
+      "http": 401,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "body": {
+        "error": "Authentication required"
+      }
+    }
+  ]
+}
