@@ -2091,6 +2091,11 @@ function Regulations() {
           </button>
         }
       />
+      <p role="note">
+        General orientation notes. RENOVA has not verified their regulatory
+        currency or applicability. Confirm requirements with the relevant
+        authority and your professional advisors.
+      </p>
       <div className="regulation-feature">
         <div>
           <span className="feature-label">
@@ -2144,7 +2149,7 @@ function Regulations() {
               onClick={() => setActiveStatus(status)}
               data-testid={`button-regulation-filter-${status.toLowerCase().replaceAll(" ", "-")}`}
             >
-              {status}
+              {status === "All" ? "All" : "Orientation notes"}
             </button>
           ))}
         </div>
@@ -2175,24 +2180,12 @@ function Regulations() {
               <div className="regulation-copy">
                 <div className="regulation-title-row">
                   <h3>{item.title}</h3>
-                  <StatusPill
-                    tone={
-                      item.status.toLowerCase().includes("active") ||
-                      item.status.toLowerCase().includes("current")
-                        ? "green"
-                        : "neutral"
-                    }
-                  >
-                    {item.status}
-                  </StatusPill>
+                  <StatusPill tone="neutral">Orientation</StatusPill>
                 </div>
                 <p>{item.summary}</p>
                 <div className="regulation-meta">
                   <span>
                     <Landmark size={13} /> {item.authority}
-                  </span>
-                  <span>
-                    <CalendarDays size={13} /> Updated {item.updatedAt}
                   </span>
                 </div>
               </div>
@@ -2270,8 +2263,8 @@ function Regulations() {
         {activeRegulation && (
           <div className="regulation-detail">
             <div className="regulation-detail-status">
-              <StatusPill tone="green">{activeRegulation.status}</StatusPill>
-              <span>Reviewed {activeRegulation.updatedAt}</span>
+              <StatusPill tone="neutral">Orientation</StatusPill>
+              <span>Regulatory currency not verified</span>
             </div>
             <p className="regulation-detail-lead">{activeRegulation.summary}</p>
             <div className="profile-facts">
@@ -4199,6 +4192,7 @@ function FaqPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search questions"
+              aria-label="Search questions"
             />
           </label>
           <div className="working-faq-list">
