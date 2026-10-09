@@ -6,6 +6,8 @@ if (!base || !token || !/^https:\/\//.test(base)) {
   throw new Error("Set RENOVA_BASE_URL (https://...) and RENOVA_REGISTRATION_TEST_TOKEN in the local test process.");
 }
 const origin = new URL(base).origin;
+// Closed is the release-safe default; explicitly opt in to checking an already-open deployment.
+const registrationOpen = process.env.RENOVA_EXPECT_REGISTRATION_OPEN === "true";
 const runId = randomBytes(5).toString("hex");
 const password = randomBytes(24).toString("base64url");
 
@@ -19,6 +21,7 @@ async function request(path, { method = "GET", body, cookie, registration = fals
     },
     body: body ? JSON.stringify(body) : undefined,
     redirect: "manual",
+    signal: AbortSignal.timeout(25000),
   });
   const contentType = response.headers.get("content-type") || "";
   if (response.status !== status) {
@@ -67,7 +70,7 @@ const ready = await request("/readyz");
 if (health.data.status !== "ok" || ready.data.status !== "ready") throw new Error("API health or database readiness failed");
 await request("/auth/me", { status: 401 });
 await request("/societies/me/interests", { status: 401 });
-await request("/auth/register", { method: "POST", body: {}, status: 503 });
+await request("/auth/register", { method: "POST", body: {}, status: registrationOpen ? 400 : 503 });
 
 const society = await register("SOCIETY");
 const otherSociety = await register("SOCIETY", "-other");
@@ -116,4 +119,6 @@ for (const role of ["DEVELOPER", "PMC"]) {
   if (otherInbox.data.interests?.some((item) => item.opportunityId === opportunityId)) throw new Error(`Second society can see ${role} interest`);
 }
 
-console.log(`RENOVA API acceptance passed on ${origin}: health, readiness, private registration gate, secure persistent sessions, login/logout, three roles, opportunity discovery and interests, draft secrecy, and cross-organization boundaries. Test marker: ${runId}`);
+console.log(`RENOVA API acceptance passed on ${origin}: health, readiness, registration ${registrationOpen ? "OPEN (not a launch approval)" : "closed"}, secure persistent sessions, login/logout, three roles, opportunity discovery and interests, draft secrecy, and cross-organization boundaries. Test marker: ${runId}`);
+
+// Email delivery, browser/mobile journeys and connection approval are separate release gates.
