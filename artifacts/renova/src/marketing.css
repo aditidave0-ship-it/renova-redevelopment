@@ -1986,8 +1986,8 @@ html { scroll-behavior: smooth; }
 .marketing-site .public-mega-nav { gap: 20px; }
 .marketing-site .public-mega-nav > a { font-size: 13px; min-height: 44px; display: inline-flex; align-items: center; }
 .renova-start-heading { max-width: 760px; margin: 0 auto 28px; text-align: center; }
-.marketing-site .renova-start-heading h2 { color: #102e50; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; margin: 12px 0; }
-.marketing-site .renova-start-heading p { color: #425975; font-size: 16px; line-height: 1.6; }
+.marketing-site .renova-start-heading h2 { color: #f7fbff; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; margin: 12px 0; }
+.marketing-site .renova-start-heading p { color: #c6d7e8; font-size: 16px; line-height: 1.6; }
 .marketing-site .stitch-action-card:focus-visible, .marketing-site .public-mega-nav a:focus-visible { outline: 3px solid #4ea7ff; outline-offset: 4px; }
 @media (max-width: 1024px) { .marketing-site .public-mega-nav { gap: 12px; } }
 @media (max-width: 768px) { .marketing-site .stitch-action-grid { grid-template-columns: 1fr; } .marketing-site .public-mega-nav > a { min-height: 48px; font-size: 15px; } }
