@@ -3002,10 +3002,10 @@ function MarketingHome() {
           <p>Renew. Connect. Redevelop.</p>
         </div>
         <div>
-          <a href="#listings">Listings</a>
-          <a href="#opportunities">Opportunities</a>
+          <Link href="/feasibility">For Societies</Link>
+          <Link href="/ecosystem">Developers & Professionals</Link>
           <Link href="/regulations">Knowledge centre</Link>
-          <Link href="/assessment">Post requirement</Link>
+          <Link href="/contact">Contact</Link>
         </div>
         <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
       </footer>
@@ -3015,17 +3015,17 @@ function MarketingHome() {
           <Home size={20} />
           <span>Home</span>
         </a>
-        <a href="#listings">
-          <Building2 size={20} />
-          <span>Listings</span>
-        </a>
-        <a href="#opportunities">
+        <Link href="/feasibility">
+          <Landmark size={20} />
+          <span>Societies</span>
+        </Link>
+        <Link href="/ecosystem">
           <Handshake size={20} />
-          <span>Opportunities</span>
-        </a>
-        <Link href="/assessment">
-          <Plus size={22} />
-          <span>Post</span>
+          <span>Ecosystem</span>
+        </Link>
+        <Link href="/platform">
+          <LayoutDashboard size={20} />
+          <span>Login</span>
         </Link>
       </nav>
       <ExperienceDrawer
