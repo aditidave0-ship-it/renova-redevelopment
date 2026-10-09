@@ -973,3 +973,16 @@
   letter-spacing: normal;
   text-transform: none;
 }
+
+/* The legacy orientation card is dark; general page heading colors must not leak into it. */
+.renova-experience .regulation-feature h2,
+.renova-experience .regulation-feature p,
+.renova-experience .regulation-feature .feature-label,
+.renova-experience .regulation-feature .feature-lines,
+.renova-experience .regulation-feature .text-link {
+  color: #ffffff;
+}
+.renova-experience .regulation-feature p,
+.renova-experience .regulation-feature .text-link {
+  font-size: 14px;
+}
