@@ -11,36 +11,36 @@ Status meanings:
 
 ## Safety and release controls
 
-| Area | Status | Evidence / next action |
-| --- | --- | --- |
-| Dedicated backend branch | DONE | Active branch: `codex/backend-integration`. |
-| Public registration closed | DONE | API requires both `RENOVA_REGISTRATION_OPEN=true` and `RENOVA_BETA_RELEASE_APPROVED=true`; neither is changed by this work. |
-| Live payments disabled | DONE | No payment provider or live credentials are configured. |
-| Production migration safety | BLOCKED | Production's third Drizzle ledger hash matches the historical profile migration from commit `06718de`, while the active branch has diverged migration history. Do not deploy a build that automatically runs migrations until the ledger and exact schema are re-inspected and reconciled. |
-| Private document storage | BLOCKED | Feasibility routes require private Vercel Blob configuration. No public fallback is permitted. |
-| Transactional email delivery | BLOCKED | Provider abstraction exists, but production sender/domain configuration is intentionally unavailable. |
+| Area                         | Status  | Evidence / next action                                                                                                                                                                                                                                                                     |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dedicated backend branch     | DONE    | Active branch: `codex/backend-integration`.                                                                                                                                                                                                                                                |
+| Public registration closed   | DONE    | API requires both `RENOVA_REGISTRATION_OPEN=true` and `RENOVA_BETA_RELEASE_APPROVED=true`; neither is changed by this work.                                                                                                                                                                |
+| Live payments disabled       | DONE    | No payment provider or live credentials are configured.                                                                                                                                                                                                                                    |
+| Production migration safety  | BLOCKED | Production's third Drizzle ledger hash matches the historical profile migration from commit `06718de`, while the active branch has diverged migration history. Do not deploy a build that automatically runs migrations until the ledger and exact schema are re-inspected and reconciled. |
+| Private document storage     | BLOCKED | Feasibility routes require private Vercel Blob configuration. No public fallback is permitted.                                                                                                                                                                                             |
+| Transactional email delivery | BLOCKED | Provider abstraction exists, but production sender/domain configuration is intentionally unavailable.                                                                                                                                                                                      |
 
 ## Platform modules
 
-| Module | Backend | Frontend connected | Tested | Production ready |
-| --- | --- | --- | --- | --- |
-| Registration | PARTIAL | PARTIAL | LOCAL PASS | NO — closed and email-dependent |
-| Email verification | PARTIAL | DONE | OTP/TEMPLATE/ROUTE PASS | NO — six-digit, 10-minute, single-use OTPs with persistent attempt limits and rate limits are implemented; proof of inbox delivery is blocked by the final sender/domain |
-| Login / logout / sessions | DONE | DONE | LOCAL PASS | NEEDS controlled deployed-account acceptance |
-| Password reset | PARTIAL | DONE | LOCAL PASS | NO — delivery blocked |
-| Contact submission | DONE | DONE | LOCAL PASS | NEEDS deployed persistence evidence |
-| Enquiry management | PARTIAL | PARTIAL | ROUTE PASS | NO — search, assignment, notes, follow-up history and requested statuses are missing |
-| Society profile | PARTIAL | DONE | POLICY/ROUTE PASS | NEEDS deployed authenticated acceptance and document support |
-| Feasibility | PARTIAL | DONE | POLICY/ROUTE PASS | NO — schema activation and private storage blocked |
-| Opportunities | PARTIAL | DONE | ROUTE PASS | Lifecycle editing, publication, closure and audit work is in progress |
-| Developer interests | PARTIAL | DONE | POLICY/ROUTE PASS | Withdrawal, notification and deployed acceptance remain |
-| PMC interests | PARTIAL | DONE | POLICY/ROUTE PASS | Withdrawal, notification and deployed acceptance remain |
-| Professional profiles | DONE | PARTIAL | LOCAL PASS | NEEDS deployed authenticated acceptance |
-| Document management | PARTIAL | PARTIAL | SIGNATURE POLICY PASS | NO — private Blob and malware-scanning gate blocked |
-| Email notifications / outbox | MISSING | N/A | NO | NO |
-| Admin workspace | PARTIAL | PARTIAL | ROLE/ROUTE PASS | NO — broader controls, audit views and production acceptance remain |
-| Checkout / payments | MISSING | MISSING | NO | NO — requires catalogue decisions and provider approval |
-| Payment webhooks | MISSING | N/A | NO | NO — provider approval required before implementation can be verified |
+| Module                       | Backend | Frontend connected | Tested                  | Production ready                                                                                                                                                         |
+| ---------------------------- | ------- | ------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Registration                 | PARTIAL | PARTIAL            | LOCAL PASS              | NO — closed and email-dependent                                                                                                                                          |
+| Email verification           | PARTIAL | DONE               | OTP/TEMPLATE/ROUTE PASS | NO — six-digit, 10-minute, single-use OTPs with persistent attempt limits and rate limits are implemented; proof of inbox delivery is blocked by the final sender/domain |
+| Login / logout / sessions    | DONE    | DONE               | LOCAL PASS              | NEEDS controlled deployed-account acceptance                                                                                                                             |
+| Password reset               | PARTIAL | DONE               | LOCAL PASS              | NO — delivery blocked                                                                                                                                                    |
+| Contact submission           | DONE    | DONE               | LOCAL PASS              | Database save is transactional with an audit record; deployed persistence and actual acknowledgement inbox evidence remain                                               |
+| Enquiry management           | PARTIAL | PARTIAL            | ROUTE/TEMPLATE PASS     | Protected filtering, assignment, status updates, close/reopen timestamps and audit history are implemented; Admin UI controls and deployed acceptance remain             |
+| Society profile              | PARTIAL | DONE               | POLICY/ROUTE PASS       | NEEDS deployed authenticated acceptance and document support                                                                                                             |
+| Feasibility                  | PARTIAL | DONE               | POLICY/ROUTE PASS       | NO — schema activation and private storage blocked                                                                                                                       |
+| Opportunities                | PARTIAL | DONE               | ROUTE PASS              | Lifecycle editing, publication, closure and audit work is in progress                                                                                                    |
+| Developer interests          | PARTIAL | DONE               | POLICY/ROUTE PASS       | Withdrawal, notification and deployed acceptance remain                                                                                                                  |
+| PMC interests                | PARTIAL | DONE               | POLICY/ROUTE PASS       | Withdrawal, notification and deployed acceptance remain                                                                                                                  |
+| Professional profiles        | DONE    | PARTIAL            | LOCAL PASS              | NEEDS deployed authenticated acceptance                                                                                                                                  |
+| Document management          | PARTIAL | PARTIAL            | SIGNATURE POLICY PASS   | NO — private Blob and malware-scanning gate blocked                                                                                                                      |
+| Email notifications / outbox | MISSING | N/A                | NO                      | NO                                                                                                                                                                       |
+| Admin workspace              | PARTIAL | PARTIAL            | ROLE/ROUTE PASS         | NO — broader controls, audit views and production acceptance remain                                                                                                      |
+| Checkout / payments          | MISSING | MISSING            | NO                      | NO — requires catalogue decisions and provider approval                                                                                                                  |
+| Payment webhooks             | MISSING | N/A                | NO                      | NO — provider approval required before implementation can be verified                                                                                                    |
 
 ## Existing backend architecture
 
@@ -76,6 +76,7 @@ Values must remain secret and environment-scoped where applicable.
 - `RENOVA_EMAIL_PROVIDER`
 - `RESEND_API_KEY`
 - `RENOVA_EMAIL_FROM`
+- `RENOVA_ADMIN_ENQUIRY_EMAIL`
 - `RENOVA_PRODUCT_NAME`
 - `RENOVA_APP_URL`
 - `BLOB_STORE_ID` or `BLOB_READ_WRITE_TOKEN`

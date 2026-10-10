@@ -45,6 +45,13 @@ export function getEmailBrand(): EmailBrand {
   };
 }
 
+export function isEmailDeliveryConfigured(): boolean {
+  return (
+    process.env.RENOVA_EMAIL_PROVIDER?.trim().toLowerCase() === "resend" &&
+    Boolean(process.env.RESEND_API_KEY)
+  );
+}
+
 export function verificationEmail(
   brand: EmailBrand,
   otp: string,
@@ -65,6 +72,38 @@ export function welcomeEmail(brand: EmailBrand): Omit<EmailMessage, "to"> {
     subject: `Welcome to ${brand.productName}`,
     text: `Your email is verified and your ${brand.productName} account is active. Sign in: ${signInUrl}`,
     html: `<h1>Welcome to ${name}</h1><p>Your email is verified and your account is active.</p><p><a href="${escapeHtml(signInUrl)}">Sign in to your workspace</a></p>`,
+  };
+}
+
+export function enquiryAcknowledgementEmail(
+  brand: EmailBrand,
+  enquiry: { name: string; reference: string },
+): Omit<EmailMessage, "to"> {
+  const name = escapeHtml(enquiry.name);
+  const reference = escapeHtml(enquiry.reference);
+  const productName = escapeHtml(brand.productName);
+  return {
+    subject: `${brand.productName} enquiry ${enquiry.reference}`,
+    text: `Hello ${enquiry.name}, we received your enquiry. Reference: ${enquiry.reference}. Our team will review the details and coordinate the next step.`,
+    html: `<h1>Enquiry received</h1><p>Hello ${name},</p><p>${productName} received your enquiry and will review the details before coordinating the next step.</p><p><strong>Reference:</strong> ${reference}</p>`,
+  };
+}
+
+export function adminEnquiryNotificationEmail(
+  brand: EmailBrand,
+  enquiry: {
+    reference: string;
+    organizationName: string;
+    source: string;
+  },
+): Omit<EmailMessage, "to"> {
+  const reference = escapeHtml(enquiry.reference);
+  const organizationName = escapeHtml(enquiry.organizationName);
+  const source = escapeHtml(enquiry.source);
+  return {
+    subject: `New enquiry ${enquiry.reference}`,
+    text: `A new enquiry was saved. Reference: ${enquiry.reference}. Organization: ${enquiry.organizationName}. Source: ${enquiry.source}.`,
+    html: `<h1>New enquiry</h1><p><strong>Reference:</strong> ${reference}</p><p><strong>Organization:</strong> ${organizationName}</p><p><strong>Source:</strong> ${source}</p><p>Open the protected Admin workspace to review the full submission.</p>`,
   };
 }
 

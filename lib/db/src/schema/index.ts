@@ -396,6 +396,10 @@ export const enquiries = pgTable(
     message: text("message").notNull(),
     source: varchar("source", { length: 80 }).default("WEBSITE").notNull(),
     status: enquiryStatus("status").default("NEW").notNull(),
+    assignedToUserId: uuid("assigned_to_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
     requestFingerprint: varchar("request_fingerprint", {
       length: 64,
     }).notNull(),
@@ -403,6 +407,10 @@ export const enquiries = pgTable(
   },
   (table) => [
     index("enquiries_status_created_idx").on(table.status, table.createdAt),
+    index("enquiries_assignee_status_idx").on(
+      table.assignedToUserId,
+      table.status,
+    ),
     index("enquiries_fingerprint_created_idx").on(
       table.requestFingerprint,
       table.createdAt,
