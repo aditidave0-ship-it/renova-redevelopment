@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { passwordResetEmail, verificationEmail, welcomeEmail } from "./email";
+import {
+  adminEnquiryNotificationEmail,
+  enquiryAcknowledgementEmail,
+  passwordResetEmail,
+  verificationEmail,
+  welcomeEmail,
+} from "./email";
 
 const brand = {
   productName: "Example Platform",
@@ -22,6 +28,22 @@ test("welcome template confirms activation without claiming provider delivery", 
   assert.match(message.subject, /Welcome to Example Platform/);
   assert.match(message.text, /account is active/);
   assert.match(message.text, /https:\/\/example\.test\/platform\/live/);
+});
+
+test("enquiry templates use the saved reference and neutral branding", () => {
+  const acknowledgement = enquiryAcknowledgementEmail(brand, {
+    name: "Society Contact",
+    reference: "REQ-2026-ABC123",
+  });
+  const notification = adminEnquiryNotificationEmail(brand, {
+    reference: "REQ-2026-ABC123",
+    organizationName: "Example Society",
+    source: "FEASIBILITY",
+  });
+  assert.match(acknowledgement.text, /REQ-2026-ABC123/);
+  assert.match(acknowledgement.text, /received your enquiry/);
+  assert.match(notification.text, /Example Society/);
+  assert.match(notification.text, /FEASIBILITY/);
 });
 
 test("password reset template documents its one-hour expiry", () => {

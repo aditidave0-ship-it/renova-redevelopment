@@ -32,6 +32,8 @@ test("public submission and protected admin enquiry routes are registered", () =
   const routes = routeMethods(enquiriesRouter);
   assert.equal(routes.includes("POST /enquiries"), true);
   assert.equal(routes.includes("GET /admin/enquiries"), true);
+  assert.equal(routes.includes("PATCH /admin/enquiries/:id"), true);
+  assert.equal(routes.includes("GET /admin/enquiries/:id/history"), true);
 });
 
 test("website remains the default enquiry source", () => {
