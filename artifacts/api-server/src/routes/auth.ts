@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "@workspace/api-zod";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
 import {
   getDb,
   clearSession,
@@ -11,17 +11,28 @@ import {
   verifyPassword,
 } from "../lib/session";
 import {
+  EMAIL_OTP_MAX_ATTEMPTS,
   hashAuthToken,
+  issueEmailOtp,
   isUsableAuthToken,
   issueAuthToken,
   type AuthTokenPurpose,
+  verifyEmailOtpHash,
 } from "../lib/auth-tokens";
 import {
   getEmailBrand,
   getEmailProvider,
   passwordResetEmail,
   verificationEmail,
+  welcomeEmail,
 } from "../lib/email";
+import {
+  authRateLimitSubject,
+  enforceAuthRateLimit,
+  type AuthRateLimitAction,
+  type AuthRateLimitPolicy,
+} from "../lib/auth-rate-limit";
+import { logger } from "../lib/logger";
 import { requireDb } from "@workspace/db";
 import {
   authSessions,
@@ -60,8 +71,23 @@ const loginSchema = z.object({
   password: z.string().min(1).max(128),
 });
 const emailRequestSchema = z.object({ email: emailSchema });
+const verificationOtpSchema = z.object({
+  email: emailSchema,
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Enter the six-digit code"),
+});
 const tokenSchema = z.object({ token: z.string().min(32).max(256) });
 const resetPasswordSchema = tokenSchema.extend({ password: passwordSchema });
+
+const AUTH_RATE_LIMITS: Record<AuthRateLimitAction, AuthRateLimitPolicy> = {
+  REGISTER: { limit: 5, windowMs: 60 * 60 * 1000 },
+  VERIFY_EMAIL: { limit: 10, windowMs: 10 * 60 * 1000 },
+  RESEND_VERIFICATION: { limit: 3, windowMs: 60 * 60 * 1000 },
+  FORGOT_PASSWORD: { limit: 5, windowMs: 60 * 60 * 1000 },
+  LOGIN: { limit: 10, windowMs: 15 * 60 * 1000 },
+};
 
 function publicUser(
   user: { id: string; email: string; displayName: string; role: string },
@@ -108,6 +134,62 @@ function ensureEmailDeliveryConfigured(): void {
     Object.assign(error, { status: 503, code: "EMAIL_DELIVERY_UNAVAILABLE" });
     throw error;
   }
+}
+
+async function rateLimitAuthRequest(
+  database: ReturnType<typeof getDb>,
+  request: { ip?: string },
+  email: string,
+  action: AuthRateLimitAction,
+) {
+  await enforceAuthRateLimit(
+    database,
+    action,
+    authRateLimitSubject(request.ip || "unknown", email),
+    AUTH_RATE_LIMITS[action],
+  );
+}
+
+async function replaceVerificationOtp(
+  database: ReturnType<typeof getDb>,
+  userId: string,
+  cooldownMs = 0,
+) {
+  if (cooldownMs > 0) {
+    const [latest] = await database
+      .select({ createdAt: authTokens.createdAt })
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.userId, userId),
+          eq(authTokens.purpose, "EMAIL_VERIFICATION"),
+        ),
+      )
+      .orderBy(desc(authTokens.createdAt))
+      .limit(1);
+    if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
+      return null;
+  }
+  const issued = issueEmailOtp(userId);
+  await database.transaction(async (tx) => {
+    await tx
+      .delete(authTokens)
+      .where(
+        and(
+          eq(authTokens.userId, userId),
+          eq(authTokens.purpose, "EMAIL_VERIFICATION"),
+          isNull(authTokens.usedAt),
+        ),
+      );
+    await tx.insert(authTokens).values({
+      userId,
+      purpose: "EMAIL_VERIFICATION",
+      tokenHash: issued.tokenHash,
+      expiresAt: issued.expiresAt,
+      failedAttempts: 0,
+    });
+  });
+  return issued.otp;
 }
 
 async function replaceAuthToken(
@@ -160,6 +242,7 @@ router.post("/auth/register", async (request, response, next) => {
     const input = registrationSchema.parse(request.body);
     const identity = registrationIdentity(input.participantType);
     const database = getDb();
+    await rateLimitAuthRequest(database, request, input.email, "REGISTER");
     const existing = await database
       .select({ id: users.id })
       .from(users)
@@ -194,13 +277,11 @@ router.post("/auth/register", async (request, response, next) => {
           location: input.location ?? null,
         })
         .returning({ id: organizations.id });
-      await tx
-        .insert(organizationMembers)
-        .values({
-          organizationId: organization.id,
-          userId: user.id,
-          role: identity.role,
-        });
+      await tx.insert(organizationMembers).values({
+        organizationId: organization.id,
+        userId: user.id,
+        role: identity.role,
+      });
       if (identity.role === "SOCIETY")
         await tx.insert(societies).values({ organizationId: organization.id });
       if (identity.role === "PROFESSIONAL" && identity.professionalType)
@@ -210,20 +291,18 @@ router.post("/auth/register", async (request, response, next) => {
         });
       return { user, organizationId: organization.id };
     });
-    const token = await replaceAuthToken(
-      database,
-      result.user.id,
-      "EMAIL_VERIFICATION",
-    );
-    if (!token) throw new Error("Unable to create verification token");
+    const otp = await replaceVerificationOtp(database, result.user.id);
+    if (!otp) throw new Error("Unable to create verification code");
     const brand = getEmailBrand();
     await getEmailProvider(brand).send({
       to: result.user.email,
-      ...verificationEmail(brand, token),
+      ...verificationEmail(brand, otp),
     });
-    return response
-      .status(202)
-      .json({ message: "Check your email to verify your account" });
+    return response.status(202).json({
+      message: "Enter the six-digit code sent to your email",
+      email: result.user.email,
+      verificationRequired: true,
+    });
   } catch (error) {
     return next(error);
   }
@@ -231,9 +310,19 @@ router.post("/auth/register", async (request, response, next) => {
 
 router.post("/auth/verify-email", async (request, response, next) => {
   try {
-    const input = tokenSchema.parse(request.body);
+    const input = verificationOtpSchema.parse(request.body);
     const database = requireDb();
+    await rateLimitAuthRequest(database, request, input.email, "VERIFY_EMAIL");
     const now = new Date();
+    const [user] = await database
+      .select({ id: users.id, email: users.email })
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1);
+    if (!user)
+      return response
+        .status(400)
+        .json({ error: "Verification code is incorrect or expired" });
     const [record] = await database
       .select({
         id: authTokens.id,
@@ -241,14 +330,42 @@ router.post("/auth/verify-email", async (request, response, next) => {
         purpose: authTokens.purpose,
         expiresAt: authTokens.expiresAt,
         usedAt: authTokens.usedAt,
+        tokenHash: authTokens.tokenHash,
+        failedAttempts: authTokens.failedAttempts,
       })
       .from(authTokens)
-      .where(eq(authTokens.tokenHash, hashAuthToken(input.token)))
+      .where(
+        and(
+          eq(authTokens.userId, user.id),
+          eq(authTokens.purpose, "EMAIL_VERIFICATION"),
+          isNull(authTokens.usedAt),
+        ),
+      )
+      .orderBy(desc(authTokens.createdAt))
       .limit(1);
     if (!record || !isUsableAuthToken(record, "EMAIL_VERIFICATION", now))
       return response
         .status(400)
-        .json({ error: "Verification link is invalid or expired" });
+        .json({ error: "Verification code is incorrect or expired" });
+    if (!verifyEmailOtpHash(user.id, input.otp, record.tokenHash)) {
+      await database
+        .update(authTokens)
+        .set({
+          failedAttempts: sql`${authTokens.failedAttempts} + 1`,
+          lastAttemptAt: now,
+        })
+        .where(
+          and(
+            eq(authTokens.id, record.id),
+            isNull(authTokens.usedAt),
+            gt(authTokens.expiresAt, now),
+            lt(authTokens.failedAttempts, EMAIL_OTP_MAX_ATTEMPTS),
+          ),
+        );
+      return response
+        .status(400)
+        .json({ error: "Verification code is incorrect or expired" });
+    }
     const consumed = await database.transaction(async (tx) => {
       const updated = await tx
         .update(authTokens)
@@ -258,6 +375,7 @@ router.post("/auth/verify-email", async (request, response, next) => {
             eq(authTokens.id, record.id),
             isNull(authTokens.usedAt),
             gt(authTokens.expiresAt, now),
+            lt(authTokens.failedAttempts, EMAIL_OTP_MAX_ATTEMPTS),
           ),
         )
         .returning({ id: authTokens.id });
@@ -271,8 +389,22 @@ router.post("/auth/verify-email", async (request, response, next) => {
     if (!consumed)
       return response
         .status(400)
-        .json({ error: "Verification link is invalid or expired" });
-    return response.json({ message: "Email verified. You can now sign in." });
+        .json({ error: "Verification code is incorrect or expired" });
+    const brand = getEmailBrand();
+    try {
+      await getEmailProvider(brand).send({
+        to: user.email,
+        ...welcomeEmail(brand),
+      });
+    } catch (error) {
+      logger.warn(
+        { err: error, userId: user.id },
+        "Welcome email was not accepted after account verification",
+      );
+    }
+    return response.json({
+      message: "Email verified. Your account is active; you can now sign in.",
+    });
   } catch (error) {
     return next(error);
   }
@@ -283,6 +415,12 @@ router.post("/auth/resend-verification", async (request, response, next) => {
     ensureEmailDeliveryConfigured();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
+    await rateLimitAuthRequest(
+      database,
+      request,
+      input.email,
+      "RESEND_VERIFICATION",
+    );
     const [user] = await database
       .select({
         id: users.id,
@@ -294,17 +432,12 @@ router.post("/auth/resend-verification", async (request, response, next) => {
       .where(eq(users.email, input.email))
       .limit(1);
     if (user && (!user.isActive || !user.emailVerifiedAt)) {
-      const token = await replaceAuthToken(
-        database,
-        user.id,
-        "EMAIL_VERIFICATION",
-        60_000,
-      );
-      if (token) {
+      const otp = await replaceVerificationOtp(database, user.id, 60_000);
+      if (otp) {
         const brand = getEmailBrand();
         await getEmailProvider(brand).send({
           to: user.email,
-          ...verificationEmail(brand, token),
+          ...verificationEmail(brand, otp),
         });
       }
     }
@@ -322,6 +455,12 @@ router.post("/auth/forgot-password", async (request, response, next) => {
     ensureEmailDeliveryConfigured();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
+    await rateLimitAuthRequest(
+      database,
+      request,
+      input.email,
+      "FORGOT_PASSWORD",
+    );
     const [user] = await database
       .select({ id: users.id, email: users.email })
       .from(users)
@@ -420,6 +559,7 @@ router.post("/auth/login", async (request, response, next) => {
   try {
     const input = loginSchema.parse(request.body);
     const database = requireDb();
+    await rateLimitAuthRequest(database, request, input.email, "LOGIN");
     const rows = await database
       .select({
         user: users,

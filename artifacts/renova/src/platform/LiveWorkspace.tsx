@@ -195,44 +195,22 @@ function Field({
 
 function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
   const [, navigate] = useLocation();
-  const [{ verificationToken, resetToken }] = useState(() => {
+  const [{ resetToken }] = useState(() => {
     const parameters = new URLSearchParams(window.location.hash.slice(1));
     return {
-      verificationToken: parameters.get("verify"),
       resetToken: parameters.get("reset"),
     };
   });
   const [mode, setMode] = useState<
     "register" | "login" | "forgot" | "resend" | "reset" | "verify"
-  >(verificationToken ? "verify" : resetToken ? "reset" : "register");
+  >(resetToken ? "reset" : "register");
   const [participantType, setParticipantType] =
     useState<ParticipantType>("SOCIETY");
   const [registrationStep, setRegistrationStep] = useState<1 | 2>(1);
+  const [verificationEmail, setVerificationEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    if (!verificationToken) return;
-    setBusy(true);
-    void api<{ message: string }>("/auth/verify-email", {
-      method: "POST",
-      body: JSON.stringify({ token: verificationToken }),
-    })
-      .then((result) => {
-        setNotice(result.message);
-        setMode("login");
-        window.history.replaceState(null, "", window.location.pathname);
-      })
-      .catch((cause) =>
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Unable to verify this email.",
-        ),
-      )
-      .finally(() => setBusy(false));
-  }, [verificationToken]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -253,7 +231,11 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
         if (result.user.dashboardPath)
           navigate(result.user.dashboardPath, { replace: true });
       } else if (mode === "register") {
-        const result = await api<{ message: string }>("/auth/register", {
+        const result = await api<{
+          message: string;
+          email: string;
+          verificationRequired: true;
+        }>("/auth/register", {
           method: "POST",
           body: JSON.stringify({
             email: form.get("email"),
@@ -262,6 +244,17 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             participantType,
             organizationName: form.get("organizationName"),
             location: form.get("location"),
+          }),
+        });
+        setVerificationEmail(result.email);
+        setNotice(result.message);
+        setMode("verify");
+      } else if (mode === "verify") {
+        const result = await api<{ message: string }>("/auth/verify-email", {
+          method: "POST",
+          body: JSON.stringify({
+            email: verificationEmail,
+            otp: form.get("otp"),
           }),
         });
         setNotice(result.message);
@@ -314,7 +307,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
                 : mode === "resend"
                   ? "Resend verification."
                   : mode === "verify"
-                    ? "Verifying your email…"
+                    ? "Enter your verification code."
                     : "Welcome back."}
         </h2>
         <p>
@@ -439,6 +432,27 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             />
           </Field>
         )}
+        {mode === "verify" && (
+          <>
+            <p className="live-registration-gate">
+              We sent a six-digit code to <strong>{verificationEmail}</strong>.
+              It expires in 10 minutes.
+            </p>
+            <Field label="Verification code">
+              <input
+                name="otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                minLength={6}
+                maxLength={6}
+                required
+                autoFocus
+              />
+            </Field>
+          </>
+        )}
         {error && (
           <p role="alert" className="live-error">
             {error}
@@ -464,24 +478,24 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             <ArrowRight size={17} />
           </button>
         ) : (
-          mode !== "verify" && (
-            <button className="live-primary" disabled={busy} type="submit">
-              {busy ? (
-                <LoaderCircle className="live-spin" size={18} />
-              ) : mode === "register" ? (
-                "Create account"
-              ) : mode === "login" ? (
-                "Sign in"
-              ) : mode === "forgot" ? (
-                "Send reset link"
-              ) : mode === "resend" ? (
-                "Resend verification"
-              ) : (
-                "Change password"
-              )}{" "}
-              <ArrowRight size={17} />
-            </button>
-          )
+          <button className="live-primary" disabled={busy} type="submit">
+            {busy ? (
+              <LoaderCircle className="live-spin" size={18} />
+            ) : mode === "register" ? (
+              "Create account"
+            ) : mode === "verify" ? (
+              "Verify email"
+            ) : mode === "login" ? (
+              "Sign in"
+            ) : mode === "forgot" ? (
+              "Send reset link"
+            ) : mode === "resend" ? (
+              "Resend verification"
+            ) : (
+              "Change password"
+            )}{" "}
+            <ArrowRight size={17} />
+          </button>
         )}
         {mode === "login" && (
           <div className="live-auth-links">
@@ -495,6 +509,16 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
         )}
         {(mode === "forgot" || mode === "resend") && (
           <div className="live-auth-links">
+            <button type="button" onClick={() => setMode("login")}>
+              Back to sign in
+            </button>
+          </div>
+        )}
+        {mode === "verify" && (
+          <div className="live-auth-links">
+            <button type="button" onClick={() => setMode("resend")}>
+              Request a new code
+            </button>
             <button type="button" onClick={() => setMode("login")}>
               Back to sign in
             </button>

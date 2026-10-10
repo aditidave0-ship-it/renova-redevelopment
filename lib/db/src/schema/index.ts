@@ -347,6 +347,8 @@ export const authTokens = pgTable(
     tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedAt: timestamp("used_at", { withTimezone: true }),
+    failedAttempts: integer("failed_attempts").default(0).notNull(),
+    lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -354,6 +356,28 @@ export const authTokens = pgTable(
   (table) => [
     index("auth_tokens_user_purpose_idx").on(table.userId, table.purpose),
     index("auth_tokens_expiry_idx").on(table.expiresAt),
+  ],
+);
+
+export const authRateLimits = pgTable(
+  "auth_rate_limits",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    action: varchar("action", { length: 48 }).notNull(),
+    subjectHash: varchar("subject_hash", { length: 64 }).notNull(),
+    windowStartedAt: timestamp("window_started_at", {
+      withTimezone: true,
+    }).notNull(),
+    requestCount: integer("request_count").default(1).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_rate_limits_bucket_idx").on(
+      table.action,
+      table.subjectHash,
+      table.windowStartedAt,
+    ),
+    index("auth_rate_limits_window_idx").on(table.windowStartedAt),
   ],
 );
 

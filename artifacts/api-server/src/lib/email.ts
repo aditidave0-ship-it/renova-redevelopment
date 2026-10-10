@@ -6,8 +6,13 @@ export type EmailMessage = {
   html: string;
   text: string;
 };
+export type EmailAcceptance = {
+  status: "ACCEPTED";
+  provider: string;
+  providerMessageId: string | null;
+};
 export interface EmailProvider {
-  send(message: EmailMessage): Promise<void>;
+  send(message: EmailMessage): Promise<EmailAcceptance>;
 }
 
 export type EmailBrand = { productName: string; appUrl: string; from: string };
@@ -42,14 +47,24 @@ export function getEmailBrand(): EmailBrand {
 
 export function verificationEmail(
   brand: EmailBrand,
-  token: string,
+  otp: string,
 ): Omit<EmailMessage, "to"> {
   const name = escapeHtml(brand.productName);
-  const link = `${brand.appUrl}/platform/live#verify=${encodeURIComponent(token)}`;
+  const safeOtp = escapeHtml(otp);
   return {
     subject: `Verify your ${brand.productName} email`,
-    text: `Verify your email by opening this link within 24 hours: ${link}`,
-    html: `<h1>Verify your email</h1><p>Finish creating your ${name} account.</p><p><a href="${escapeHtml(link)}">Verify email</a></p><p>This link expires in 24 hours. If you did not request this account, you can ignore this message.</p>`,
+    text: `Your verification code is ${otp}. It expires in 10 minutes. If you did not request this account, you can ignore this message.`,
+    html: `<h1>Verify your email</h1><p>Finish creating your ${name} account with this one-time code:</p><p style="font-size:28px;font-weight:700;letter-spacing:0.22em">${safeOtp}</p><p>This code expires in 10 minutes and can be used once. If you did not request this account, you can ignore this message.</p>`,
+  };
+}
+
+export function welcomeEmail(brand: EmailBrand): Omit<EmailMessage, "to"> {
+  const name = escapeHtml(brand.productName);
+  const signInUrl = `${brand.appUrl}/platform/live`;
+  return {
+    subject: `Welcome to ${brand.productName}`,
+    text: `Your email is verified and your ${brand.productName} account is active. Sign in: ${signInUrl}`,
+    html: `<h1>Welcome to ${name}</h1><p>Your email is verified and your account is active.</p><p><a href="${escapeHtml(signInUrl)}">Sign in to your workspace</a></p>`,
   };
 }
 
@@ -67,7 +82,7 @@ export function passwordResetEmail(
 }
 
 class DisabledEmailProvider implements EmailProvider {
-  async send(): Promise<void> {
+  async send(): Promise<EmailAcceptance> {
     const error = new Error("Transactional email delivery is not configured");
     Object.assign(error, { status: 503, code: "EMAIL_DELIVERY_UNAVAILABLE" });
     throw error;
@@ -79,7 +94,7 @@ class ResendEmailProvider implements EmailProvider {
     private readonly apiKey: string,
     private readonly from: string,
   ) {}
-  async send(message: EmailMessage): Promise<void> {
+  async send(message: EmailMessage): Promise<EmailAcceptance> {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -103,6 +118,14 @@ class ResendEmailProvider implements EmailProvider {
       Object.assign(error, { status: 503, code: "EMAIL_DELIVERY_FAILED" });
       throw error;
     }
+    const payload = (await response.json().catch(() => null)) as {
+      id?: unknown;
+    } | null;
+    return {
+      status: "ACCEPTED",
+      provider: "resend",
+      providerMessageId: typeof payload?.id === "string" ? payload.id : null,
+    };
   }
 }
 
@@ -117,21 +140,21 @@ export function getEmailProvider(brand = getEmailBrand()): EmailProvider {
 
 export async function sendVerificationEmail(
   to: string,
-  token: string,
-): Promise<void> {
+  otp: string,
+): Promise<EmailAcceptance> {
   const brand = getEmailBrand();
-  await getEmailProvider(brand).send({
+  return getEmailProvider(brand).send({
     to,
-    ...verificationEmail(brand, token),
+    ...verificationEmail(brand, otp),
   });
 }
 
 export async function sendPasswordResetEmail(
   to: string,
   token: string,
-): Promise<void> {
+): Promise<EmailAcceptance> {
   const brand = getEmailBrand();
-  await getEmailProvider(brand).send({
+  return getEmailProvider(brand).send({
     to,
     ...passwordResetEmail(brand, token),
   });
