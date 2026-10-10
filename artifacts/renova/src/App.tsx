@@ -2630,10 +2630,10 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
         onEnded={finishIntro}
         onError={() => setShowFallback(true)}
       >
-        <source
-          src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
-          type="video/mp4"
-        />
+          <source
+            src={`${import.meta.env.BASE_URL}renova-intro.mp4`}
+            type="video/mp4"
+          />
       </video>
       {showFallback && (
         <div className="renova-film-fallback" role="status">
