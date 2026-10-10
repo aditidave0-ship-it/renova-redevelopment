@@ -56,6 +56,21 @@ const professionals = [
 
 const regulations = [
   {
+    id: "mpcb-cfs-ecy-guidelines-2026",
+    code: "MPCB CFS/ECY 2026",
+    title: "Environmental and siting standards for container and truck-parking facilities",
+    summary: "MPCB has prescribed Maharashtra-wide siting and pollution-control requirements for container freight stations, empty-container yards and truck-parking areas, including planning permission, MPCB consent, road access, sensitive-use buffers, drainage, dust control, green-belt, monitoring and traffic-management measures.",
+    authority: "Maharashtra Pollution Control Board",
+    updatedAt: "9 Oct 2026",
+    status: "Current",
+    instrumentNumber: "MPCB/APC-2025/(C.R.-44)/Air-11",
+    publicationDate: "9 Oct 2026",
+    effectiveDate: "8 Oct 2026",
+    affectedArea: "Maharashtra · proposed and operating CFS, empty-container yards and truck-parking areas, including the Mumbai Metropolitan Region",
+    stakeholderImpact: "Owners, operators, developers and consultants for affected logistics sites should test plot size, road width, sensitive-use buffers, CRZ/ESZ and flood-risk constraints before land commitment; obtain planning permission and MPCB consent; and budget for paved circulation, drainage, dust suppression, a minimum 10% green belt, quarterly air monitoring, noise controls, CCTV and traffic-management systems.",
+    sourceUrl: "https://www.mpcb.gov.in/sites/default/files/standing_orders/Guidelines_Container_Yards.pdf",
+  },
+  {
     id: "maharera-order-66-2026",
     code: "Order 66/2026",
     title: "Four-month force-majeure extension for eligible project registrations",
