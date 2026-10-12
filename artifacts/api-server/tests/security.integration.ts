@@ -16,32 +16,57 @@ import {
   enquiries,
 } from "./database";
 import auth from "../src/routes/auth";
+import renovaRouter from "../src/routes/renova";
 import opportunitiesRouter from "../src/routes/opportunities";
 import workspace from "../src/routes/workspace";
 import enquiriesRouter from "../src/routes/enquiries";
+import profilesRouter from "../src/routes/profiles";
+import feasibilityRouter from "../src/routes/feasibility";
 import {
   hashPassword,
   createSession,
   readSession,
   verifyPassword,
 } from "../src/lib/session";
-import { issueAuthToken } from "../src/lib/auth-tokens";
+import { issueAuthToken, issueEmailOtp } from "../src/lib/auth-tokens";
+import { testSandboxAndEmail } from "./sandbox-delivery";
+import sandboxBillingRouter from "../src/routes/sandbox-billing";
+import emailJobsRouter from "../src/routes/email-jobs";
 import { testAuthDelivery } from "./auth-delivery";
 
-for (const file of [
-  "0000_real_roland_deschain",
-  "0001_bright_hedge_knight",
-  "0002_credential_versions",
-  "0003_feasibility_foundation",
-  "0004_participant_feasibility",
-]) {
-  await engine.exec(await readFile(`../../lib/db/drizzle/${file}.sql`, "utf8"));
-}
+const previousOtpSecret = process.env.RENOVA_AUTH_TOKEN_SECRET;
+process.env.RENOVA_AUTH_TOKEN_SECRET =
+  "TEST-ONLY-otp-secret-at-least-thirty-two-characters";
+const journal = JSON.parse(
+  await readFile("../../lib/db/drizzle/meta/_journal.json", "utf8"),
+);
+for (const entry of journal.entries)
+  await engine.exec(
+    await readFile(`../../lib/db/drizzle/${entry.tag}.sql`, "utf8"),
+  );
+
 const app = express();
+app.use(
+  "/api/billing/webhook",
+  express.raw({ type: "application/json", limit: "256kb" }),
+);
 app.use(express.json(), cookieParser());
-app.use("/api", auth, opportunitiesRouter, workspace, enquiriesRouter);
+app.use(
+  "/api",
+  auth,
+  renovaRouter,
+  opportunitiesRouter,
+  workspace,
+  enquiriesRouter,
+  profilesRouter,
+  feasibilityRouter,
+  sandboxBillingRouter,
+  emailJobsRouter,
+);
 const testErrors: ErrorRequestHandler = (error, _request, response, _next) => {
-  response.status(error.name === "ZodError" ? 400 : error.status ?? 500).json({ error: "Test request rejected" });
+  response
+    .status(error.name === "ZodError" ? 400 : (error.status ?? 500))
+    .json({ error: "Test request rejected" });
 };
 app.use(testErrors);
 const server = createServer(app);
@@ -62,7 +87,10 @@ async function request(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
-async function account(role: "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL", n: number) {
+async function account(
+  role: "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL",
+  n: number,
+) {
   const [user] = await db
     .insert(users)
     .values({
@@ -96,25 +124,107 @@ async function account(role: "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL", n
 }
 try {
   const professional = await account("PROFESSIONAL", 1);
-  for (const specialization of ["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"]) {
-    const saved = await request("/organizations/me", "PUT", professional.cookie, { name: "TEST ONLY professional", location: "Mumbai", description: "TEST ONLY practice", website: "", specialization, services: "TEST ONLY services", credentials: "Self-reported test record", portfolio: "TEST ONLY portfolio" });
-    assert.equal(saved.status, 200); checks++;
-    assert.equal(((await (await request("/organizations/me", "GET", professional.cookie)).json()) as any).organization.specialization, specialization); checks++;
+  for (const specialization of [
+    "ADVOCATE_LEGAL",
+    "ARCHITECT",
+    "STRUCTURAL_CONSULTANT",
+    "VALUATION_FINANCE",
+    "OTHER",
+  ]) {
+    const saved = await request("/profiles/me", "PUT", professional.cookie, {
+      organizationName: "TEST ONLY professional",
+      location: "Mumbai",
+      description: "TEST ONLY practice",
+      website: null,
+      specialization,
+      services: ["TEST ONLY services"],
+      credentials: [{ name: "TEST ONLY private credential", isPublic: false }],
+    });
+    assert.equal(saved.status, 200);
+    checks++;
+    assert.equal(
+      (
+        (await (
+          await request("/profiles/me", "GET", professional.cookie)
+        ).json()) as any
+      ).profile.specialization,
+      specialization,
+    );
+    checks++;
   }
-  assert.equal((await request("/societies/me/opportunities", "GET", professional.cookie)).status, 403); checks++;
+  assert.equal(
+    (await request("/societies/me/opportunities", "GET", professional.cookie))
+      .status,
+    403,
+  );
+  checks++;
   const a = await account("SOCIETY", 1),
     b = await account("SOCIETY", 2),
     dev = await account("DEVELOPER", 1),
     pmc = await account("PMC", 1);
+  for (const actor of [dev, pmc]) {
+    const payload = {
+      organizationName: `TEST ONLY ${actor.user.role} profile`,
+      location: "Mumbai",
+      officeLocation: "Mumbai",
+      description: "TEST ONLY services",
+      website: "https://company.example.invalid",
+      publicEmail: "contact@example.invalid",
+      areasServed: ["Mumbai"],
+      locationsServed: ["Mumbai"],
+      services: ["TEST ONLY consulting"],
+      specializations: ["Redevelopment"],
+      portfolio: [],
+      credentials: [
+        { name: "TEST ONLY private credential", isPublic: false },
+        { name: "TEST ONLY public credential", isPublic: true },
+      ],
+      marketplaceVisible: true,
+    };
+    assert.equal(
+      (await request("/profiles/me", "PUT", actor.cookie, payload)).status,
+      200,
+    );
+    checks++;
+    const owned = (
+      (await (await request("/profiles/me", "GET", actor.cookie)).json()) as any
+    ).profile;
+    assert.equal(owned.organizationName, payload.organizationName);
+    checks++;
+    assert.equal(owned.credentials.length, 2);
+    checks++;
+    const visible = (
+      (await (
+        await request(
+          `/marketplace/organizations/${actor.org.id}`,
+          "GET",
+          a.cookie,
+        )
+      ).json()) as any
+    ).profile;
+    assert.equal(visible.credentials.length, 1);
+    checks++;
+    assert.equal(visible.credentials[0].name, "TEST ONLY public credential");
+    checks++;
+    assert.equal(
+      (
+        await request(
+          `/marketplace/organizations/${actor.org.id}`,
+          "GET",
+          pmc.cookie,
+        )
+      ).status,
+      403,
+    );
+    checks++;
+  }
   const token = issueAuthToken("PASSWORD_RESET");
-  await db
-    .insert(authTokens)
-    .values({
-      userId: a.user.id,
-      purpose: "PASSWORD_RESET",
-      tokenHash: token.tokenHash,
-      expiresAt: token.expiresAt,
-    });
+  await db.insert(authTokens).values({
+    userId: a.user.id,
+    purpose: "PASSWORD_RESET",
+    tokenHash: token.tokenHash,
+    expiresAt: token.expiresAt,
+  });
   const reset = await request("/auth/reset-password", "POST", "", {
     token: token.token,
     password: "new-password-test",
@@ -184,7 +294,11 @@ try {
   assert.equal(created.status, 201);
   const { opportunity } = (await created.json()) as any;
   checks++;
-  assert.equal((await request(`/opportunities/${opportunity.id}`)).status, 404);
+  assert.equal(
+    (await request(`/opportunities/${opportunity.id}`, "GET", dev.cookie))
+      .status,
+    404,
+  );
   checks++;
   for (const foreign of [b, dev, pmc]) {
     const expected = foreign === b ? 404 : 403;
@@ -237,16 +351,20 @@ try {
   assert.equal(
     (
       await request(
-        `/societies/me/opportunities/${opportunity.id}`,
-        "PATCH",
+        `/societies/me/opportunities/${opportunity.id}/publish`,
+        "POST",
         a.cookie,
-        { ...draft, publish: true },
+        {},
       )
     ).status,
     200,
   );
   checks++;
-  const published = await request(`/opportunities/${opportunity.id}`);
+  const published = await request(
+    `/opportunities/${opportunity.id}`,
+    "GET",
+    dev.cookie,
+  );
   const publicFields = ((await published.json()) as any).opportunity;
   assert.equal(published.status, 200);
   assert.equal("societyId" in publicFields, false);
@@ -266,34 +384,144 @@ try {
     );
   checks += 2;
   const received = await request("/societies/me/interests", "GET", a.cookie);
-  assert.equal(((await received.json()) as any).interests.length, 2);
+  const receivedInterests = ((await received.json()) as any).interests;
+  assert.equal(receivedInterests.length, 2);
   checks++;
-  const profile = {
-    name: "TEST ONLY society profile",
-    location: "Mumbai",
-    website: "",
-    description: "Test organization description",
-  };
   assert.equal(
-    (await request("/organizations/me", "PUT", a.cookie, profile)).status,
-    200,
-  );
-  checks++;
-  const aProfile = await request("/organizations/me", "GET", a.cookie);
-  assert.equal(
-    ((await aProfile.json()) as any).organization.name,
-    profile.name,
-  );
-  checks++;
-  const bProfile = await request("/organizations/me", "GET", b.cookie);
-  assert.notEqual(
-    ((await bProfile.json()) as any).organization.name,
-    profile.name,
+    (
+      await request(
+        `/opportunities/${opportunity.id}/interests`,
+        "POST",
+        dev.cookie,
+        {},
+      )
+    ).status,
+    409,
   );
   checks++;
   assert.equal(
     (
-      await request("/societies/me/profile", "PUT", a.cookie, {
+      await request(
+        `/societies/me/opportunities/${opportunity.id}`,
+        "PATCH",
+        a.cookie,
+        { title: "TEST ONLY published edit" },
+      )
+    ).status,
+    409,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/societies/me/opportunities/${opportunity.id}/publish`,
+        "POST",
+        b.cookie,
+        {},
+      )
+    ).status,
+    404,
+  );
+  checks++;
+  const devInterest = receivedInterests.find(
+    (item: any) => item.role === "DEVELOPER",
+  );
+  assert.equal(
+    (
+      await request(
+        `/societies/me/interests/${devInterest.id}`,
+        "PATCH",
+        b.cookie,
+        { status: "SHORTLISTED" },
+      )
+    ).status,
+    404,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/societies/me/interests/${devInterest.id}`,
+        "PATCH",
+        a.cookie,
+        { status: "SHORTLISTED" },
+      )
+    ).status,
+    200,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/organizations/me/interests/${devInterest.id}`,
+        "DELETE",
+        pmc.cookie,
+      )
+    ).status,
+    404,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/organizations/me/interests/${devInterest.id}`,
+        "DELETE",
+        dev.cookie,
+      )
+    ).status,
+    200,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/societies/me/interests/${devInterest.id}`,
+        "PATCH",
+        a.cookie,
+        { status: "RECEIVED" },
+      )
+    ).status,
+    409,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/organizations/me/interests/${devInterest.id}`,
+        "DELETE",
+        dev.cookie,
+      )
+    ).status,
+    409,
+  );
+  checks++;
+  const profile = {
+    organizationName: "TEST ONLY society profile",
+    location: "Mumbai",
+    website: null,
+    description: "Test organization description",
+  };
+  assert.equal(
+    (await request("/profiles/me", "PUT", a.cookie, profile)).status,
+    200,
+  );
+  checks++;
+  const aProfile = await request("/profiles/me", "GET", a.cookie);
+  assert.equal(
+    ((await aProfile.json()) as any).profile.organizationName,
+    profile.organizationName,
+  );
+  checks++;
+  const bProfile = await request("/profiles/me", "GET", b.cookie);
+  assert.notEqual(
+    ((await bProfile.json()) as any).profile.organizationName,
+    profile.organizationName,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request("/profiles/me", "PUT", a.cookie, {
+        organizationName: "TEST ONLY society profile",
         address: "TEST ONLY address",
         city: "Mumbai",
         memberCount: 20,
@@ -305,8 +533,8 @@ try {
   );
   checks++;
   assert.equal(
-    (await request("/societies/me/profile", "PUT", pmc.cookie, {})).status,
-    403,
+    (await request("/profiles/me", "PUT", pmc.cookie, {})).status,
+    400,
   );
   checks++;
   const metric = await request("/workspace/metrics", "GET", a.cookie);
@@ -321,48 +549,83 @@ try {
     assert.equal(((await interest.json()) as any).interests.length, 1);
     checks++;
   }
-  const feasible = await request(
-    "/societies/me/feasibility", "POST", a.cookie,
-    { propertyAddress: "", requirement: "", submit: false },
-  );
-  assert.equal(feasible.status, 201); checks++;
-  const draftFeasibility = ((await feasible.json()) as any).request;
-  assert.equal(draftFeasibility.status, "DRAFT"); checks++;
+  const details = {
+    societyName: "TEST ONLY society",
+    propertyAddress: "TEST ONLY property",
+    locality: "Mumbai",
+    city: "Mumbai",
+    pinCode: "400001",
+    contactPerson: "TEST ONLY contact",
+    contactEmail: "society@example.invalid",
+    contactPhone: "9000000000",
+    propertyData: { unknownFields: ["plotArea"] },
+  };
+  const feasible = await request("/feasibility", "POST", a.cookie, details);
+  assert.equal(feasible.status, 201);
+  checks++;
+  const feasibility = ((await feasible.json()) as any).request;
+  assert.equal(feasibility.status, "DRAFT");
+  checks++;
+  assert.equal(feasibility.assessment, null);
+  checks++;
   for (const actor of [b, dev, pmc]) {
-    assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", actor.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: true })).status, actor === b ? 404 : 403); checks++;
+    for (const [method, path, body] of [
+      ["GET", `/feasibility/${feasibility.id}`, undefined],
+      ["PUT", `/feasibility/${feasibility.id}`, details],
+      ["POST", `/feasibility/${feasibility.id}/submit`, {}],
+    ] as const) {
+      assert.equal(
+        (await request(path, method, actor.cookie, body)).status,
+        actor === b ? 404 : 403,
+      );
+      checks++;
+    }
   }
-  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: false })).status, 200); checks++;
-  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: true })).status, 200); checks++;
-  assert.equal((await request(`/societies/me/feasibility/${draftFeasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY property", requirement: "TEST ONLY professional review requested", submit: false })).status, 404); checks++;
-  const submittedFeasible = await request(
-    "/societies/me/feasibility",
-    "POST",
-    a.cookie,
-    {
-      propertyAddress: "TEST ONLY Mumbai property",
-      requirement: "TEST ONLY request for professional review",
-    },
+  assert.equal(
+    (
+      await request(`/feasibility/${feasibility.id}`, "PUT", a.cookie, {
+        ...details,
+        societyName: "TEST ONLY edited society",
+      })
+    ).status,
+    200,
   );
-  assert.equal(submittedFeasible.status, 201);
   checks++;
-  const feasibility = ((await submittedFeasible.json()) as any).request;
-  assert.equal(feasibility.status, "SUBMITTED");
-  assert.equal(feasibility.assessmentNotes, null);
+  assert.equal(
+    (
+      (await (
+        await request(`/feasibility/${feasibility.id}`, "GET", a.cookie)
+      ).json()) as any
+    ).request.societyName,
+    "TEST ONLY edited society",
+  );
   checks++;
-  const isolated = await request("/societies/me/feasibility", "GET", b.cookie);
-  assert.deepEqual(((await isolated.json()) as any).requests, []);
+  const submissions = await Promise.all([
+    request(`/feasibility/${feasibility.id}/submit`, "POST", a.cookie, {}),
+    request(`/feasibility/${feasibility.id}/submit`, "POST", a.cookie, {}),
+  ]);
+  assert.deepEqual(submissions.map((row) => row.status).sort(), [200, 409]);
+  checks++;
+  assert.equal(
+    (await request(`/feasibility/${feasibility.id}`, "PUT", a.cookie, details))
+      .status,
+    409,
+  );
+  checks++;
+  assert.deepEqual(
+    ((await (await request("/feasibility/me", "GET", b.cookie)).json()) as any)
+      .requests,
+    [],
+  );
   checks++;
   for (const actor of [a, dev, pmc]) {
     assert.equal(
       (
         await request(
-          `/admin/feasibility/${feasibility.id}`,
+          `/admin/feasibility/${feasibility.id}/status`,
           "PATCH",
           actor.cookie,
-          {
-            status: "ASSESSED",
-            assessmentNotes: "TEST ONLY professional notes",
-          },
+          { status: "IN_REVIEW" },
         )
       ).status,
       403,
@@ -390,45 +653,150 @@ try {
     } as never,
     0,
   );
+  for (const payload of [
+    { status: "IN_REVIEW" },
+    {
+      status: "MORE_INFORMATION_REQUIRED",
+      missingInformation: "TEST ONLY request more documents",
+    },
+  ]) {
+    assert.equal(
+      (
+        await request(
+          `/admin/feasibility/${feasibility.id}/status`,
+          "PATCH",
+          adminCookie,
+          payload,
+        )
+      ).status,
+      200,
+    );
+    checks++;
+  }
+  const responseDraft = await request(
+    `/feasibility/${feasibility.id}`,
+    "PUT",
+    a.cookie,
+    details,
+  );
+  assert.equal(responseDraft.status, 200);
+  checks++;
+  assert.equal(
+    ((await responseDraft.json()) as any).request.status,
+    "MORE_INFORMATION_REQUIRED",
+  );
+  checks++;
+  assert.ok(
+    (
+      (await (
+        await request("/admin/feasibility", "GET", adminCookie)
+      ).json()) as any
+    ).requests.some((row: any) => row.id === feasibility.id),
+  );
+  checks++;
   assert.equal(
     (
       await request(
-        `/admin/feasibility/${feasibility.id}`,
+        `/feasibility/${feasibility.id}/submit`,
+        "POST",
+        a.cookie,
+        {},
+      )
+    ).status,
+    200,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/admin/feasibility/${feasibility.id}/status`,
         "PATCH",
         adminCookie,
+        { status: "IN_REVIEW" },
+      )
+    ).status,
+    200,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/admin/feasibility/${feasibility.id}/publish`,
+        "POST",
+        adminCookie,
+        {},
+      )
+    ).status,
+    409,
+  );
+  checks++;
+  assert.equal(
+    (
+      await request(
+        `/admin/feasibility/${feasibility.id}/assessment`,
+        "PUT",
+        adminCookie,
         {
-          status: "IN_REVIEW",
-          assessmentNotes: "TEST ONLY review awaiting verified documents",
+          professionalNotes:
+            "TEST ONLY professional assessment; no invented conclusions",
+          assumptions: [],
+          documentsReviewed: [],
         },
       )
     ).status,
     200,
   );
   checks++;
-  const reviewed = await request("/societies/me/feasibility", "GET", a.cookie);
   assert.equal(
-    ((await reviewed.json()) as any).requests.find((r: any) => r.id === feasibility.id).status,
-    "IN_REVIEW",
+    (
+      (await (
+        await request(`/feasibility/${feasibility.id}`, "GET", a.cookie)
+      ).json()) as any
+    ).request.assessment,
+    null,
   );
   checks++;
-  for (const status of ["MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY"]) {
-    assert.equal((await request(`/admin/feasibility/${feasibility.id}`, "PATCH", adminCookie, { status, assessmentNotes: "TEST ONLY assessment; no regulatory conclusions" })).status, 200); checks++;
-    if (status === "MORE_INFORMATION_REQUIRED") {
-      const responseDraft = await request(`/societies/me/feasibility/${feasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY updated property", requirement: "TEST ONLY additional information in progress", submit: false });
-      assert.equal(responseDraft.status, 200); checks++;
-      assert.equal(((await responseDraft.json()) as any).request.status, "MORE_INFORMATION_REQUIRED", "saving a response must keep the request in the Admin queue"); checks++;
-      const reviewQueue = ((await (await request("/admin/feasibility", "GET", adminCookie)).json()) as any).requests;
-      assert.ok(reviewQueue.some((row: any) => row.id === feasibility.id)); checks++;
-      assert.equal((await request(`/societies/me/feasibility/${feasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY updated property", requirement: "TEST ONLY additional information provided", submit: true })).status, 200); checks++;
-    }
-  }
-  const history = await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", a.cookie);
-  assert.equal(history.status, 200); checks++;
-  assert.deepEqual(((await history.json()) as any).history.map((entry: any) => entry.status), ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "MORE_INFORMATION_REQUIRED", "SUBMITTED", "ASSESSMENT_READY"]); checks++;
-  assert.equal((await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", b.cookie)).status, 404); checks++;
-  const finalResult = ((await (await request("/societies/me/feasibility", "GET", a.cookie)).json()) as any).requests.find((r: any) => r.id === feasibility.id);
-  assert.equal(finalResult.status, "ASSESSMENT_READY"); checks++;
-  assert.equal(finalResult.assessmentNotes, "TEST ONLY assessment; no regulatory conclusions"); checks++;
+  const publications = await Promise.all([
+    request(
+      `/admin/feasibility/${feasibility.id}/publish`,
+      "POST",
+      adminCookie,
+      {},
+    ),
+    request(
+      `/admin/feasibility/${feasibility.id}/publish`,
+      "POST",
+      adminCookie,
+      {},
+    ),
+  ]);
+  assert.deepEqual(publications.map((row) => row.status).sort(), [200, 409]);
+  checks++;
+  const finalResult = (
+    (await (
+      await request(`/feasibility/${feasibility.id}`, "GET", a.cookie)
+    ).json()) as any
+  ).request;
+  assert.equal(finalResult.status, "ASSESSMENT_READY");
+  checks++;
+  assert.equal(
+    finalResult.assessment.professionalNotes,
+    "TEST ONLY professional assessment; no invented conclusions",
+  );
+  checks++;
+  assert.deepEqual(
+    finalResult.history.map((row: any) => row.toStatus),
+    [
+      "DRAFT",
+      "SUBMITTED",
+      "IN_REVIEW",
+      "MORE_INFORMATION_REQUIRED",
+      "SUBMITTED",
+      "IN_REVIEW",
+      "ASSESSMENT_READY",
+    ],
+  );
+  checks++;
   const enquiry = await request("/enquiries", "POST", "", {
     name: "TEST ONLY person",
     organizationName: "TEST ONLY society",
@@ -453,14 +821,12 @@ try {
   checks++;
   for (const purpose of ["EMAIL_VERIFICATION", "PASSWORD_RESET"] as const) {
     const expired = issueAuthToken(purpose);
-    await db
-      .insert(authTokens)
-      .values({
-        userId: dev.user.id,
-        purpose,
-        tokenHash: expired.tokenHash,
-        expiresAt: new Date(Date.now() - 1000),
-      });
+    await db.insert(authTokens).values({
+      userId: dev.user.id,
+      purpose,
+      tokenHash: expired.tokenHash,
+      expiresAt: new Date(Date.now() - 1000),
+    });
     const endpoint =
       purpose === "PASSWORD_RESET"
         ? "/auth/reset-password"
@@ -493,14 +859,12 @@ try {
   });
   const secondCookie = second.headers.get("set-cookie")!.split(";")[0];
   const concurrentToken = issueAuthToken("PASSWORD_RESET");
-  await db
-    .insert(authTokens)
-    .values({
-      userId: dev.user.id,
-      purpose: "PASSWORD_RESET",
-      tokenHash: concurrentToken.tokenHash,
-      expiresAt: concurrentToken.expiresAt,
-    });
+  await db.insert(authTokens).values({
+    userId: dev.user.id,
+    purpose: "PASSWORD_RESET",
+    tokenHash: concurrentToken.tokenHash,
+    expiresAt: concurrentToken.expiresAt,
+  });
   const [duringLogin, duringReset] = await Promise.all([
     request("/auth/login", "POST", "", {
       email: dev.user.email,
@@ -532,34 +896,155 @@ try {
   );
   checks++;
   for (const role of ["SOCIETY", "DEVELOPER", "PMC"] as const) {
-    const [unverified] = await db.insert(users).values({ email: `unverified-${role.toLowerCase()}@example.invalid`, displayName: 'TEST ONLY verification', role, passwordHash: hashPassword('verification-password'), isActive: false }).returning();
-    assert.equal((await request('/auth/login','POST','',{email:unverified.email,password:'verification-password'})).status,401); checks++;
-    const verification=issueAuthToken('EMAIL_VERIFICATION');
-    await db.insert(authTokens).values({userId:unverified.id,purpose:'EMAIL_VERIFICATION',tokenHash:verification.tokenHash,expiresAt:verification.expiresAt});
-    assert.equal((await request('/auth/verify-email','POST','',{token:verification.token})).status,200); checks++;
-    assert.equal((await request('/auth/verify-email','POST','',{token:verification.token})).status,400); checks++;
-    assert.equal((await request('/auth/login','POST','',{email:unverified.email,password:'verification-password'})).status,200); checks++;
+    const [unverified] = await db
+      .insert(users)
+      .values({
+        email: `unverified-${role.toLowerCase()}@example.invalid`,
+        displayName: "TEST ONLY verification",
+        role,
+        passwordHash: hashPassword("verification-password"),
+        isActive: false,
+      })
+      .returning();
+    assert.equal(
+      (
+        await request("/auth/login", "POST", "", {
+          email: unverified.email,
+          password: "verification-password",
+        })
+      ).status,
+      401,
+    );
+    checks++;
+    const verification = issueEmailOtp(unverified.id);
+    await db.insert(authTokens).values({
+      userId: unverified.id,
+      purpose: "EMAIL_VERIFICATION",
+      tokenHash: verification.tokenHash,
+      expiresAt: verification.expiresAt,
+    });
+    assert.equal(
+      (
+        await request("/auth/verify-email", "POST", "", {
+          email: unverified.email,
+          otp: verification.otp,
+        })
+      ).status,
+      200,
+    );
+    checks++;
+    assert.equal(
+      (
+        await request("/auth/verify-email", "POST", "", {
+          email: unverified.email,
+          otp: verification.otp,
+        })
+      ).status,
+      400,
+    );
+    checks++;
+    assert.equal(
+      (
+        await request("/auth/login", "POST", "", {
+          email: unverified.email,
+          password: "verification-password",
+        })
+      ).status,
+      200,
+    );
+    checks++;
   }
   const disabled = await account("DEVELOPER", 42);
-  await db.update(users).set({ isActive: false }).where(eq(users.id, disabled.user.id));
-  const oldVerification = issueAuthToken("EMAIL_VERIFICATION");
-  await db.insert(authTokens).values({ userId: disabled.user.id, purpose: "EMAIL_VERIFICATION", tokenHash: oldVerification.tokenHash, expiresAt: oldVerification.expiresAt });
-  assert.equal((await request("/auth/verify-email", "POST", "", { token: oldVerification.token })).status, 400, "verification must not reactivate a verified disabled account"); checks++;
-  const [stillDisabled] = await db.select().from(users).where(eq(users.id, disabled.user.id));
-  assert.equal(stillDisabled.isActive, false); checks++;
-  assert.equal((await request("/auth/me", "GET", disabled.cookie)).status, 401); checks++;
-  assert.equal((await request("/auth/login", "POST", "", { email: disabled.user.email, password: "old-password-test" })).status, 401); checks++;
+  await db
+    .update(users)
+    .set({ isActive: false })
+    .where(eq(users.id, disabled.user.id));
+  const oldVerification = issueEmailOtp(disabled.user.id);
+  await db.insert(authTokens).values({
+    userId: disabled.user.id,
+    purpose: "EMAIL_VERIFICATION",
+    tokenHash: oldVerification.tokenHash,
+    expiresAt: oldVerification.expiresAt,
+  });
+  assert.equal(
+    (
+      await request("/auth/verify-email", "POST", "", {
+        email: disabled.user.email,
+        otp: oldVerification.otp,
+      })
+    ).status,
+    400,
+    "verification must not reactivate a verified disabled account",
+  );
+  checks++;
+  const [stillDisabled] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, disabled.user.id));
+  assert.equal(stillDisabled.isActive, false);
+  checks++;
+  assert.equal((await request("/auth/me", "GET", disabled.cookie)).status, 401);
+  checks++;
+  assert.equal(
+    (
+      await request("/auth/login", "POST", "", {
+        email: disabled.user.email,
+        password: "old-password-test",
+      })
+    ).status,
+    401,
+  );
+  checks++;
   checks += await testAuthDelivery(origin);
-  const concurrentEnquiries = await Promise.all(Array.from({ length: 8 }, () => request("/enquiries", "POST", "", {
-    name: "TEST ONLY concurrent enquiry", organizationName: "TEST ONLY society", email: "concurrent-enquiry@example.invalid", phone: "9000000000", city: "Mumbai", actorType: "Housing Society", message: "TEST ONLY rate-limit regression", consent: true,
-  })));
-  assert.equal(concurrentEnquiries.filter(row => row.status === 201).length, 5, "concurrent enquiries must not exceed five submissions per fingerprint/hour"); checks++;
-  assert.equal(concurrentEnquiries.filter(row => row.status === 429).length, 3); checks++;
-  assert.equal((await db.select().from(enquiries).where(eq(enquiries.email, "concurrent-enquiry@example.invalid"))).length, 5); checks++;
+  const concurrentEnquiries = await Promise.all(
+    Array.from({ length: 8 }, () =>
+      request("/enquiries", "POST", "", {
+        name: "TEST ONLY concurrent enquiry",
+        organizationName: "TEST ONLY society",
+        email: "concurrent-enquiry@example.invalid",
+        phone: "9000000000",
+        city: "Mumbai",
+        actorType: "Housing Society",
+        message: "TEST ONLY rate-limit regression",
+        consent: true,
+      }),
+    ),
+  );
+  assert.equal(
+    concurrentEnquiries.filter((row) => row.status === 201).length,
+    5,
+    "concurrent enquiries must not exceed five submissions per fingerprint/hour",
+  );
+  checks++;
+  assert.equal(
+    concurrentEnquiries.filter((row) => row.status === 429).length,
+    3,
+  );
+  checks++;
+  assert.equal(
+    (
+      await db
+        .select()
+        .from(enquiries)
+        .where(eq(enquiries.email, "concurrent-enquiry@example.invalid"))
+    ).length,
+    5,
+  );
+  checks++;
+  checks += await testSandboxAndEmail(
+    origin,
+    a.cookie,
+    b.cookie,
+    pmc.cookie,
+    adminCookie,
+  );
   console.log(
     `PASS: ${checks} database-backed auth/draft/authorization assertions (isolated PostgreSQL/PGlite).`,
   );
 } finally {
   await new Promise<void>((resolve) => server.close(() => resolve()));
   await engine.close();
+  if (previousOtpSecret === undefined)
+    delete process.env.RENOVA_AUTH_TOKEN_SECRET;
+  else process.env.RENOVA_AUTH_TOKEN_SECRET = previousOtpSecret;
 }

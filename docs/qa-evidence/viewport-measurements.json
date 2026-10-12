@@ -1,0 +1,162 @@
+{
+  "roleSelection": [
+    {
+      "heading": "How will you use RENOVA?",
+      "scrollWidth": 360,
+      "url": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/platform/live?mode=start",
+      "width": 360
+    },
+    {
+      "heading": "How will you use RENOVA?",
+      "scrollWidth": 375,
+      "url": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/platform/live?mode=start",
+      "width": 375
+    },
+    {
+      "heading": "How will you use RENOVA?",
+      "scrollWidth": 753,
+      "url": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/platform/live?mode=start",
+      "width": 753
+    },
+    {
+      "heading": "How will you use RENOVA?",
+      "scrollWidth": 1009,
+      "url": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/platform/live?mode=start",
+      "width": 1009
+    },
+    {
+      "heading": "How will you use RENOVA?",
+      "scrollWidth": 1425,
+      "url": "https://renova-git-feat-renova-ux-consolidation-aditi-dave-s-projects.vercel.app/platform/live?mode=start",
+      "width": 1425
+    }
+  ],
+  "homepage": [
+    {
+      "heading": "Redevelopment,Reimagined.",
+      "screen": "homepage",
+      "scrollWidth": 360,
+      "width": 360
+    },
+    {
+      "heading": "Redevelopment,Reimagined.",
+      "screen": "homepage",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "heading": "Redevelopment,Reimagined.",
+      "screen": "homepage",
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "heading": "Redevelopment,Reimagined.",
+      "screen": "homepage",
+      "scrollWidth": 1009,
+      "width": 1009
+    },
+    {
+      "heading": "Redevelopment,Reimagined.",
+      "screen": "homepage",
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ],
+  "contact": [
+    {
+      "heading": "Start with a conversation.",
+      "screen": "contact",
+      "scrollWidth": 360,
+      "width": 360
+    },
+    {
+      "heading": "Start with a conversation.",
+      "screen": "contact",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "heading": "Start with a conversation.",
+      "screen": "contact",
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "heading": "Start with a conversation.",
+      "screen": "contact",
+      "scrollWidth": 1009,
+      "width": 1009
+    },
+    {
+      "heading": "Start with a conversation.",
+      "screen": "contact",
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ],
+  "ecosystem": [
+    {
+      "heading": "Explore the Redevelopment Ecosystem.",
+      "screen": "ecosystem",
+      "scrollWidth": 360,
+      "width": 360
+    },
+    {
+      "heading": "Explore the Redevelopment Ecosystem.",
+      "screen": "ecosystem",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "heading": "Explore the Redevelopment Ecosystem.",
+      "screen": "ecosystem",
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "heading": "Explore the Redevelopment Ecosystem.",
+      "screen": "ecosystem",
+      "scrollWidth": 1009,
+      "width": 1009
+    },
+    {
+      "heading": "Explore the Redevelopment Ecosystem.",
+      "screen": "ecosystem",
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ],
+  "login": [
+    {
+      "heading": "Welcome back.",
+      "screen": "login",
+      "scrollWidth": 360,
+      "width": 360
+    },
+    {
+      "heading": "Welcome back.",
+      "screen": "login",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "heading": "Welcome back.",
+      "screen": "login",
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "heading": "Welcome back.",
+      "screen": "login",
+      "scrollWidth": 1009,
+      "width": 1009
+    },
+    {
+      "heading": "Welcome back.",
+      "screen": "login",
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ]
+}

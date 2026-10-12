@@ -1,6 +1,6 @@
 {
-  "id": "10986528-94d4-4514-9d82-75a0d84f3266",
-  "prevId": "32786b3d-744e-49f7-a76e-affee111d4a7",
+  "id": "67f83a04-c356-468b-b437-fcf2ebd08648",
+  "prevId": "1c28cdd4-6200-4ceb-b012-21e490eb3706",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -126,13 +126,6 @@
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
-        },
-        "credential_version": {
-          "name": "credential_version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         },
         "expires_at": {
           "name": "expires_at",
@@ -333,6 +326,145 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.developer_profiles": {
+      "name": "developer_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "website": {
+          "name": "website",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public_email": {
+          "name": "public_email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public_phone": {
+          "name": "public_phone",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "office_location": {
+          "name": "office_location",
+          "type": "varchar(220)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "areas_served": {
+          "name": "areas_served",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "specializations": {
+          "name": "specializations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "team_information": {
+          "name": "team_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "portfolio": {
+          "name": "portfolio",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "credentials": {
+          "name": "credentials",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "marketplace_visible": {
+          "name": "marketplace_visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "developer_profiles_organization_id_organizations_id_fk": {
+          "name": "developer_profiles_organization_id_organizations_id_fk",
+          "tableFrom": "developer_profiles",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "developer_profiles_organization_id_unique": {
+          "name": "developer_profiles_organization_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.enquiries": {
       "name": "enquiries",
       "schema": "",
@@ -493,6 +625,601 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.feasibility_assessments": {
+      "name": "feasibility_assessments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prepared_by_user_id": {
+          "name": "prepared_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "existing_property": {
+          "name": "existing_property",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plot_information": {
+          "name": "plot_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_built_up_area": {
+          "name": "existing_built_up_area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "applicable_planning_inputs": {
+          "name": "applicable_planning_inputs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "potential_development_inputs": {
+          "name": "potential_development_inputs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rehabilitation_requirement": {
+          "name": "rehabilitation_requirement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "potential_sale_component": {
+          "name": "potential_sale_component",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parking_amenity_considerations": {
+          "name": "parking_amenity_considerations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "key_constraints": {
+          "name": "key_constraints",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "professional_notes": {
+          "name": "professional_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documents_reviewed": {
+          "name": "documents_reviewed",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "assessment_date": {
+          "name": "assessment_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "feasibility_assessments_request_id_feasibility_requests_id_fk": {
+          "name": "feasibility_assessments_request_id_feasibility_requests_id_fk",
+          "tableFrom": "feasibility_assessments",
+          "tableTo": "feasibility_requests",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feasibility_assessments_prepared_by_user_id_users_id_fk": {
+          "name": "feasibility_assessments_prepared_by_user_id_users_id_fk",
+          "tableFrom": "feasibility_assessments",
+          "tableTo": "users",
+          "columnsFrom": [
+            "prepared_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feasibility_assessments_request_id_unique": {
+          "name": "feasibility_assessments_request_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "request_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feasibility_assumptions": {
+      "name": "feasibility_assumptions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement": {
+          "name": "statement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "feasibility_assumptions_assessment_idx": {
+          "name": "feasibility_assumptions_assessment_idx",
+          "columns": [
+            {
+              "expression": "assessment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "feasibility_assumptions_assessment_id_feasibility_assessments_id_fk": {
+          "name": "feasibility_assumptions_assessment_id_feasibility_assessments_id_fk",
+          "tableFrom": "feasibility_assumptions",
+          "tableTo": "feasibility_assessments",
+          "columnsFrom": [
+            "assessment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feasibility_assumptions_created_by_user_id_users_id_fk": {
+          "name": "feasibility_assumptions_created_by_user_id_users_id_fk",
+          "tableFrom": "feasibility_assumptions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feasibility_documents": {
+      "name": "feasibility_documents",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uploaded_by_user_id": {
+          "name": "uploaded_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_type": {
+          "name": "content_type",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "size_bytes": {
+          "name": "size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storage_provider": {
+          "name": "storage_provider",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storage_key": {
+          "name": "storage_key",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "checksum_sha256": {
+          "name": "checksum_sha256",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "feasibility_document_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING_UPLOAD'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "feasibility_documents_request_idx": {
+          "name": "feasibility_documents_request_idx",
+          "columns": [
+            {
+              "expression": "request_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "feasibility_documents_request_id_feasibility_requests_id_fk": {
+          "name": "feasibility_documents_request_id_feasibility_requests_id_fk",
+          "tableFrom": "feasibility_documents",
+          "tableTo": "feasibility_requests",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feasibility_documents_uploaded_by_user_id_users_id_fk": {
+          "name": "feasibility_documents_uploaded_by_user_id_users_id_fk",
+          "tableFrom": "feasibility_documents",
+          "tableTo": "users",
+          "columnsFrom": [
+            "uploaded_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feasibility_documents_storage_key_unique": {
+          "name": "feasibility_documents_storage_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "storage_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feasibility_property_data": {
+      "name": "feasibility_property_data",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plot_area": {
+          "name": "plot_area",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_buildings": {
+          "name": "number_buildings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_wings": {
+          "name": "number_wings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_floors": {
+          "name": "existing_floors",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "residential_units": {
+          "name": "residential_units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "commercial_units": {
+          "name": "commercial_units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_built_up_information": {
+          "name": "existing_built_up_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approximate_building_age": {
+          "name": "approximate_building_age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_parking": {
+          "name": "existing_parking",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_amenities": {
+          "name": "existing_amenities",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cts_survey_information": {
+          "name": "cts_survey_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_approved_plans": {
+          "name": "existing_approved_plans",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_card_information": {
+          "name": "property_card_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conveyance_information": {
+          "name": "conveyance_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "existing_fsi_information": {
+          "name": "existing_fsi_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "road_width": {
+          "name": "road_width",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reservations_restrictions": {
+          "name": "reservations_restrictions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_property_information": {
+          "name": "other_property_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unknown_fields": {
+          "name": "unknown_fields",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "feasibility_property_request_idx": {
+          "name": "feasibility_property_request_idx",
+          "columns": [
+            {
+              "expression": "request_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "feasibility_property_data_request_id_feasibility_requests_id_fk": {
+          "name": "feasibility_property_data_request_id_feasibility_requests_id_fk",
+          "tableFrom": "feasibility_property_data",
+          "tableTo": "feasibility_requests",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feasibility_property_data_request_id_unique": {
+          "name": "feasibility_property_data_request_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "request_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.feasibility_requests": {
       "name": "feasibility_requests",
       "schema": "",
@@ -504,15 +1231,41 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "reference": {
+          "name": "reference",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "society_id": {
           "name": "society_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "submitted_by_user_id": {
-          "name": "submitted_by_user_id",
+        "created_by_user_id": {
+          "name": "created_by_user_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assigned_reviewer_user_id": {
+          "name": "assigned_reviewer_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "feasibility_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "society_name": {
+          "name": "society_name",
+          "type": "varchar(220)",
           "primaryKey": false,
           "notNull": true
         },
@@ -522,51 +1275,56 @@
           "primaryKey": false,
           "notNull": true
         },
-        "site_area": {
-          "name": "site_area",
-          "type": "varchar(80)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "member_count": {
-          "name": "member_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "building_age": {
-          "name": "building_age",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "requirement": {
-          "name": "requirement",
-          "type": "text",
+        "locality": {
+          "name": "locality",
+          "type": "varchar(180)",
           "primaryKey": false,
           "notNull": true
         },
-        "status": {
-          "name": "status",
+        "city": {
+          "name": "city",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pin_code": {
+          "name": "pin_code",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_person": {
+          "name": "contact_person",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_email": {
+          "name": "contact_email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_phone": {
+          "name": "contact_phone",
           "type": "varchar(40)",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'SUBMITTED'"
+          "notNull": true
         },
-        "assessment_notes": {
-          "name": "assessment_notes",
+        "missing_information": {
+          "name": "missing_information",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "reviewed_by_user_id": {
-          "name": "reviewed_by_user_id",
-          "type": "uuid",
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
-        "reviewed_at": {
-          "name": "reviewed_at",
+        "closed_at": {
+          "name": "closed_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -587,8 +1345,8 @@
         }
       },
       "indexes": {
-        "feasibility_society_idx": {
-          "name": "feasibility_society_idx",
+        "feasibility_requests_society_idx": {
+          "name": "feasibility_requests_society_idx",
           "columns": [
             {
               "expression": "society_id",
@@ -602,8 +1360,8 @@
           "method": "btree",
           "with": {}
         },
-        "feasibility_status_idx": {
-          "name": "feasibility_status_idx",
+        "feasibility_requests_status_idx": {
+          "name": "feasibility_requests_status_idx",
           "columns": [
             {
               "expression": "status",
@@ -632,30 +1390,146 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "feasibility_requests_submitted_by_user_id_users_id_fk": {
-          "name": "feasibility_requests_submitted_by_user_id_users_id_fk",
+        "feasibility_requests_created_by_user_id_users_id_fk": {
+          "name": "feasibility_requests_created_by_user_id_users_id_fk",
           "tableFrom": "feasibility_requests",
           "tableTo": "users",
           "columnsFrom": [
-            "submitted_by_user_id"
+            "created_by_user_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "restrict",
           "onUpdate": "no action"
         },
-        "feasibility_requests_reviewed_by_user_id_users_id_fk": {
-          "name": "feasibility_requests_reviewed_by_user_id_users_id_fk",
+        "feasibility_requests_assigned_reviewer_user_id_users_id_fk": {
+          "name": "feasibility_requests_assigned_reviewer_user_id_users_id_fk",
           "tableFrom": "feasibility_requests",
           "tableTo": "users",
           "columnsFrom": [
-            "reviewed_by_user_id"
+            "assigned_reviewer_user_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feasibility_requests_reference_unique": {
+          "name": "feasibility_requests_reference_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "reference"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feasibility_status_history": {
+      "name": "feasibility_status_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_status": {
+          "name": "from_status",
+          "type": "feasibility_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_status": {
+          "name": "to_status",
+          "type": "feasibility_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "changed_by_user_id": {
+          "name": "changed_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "feasibility_status_history_request_idx": {
+          "name": "feasibility_status_history_request_idx",
+          "columns": [
+            {
+              "expression": "request_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "feasibility_status_history_request_id_feasibility_requests_id_fk": {
+          "name": "feasibility_status_history_request_id_feasibility_requests_id_fk",
+          "tableFrom": "feasibility_status_history",
+          "tableTo": "feasibility_requests",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feasibility_status_history_changed_by_user_id_users_id_fk": {
+          "name": "feasibility_status_history_changed_by_user_id_users_id_fk",
+          "tableFrom": "feasibility_status_history",
+          "tableTo": "users",
+          "columnsFrom": [
+            "changed_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -842,6 +1716,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'PENDING'"
+        },
+        "review_status": {
+          "name": "review_status",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'RECEIVED'"
         },
         "created_at": {
           "name": "created_at",
@@ -1119,6 +2000,152 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.pmc_profiles": {
+      "name": "pmc_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "varchar(1000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "website": {
+          "name": "website",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public_email": {
+          "name": "public_email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public_phone": {
+          "name": "public_phone",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "office_location": {
+          "name": "office_location",
+          "type": "varchar(220)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locations_served": {
+          "name": "locations_served",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "services": {
+          "name": "services",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "specializations": {
+          "name": "specializations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "team_information": {
+          "name": "team_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "portfolio": {
+          "name": "portfolio",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "credentials": {
+          "name": "credentials",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "marketplace_visible": {
+          "name": "marketplace_visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pmc_profiles_organization_id_organizations_id_fk": {
+          "name": "pmc_profiles_organization_id_organizations_id_fk",
+          "tableFrom": "pmc_profiles",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pmc_profiles_organization_id_unique": {
+          "name": "pmc_profiles_organization_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.societies": {
       "name": "societies",
       "schema": "",
@@ -1166,6 +2193,67 @@
           "type": "varchar(120)",
           "primaryKey": false,
           "notNull": false
+        },
+        "contact_name": {
+          "name": "contact_name",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contact_email": {
+          "name": "contact_email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contact_phone": {
+          "name": "contact_phone",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_buildings": {
+          "name": "number_buildings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_wings": {
+          "name": "number_wings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unit_count": {
+          "name": "unit_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_area": {
+          "name": "land_area",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "marketplace_visible": {
+          "name": "marketplace_visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "created_at": {
           "name": "created_at",
@@ -1234,13 +2322,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "credential_version": {
-          "name": "credential_version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         },
         "display_name": {
           "name": "display_name",
@@ -1343,6 +2424,27 @@
         "NEW",
         "IN_REVIEW",
         "CONTACTED",
+        "CLOSED"
+      ]
+    },
+    "public.feasibility_document_status": {
+      "name": "feasibility_document_status",
+      "schema": "public",
+      "values": [
+        "PENDING_UPLOAD",
+        "AVAILABLE",
+        "REMOVED"
+      ]
+    },
+    "public.feasibility_status": {
+      "name": "feasibility_status",
+      "schema": "public",
+      "values": [
+        "DRAFT",
+        "SUBMITTED",
+        "IN_REVIEW",
+        "MORE_INFORMATION_REQUIRED",
+        "ASSESSMENT_READY",
         "CLOSED"
       ]
     },

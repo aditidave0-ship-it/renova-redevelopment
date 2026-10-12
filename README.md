@@ -31,6 +31,7 @@ Codespaces will offer to open the forwarded frontend port. Open port `5173` to u
 - `lib/db` — Drizzle/PostgreSQL schema for accounts, organizations, societies, opportunities, interests and sessions
 
 The coordinated web and mobile delivery sequence is documented in [`docs/WEB_MOBILE_ROADMAP.md`](docs/WEB_MOBILE_ROADMAP.md).
+The role-specific profile, marketplace visibility, and interest-review boundaries are documented in [`docs/PROFILES_INTEREST_MILESTONE.md`](docs/PROFILES_INTEREST_MILESTONE.md).
 
 ## Backend foundation
 
@@ -63,6 +64,8 @@ Authentication uses server-side sessions in an HTTP-only cookie, scrypt password
 Email-verification and password-reset tokens are stored only as SHA-256 hashes, expire after 24 hours and 1 hour respectively, and are single-use. Password reset deletes every existing session for the account. Email delivery is provider-abstracted and brand-neutral: configure `RENOVA_PRODUCT_NAME`, `RENOVA_APP_URL`, `RENOVA_EMAIL_FROM`, `RENOVA_EMAIL_PROVIDER=resend`, and `RESEND_API_KEY` only when an approved sender is available. Until then, external delivery intentionally returns `503` and remains **BLOCKED — WAITING FOR FINAL DOMAIN**; never log or commit the provider key.
 
 Public contact and organization enquiries use `POST /api/enquiries`, server-side validation and rate protection, PostgreSQL storage, and an `ADMIN`-only `GET /api/admin/enquiries` view. They are no longer stored in browser `localStorage`.
+
+Verified Society, Developer, and PMC accounts have separate PostgreSQL profile structures, factual completion indicators, draft editing, explicit marketplace previews, and allowlisted visibility. Developer/PMC discovery, opportunity detail, interest tracking, and Society review states use real backend data. The `/dashboard/society`, `/dashboard/developer`, and `/dashboard/pmc` URLs now enter this authenticated workspace rather than the role-switching preview.
 
 The current legacy dashboard endpoints remain available while the frontend is connected incrementally to the persistent API.
 

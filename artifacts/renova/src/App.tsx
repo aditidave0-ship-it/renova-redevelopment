@@ -1,3 +1,6 @@
+import { RenovaHome } from "./experience/Home";
+import { ExperienceFooter, ExperienceHeader } from "./experience/Header";
+import { ContactPage } from "./experience/ContactForm";
 import {
   lazy,
   Suspense,
@@ -15,6 +18,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowUpRight,
+  ArrowRight,
   BadgeCheck,
   Bell,
   BookOpenText,
@@ -65,7 +69,7 @@ import {
   useListProjects,
   useListRegulations,
 } from "@workspace/api-client-react";
-import { Link, Route, Switch, Redirect, useLocation, useParams } from "wouter";
+import { Link, Route, Switch, useLocation, useParams } from "wouter";
 import {
   ErrorBoundary,
   type ErrorFallbackProps,
@@ -85,11 +89,6 @@ import "./marketing.css";
 import "./requirement.css";
 
 const queryClient = new QueryClient();
-const PlatformRouter = lazy(() =>
-  import("@/platform/PlatformApp").then((module) => ({
-    default: module.PlatformRouter,
-  })),
-);
 const LiveWorkspace = lazy(() =>
   import("@/platform/LiveWorkspace").then((module) => ({
     default: module.LiveWorkspace,
@@ -2092,6 +2091,11 @@ function Regulations() {
           </button>
         }
       />
+      <p role="note">
+        General orientation notes. RENOVA has not verified their regulatory
+        currency or applicability. Confirm requirements with the relevant
+        authority and your professional advisors.
+      </p>
       <div className="regulation-feature">
         <div>
           <span className="feature-label">
@@ -2145,7 +2149,7 @@ function Regulations() {
               onClick={() => setActiveStatus(status)}
               data-testid={`button-regulation-filter-${status.toLowerCase().replaceAll(" ", "-")}`}
             >
-              {status}
+              {status === "All" ? "All" : "Orientation notes"}
             </button>
           ))}
         </div>
@@ -2176,24 +2180,12 @@ function Regulations() {
               <div className="regulation-copy">
                 <div className="regulation-title-row">
                   <h3>{item.title}</h3>
-                  <StatusPill
-                    tone={
-                      item.status.toLowerCase().includes("active") ||
-                      item.status.toLowerCase().includes("current")
-                        ? "green"
-                        : "neutral"
-                    }
-                  >
-                    {item.status}
-                  </StatusPill>
+                  <StatusPill tone="neutral">Orientation</StatusPill>
                 </div>
                 <p>{item.summary}</p>
                 <div className="regulation-meta">
                   <span>
                     <Landmark size={13} /> {item.authority}
-                  </span>
-                  <span>
-                    <CalendarDays size={13} /> Updated {item.updatedAt}
                   </span>
                 </div>
               </div>
@@ -2271,8 +2263,8 @@ function Regulations() {
         {activeRegulation && (
           <div className="regulation-detail">
             <div className="regulation-detail-status">
-              <StatusPill tone="green">{activeRegulation.status}</StatusPill>
-              <span>Reviewed {activeRegulation.updatedAt}</span>
+              <StatusPill tone="neutral">Orientation</StatusPill>
+              <span>Regulatory currency not verified</span>
             </div>
             <p className="regulation-detail-lead">{activeRegulation.summary}</p>
             <div className="profile-facts">
@@ -2321,12 +2313,13 @@ function Regulations() {
   );
 }
 
-const publicNav: { href: string; label: string; items?: { href: string; label: string }[] }[] = [
-  { href: "/", label: "Home" },
-  { href: "/societies", label: "For Societies" },
-  { href: "/ecosystem", label: "Developers & Professionals" },
-  { href: "/knowledge-centre", label: "Knowledge Centre" },
+const publicNav = [
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/ecosystem", label: "Ecosystem" },
+  { href: "/knowledge-centre", label: "Knowledge centre" },
   { href: "/contact", label: "Contact" },
+  { href: "/platform/live?mode=login", label: "Log in" },
+  { href: "/platform/live?mode=start", label: "Get Started" },
 ];
 
 function PublicNavLink({
@@ -2340,7 +2333,7 @@ function PublicNavLink({
   onClick?: () => void;
   className?: string;
 }) {
-  if (href.includes("#"))
+  if (href.startsWith("#"))
     return (
       <a href={href} onClick={onClick} className={className}>
         {children}
@@ -2368,49 +2361,41 @@ function PublicNavigation({
       )}
       aria-label="RENOVA website navigation"
     >
-      {publicNav.map((section) =>
-        section.items ? (
-          <div className="public-nav-item" key={section.label}>
-            <PublicNavLink
-              href={section.href}
-              onClick={onNavigate}
-              className="public-nav-trigger"
-            >
-              {section.label}
-              <ChevronDown size={12} />
-            </PublicNavLink>
-            <div className="public-nav-dropdown">
-              {section.items.map((item) => (
-                <PublicNavLink
-                  href={item.href}
-                  onClick={onNavigate}
-                  key={item.href + item.label}
-                >
-                  {item.label}
-                  <ChevronRight size={13} />
-                </PublicNavLink>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <PublicNavLink
-            href={section.href}
-            onClick={onNavigate}
-            key={section.href}
-          >
-            {section.label}
-          </PublicNavLink>
-        ),
-      )}
+      {publicNav.map((item) => (
+        <PublicNavLink key={item.href} href={item.href} onClick={onNavigate}>
+          {item.label}
+        </PublicNavLink>
+      ))}
     </nav>
   );
 }
 
 const stakeholderCards = [
-  { title: "I represent a society", detail: "Understand the process and find your society’s next step.", icon: Landmark, href: "/societies" },
-  { title: "I am a developer", detail: "Learn how to discover redevelopment opportunities on RENOVA.", icon: Building2, href: "/developers" },
-  { title: "I am a PMC or professional", detail: "Explore specialist services and public organization profiles.", icon: Compass, href: "/ecosystem" },
-  { title: "I already have an account", detail: "Sign in to your existing workspace. New registration remains closed.", icon: LayoutDashboard, href: "/platform/live" },
+  {
+    title: "Find a Developer",
+    detail: "Explore public developer profiles and their documented services.",
+    icon: Building2,
+    href: "/ecosystem?category=Developers",
+  },
+  {
+    title: "Explore Societies",
+    detail:
+      "See how structured redevelopment opportunities can appear on RENOVA.",
+    icon: Landmark,
+    href: "#opportunities",
+  },
+  {
+    title: "Find a PMC",
+    detail: "Bring structure, evaluation and oversight to your redevelopment.",
+    icon: ClipboardCheck,
+    href: "/ecosystem?category=PMC",
+  },
+  {
+    title: "Find an Architect",
+    detail: "Explore architecture practices across the ecosystem.",
+    icon: Compass,
+    href: "/ecosystem?category=Architects",
+  },
 ];
 
 const featuredOpportunities = [
@@ -2542,7 +2527,7 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
         onError={() => setShowFallback(true)}
       >
         <source
-          src="https://d2ol7oe51mr4n9.cloudfront.net/user_2xliFXcBCK07kBXVebz8x4IPd32/8cde5ae3-3fb6-4305-9272-5f52c4c245a3.mp4"
+          src={`${import.meta.env.BASE_URL}renova-intro.mp4`}
           type="video/mp4"
         />
       </video>
@@ -2568,407 +2553,16 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
 }
 
 function MarketingHome() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [showLogoReveal, setShowLogoReveal] = useState(true);
-  const [updatesOpen, setUpdatesOpen] = useState(false);
-  const [activeOpportunityName, setActiveOpportunityName] = useState<
-    string | null
-  >(null);
-  const activeOpportunity = featuredOpportunities.find(
-    (item) => item.name === activeOpportunityName,
-  );
-  const finishLogoReveal = () => setShowLogoReveal(false);
+  const [showIntro, setShowIntro] = useState(true);
   return (
-    <div
-      className={cn(
-        "marketing-site stitch-site",
-        showLogoReveal && "intro-active",
+    <>
+      <div className="renova-home-underlay" inert={showIntro}>
+        <RenovaHome />
+      </div>
+      {showIntro && (
+        <CinematicVideoIntro onFinish={() => setShowIntro(false)} />
       )}
-      id="top"
-    >
-      {showLogoReveal && <CinematicVideoIntro onFinish={finishLogoReveal} />}
-      <header className="stitch-header">
-        <div className="stitch-header-inner">
-          <button
-            className="stitch-menu"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-label="Toggle navigation"
-          >
-            {menuOpen ? <X size={20} /> : <Compass size={20} />}
-          </button>
-          <Logo />
-          <button
-            className="stitch-notification"
-            onClick={() => setUpdatesOpen((open) => !open)}
-            aria-expanded={updatesOpen}
-            aria-label="RENOVA updates"
-          >
-            <Bell size={19} />
-            <span className="stitch-notification-dot" />
-          </button>
-          <PublicNavigation
-            menuOpen={menuOpen}
-            onNavigate={() => setMenuOpen(false)}
-          />
-          {updatesOpen && (
-            <div className="stitch-update-popover">
-              <div>
-                <span>RENOVA pulse</span>
-                <button
-                  type="button"
-                  onClick={() => setUpdatesOpen(false)}
-                  aria-label="Close updates"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <article>
-                <BadgeCheck size={17} />
-                <p>
-                  <strong>Verified network growing</strong>
-                  <span>
-                    New PMCs and architects are being reviewed for Mumbai
-                    societies.
-                  </span>
-                </p>
-              </article>
-              <article>
-                <Building2 size={17} />
-                <p>
-                  <strong>Opportunity preview available</strong>
-                  <span>
-                    Explore demonstration listings showing how society
-                    requirements can be structured.
-                  </span>
-                </p>
-              </article>
-              <Link href="/assessment" onClick={() => setUpdatesOpen(false)}>
-                Post your requirement <ArrowUpRight size={14} />
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main>
-        <section className="stitch-hero" aria-labelledby="renova-hero-title">
-          <div
-            className="stitch-hero-image"
-            role="img"
-            aria-label="A 44-storey Mumbai residential tower transforming from architectural blueprint into completed reality"
-          />
-          <div className="stitch-hero-overlay" />
-          <div className="stitch-hero-frame" aria-hidden="true" />
-          <div className="stitch-hero-meta" aria-hidden="true">
-            <span>01 / Mumbai</span>
-            <span>19.0760° N&nbsp;&nbsp;72.8777° E</span>
-          </div>
-          <div className="stitch-hero-transformation" aria-hidden="true">
-            <span>Existing</span>
-            <i>↓</i>
-            <span>Reimagined</span>
-            <i>↓</i>
-            <span>Renewed</span>
-            <small>
-              The same property.
-              <br />A new possibility.
-            </small>
-          </div>
-
-          <div className="stitch-hero-copy">
-            <p className="stitch-eyebrow">Redevelopment, reimagined.</p>
-            <h1 id="renova-hero-title">
-              <span>Renew Mumbai.</span>
-              <span>Responsibly.</span>
-            </h1>
-            <p>
-              RENOVA brings societies, developers and specialists into one
-              clear, professional redevelopment process.
-            </p>
-            <div className="stitch-hero-actions">
-              <a href="#listings" className="stitch-primary-button">
-                Find my next step <ArrowUpRight size={15} />
-              </a>
-              <a href="/contact" className="stitch-secondary-button">
-                Talk to RENOVA <ArrowUpRight size={15} />
-              </a>
-            </div>
-          </div>
-
-          <div className="stitch-hero-word" aria-hidden="true">
-            RENOVA
-          </div>
-          <div
-            className="stitch-hero-index"
-            aria-label="RENOVA connects the redevelopment ecosystem"
-          >
-            <span>For societies</span>
-            <span>For developers</span>
-            <span>For professionals</span>
-            <span>
-              Explore RENOVA <ArrowUpRight size={14} />
-            </span>
-          </div>
-        </section>
-
-        <section
-          className="stitch-actions"
-          id="listings"
-          aria-label="Choose your starting point"
-        >
-          <div className="renova-start-heading"><p>Start here</p><h2>What brings you to RENOVA?</h2><p>Choose the option that describes you. Each path explains what you can do next.</p></div>
-          <div className="stitch-action-grid">
-            {stakeholderCards.map(({ title, detail, icon: Icon, href }) =>
-              href.startsWith("/") ? (
-                <Link href={href} className="stitch-action-card" key={title}>
-                  <span className="stitch-action-icon">
-                    <Icon size={22} />
-                  </span>
-                  <strong>{title}</strong>
-                  <p>{detail}</p>
-                  <ArrowUpRight size={15} />
-                </Link>
-              ) : (
-                <a href={href} className="stitch-action-card" key={title}>
-                  <span className="stitch-action-icon">
-                    <Icon size={22} />
-                  </span>
-                  <strong>{title}</strong>
-                  <p>{detail}</p>
-                  <ArrowUpRight size={15} />
-                </a>
-              ),
-            )}
-          </div>
-        </section>
-
-        <section
-          className="stitch-section stitch-opportunities"
-          id="opportunities"
-        >
-          <div className="stitch-section-heading">
-            <div>
-              <p>Product preview · demo data</p>
-              <h2>Illustrative redevelopment opportunities</h2>
-            </div>
-            <Link href="/assessment">
-              Post an opportunity <ArrowUpRight size={14} />
-            </Link>
-          </div>
-          <p className="stitch-opportunity-disclaimer">
-            These sample listings demonstrate the RENOVA experience. They do not
-            represent real societies, verified projects, commercial offers or
-            investment opportunities.
-          </p>
-          <div className="stitch-opportunity-grid">
-            {featuredOpportunities.map((item) => (
-              <article className="stitch-opportunity-card" key={item.name}>
-                <span className="stitch-status">{item.status}</span>
-                <h3>{item.name}</h3>
-                <p>
-                  <MapPin size={14} /> {item.location}
-                </p>
-                <p className="stitch-opportunity-detail">{item.detail}</p>
-                <div>
-                  <span>
-                    Building age<strong>{item.age}</strong>
-                  </span>
-                  <span>
-                    Homes<strong>{item.homes}</strong>
-                  </span>
-                  <span>
-                    Site area<strong>{item.area}</strong>
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className="stitch-details-button"
-                  onClick={() => setActiveOpportunityName(item.name)}
-                >
-                  View demo opportunity · {item.scale}{" "}
-                  <ArrowUpRight size={14} />
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="stitch-section stitch-why" id="why-renova">
-          <div className="stitch-section-heading stitch-heading-stack">
-            <div>
-              <p>A clearer way forward</p>
-              <h2>Why RENOVA?</h2>
-            </div>
-            <span>
-              Streamlining redevelopment through structured processes, verified
-              connections and absolute clarity.
-            </span>
-          </div>
-          <div className="stitch-benefit-grid">
-            {trustBenefits.map(({ title, detail, icon: Icon }) => (
-              <article key={title}>
-                <span>
-                  <Icon size={22} />
-                </span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{detail}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="stitch-section stitch-process" id="how-it-works">
-          <div className="stitch-section-heading stitch-heading-stack">
-            <div>
-              <p>How it works</p>
-              <h2>From requirement to right connection.</h2>
-            </div>
-          </div>
-          <div className="stitch-process-grid">
-            {[
-              [
-                "01",
-                "Make your intent clear",
-                "Tell us where you are in the journey, from first conversation to a ready opportunity.",
-              ],
-              [
-                "02",
-                "Meet the right people",
-                "Explore a focused network of developers, PMCs, architects and advisors.",
-              ],
-              [
-                "03",
-                "Move forward, together",
-                "Shortlist a match, start a conversation and shape a better brief.",
-              ],
-            ].map(([number, title, detail]) => (
-              <article key={number}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-                <p>{detail}</p>
-              </article>
-            ))}
-          </div>
-          <div className="stitch-requirement-cta" id="requirement">
-            <div>
-              <p>Ready to begin?</p>
-              <h2>Start your society's redevelopment journey.</h2>
-            </div>
-            <Link href="/assessment" className="stitch-primary-button">
-              Post your requirement <ArrowUpRight size={16} />
-            </Link>
-          </div>
-        </section>
-
-        <section className="stitch-section stitch-about" id="about">
-          <p>About RENOVA</p>
-          <h2>
-            Renewing communities. Restoring ageing properties. Creating better
-            possibilities for Mumbai.
-          </h2>
-          <div>
-            <p>
-              RENOVA is a redevelopment-focused platform and service ecosystem
-              that brings housing societies, developers, PMCs, architects and
-              specialists together.
-            </p>
-            <Link href="/regulations">
-              Open knowledge centre <BookOpenText size={16} />
-            </Link>
-          </div>
-        </section>
-      </main>
-
-      <footer className="stitch-footer" id="contact">
-        <div>
-          <Logo />
-          <p>Renew. Connect. Redevelop.</p>
-        </div>
-        <div>
-          <a href="#listings">Listings</a>
-          <a href="#opportunities">Opportunities</a>
-          <Link href="/regulations">Knowledge centre</Link>
-          <Link href="/assessment">Post requirement</Link>
-        </div>
-        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
-      </footer>
-
-      <nav className="stitch-bottom-nav" aria-label="Mobile navigation">
-        <a href="#top" className="active">
-          <Home size={20} />
-          <span>Home</span>
-        </a>
-        <a href="#listings">
-          <Building2 size={20} />
-          <span>Listings</span>
-        </a>
-        <a href="#opportunities">
-          <Handshake size={20} />
-          <span>Opportunities</span>
-        </a>
-        <Link href="/assessment">
-          <Plus size={22} />
-          <span>Post</span>
-        </Link>
-      </nav>
-      <ExperienceDrawer
-        open={Boolean(activeOpportunity)}
-        onClose={() => setActiveOpportunityName(null)}
-        eyebrow="Product preview · demo data"
-        title={activeOpportunity?.name || "Opportunity"}
-      >
-        {activeOpportunity && (
-          <div className="opportunity-detail">
-            <div className="opportunity-detail-top">
-              <span className="stitch-status">{activeOpportunity.status}</span>
-              <p>
-                <MapPin size={15} /> {activeOpportunity.location}
-              </p>
-            </div>
-            <p className="regulation-detail-lead">{activeOpportunity.detail}</p>
-            <div className="opportunity-metrics">
-              <div>
-                <span>Building age</span>
-                <strong>{activeOpportunity.age}</strong>
-              </div>
-              <div>
-                <span>Member homes</span>
-                <strong>{activeOpportunity.homes}</strong>
-              </div>
-              <div>
-                <span>Site area</span>
-                <strong>{activeOpportunity.area}</strong>
-              </div>
-              <div>
-                <span>Illustrative scale</span>
-                <strong>{activeOpportunity.scale}</strong>
-              </div>
-            </div>
-            <div>
-              <p className="drawer-label">Example requirement</p>
-              <ul>
-                <li>Initial fit assessment and stakeholder verification</li>
-                <li>Professional support appropriate to the society’s stage</li>
-                <li>Transparent next-step discussion through RENOVA</li>
-              </ul>
-            </div>
-            <div className="drawer-note">
-              <ShieldCheck size={18} />
-              <p>
-                This is demonstration data, not a real society, verified
-                project, commercial offer or investment opportunity.
-              </p>
-            </div>
-            <Link href="/assessment" className="button button-dark button-full">
-              Prepare a real opportunity brief <ArrowUpRight size={15} />
-            </Link>
-          </div>
-        )}
-      </ExperienceDrawer>
-    </div>
+    </>
   );
 }
 
@@ -3117,7 +2711,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Bring project information and expectations into one consistent process.",
       },
     ],
-    ctaLabel: "Prepare society details",
+    ctaLabel: "Register your society",
     ctaHref: "/assessment",
   },
   "/societies/how-it-works": {
@@ -3144,7 +2738,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Use a structured workspace to follow decisions and milestones.",
       },
     ],
-    ctaLabel: "Prepare society details",
+    ctaLabel: "Start society registration",
     ctaHref: "/assessment",
   },
   "/developers": {
@@ -3169,7 +2763,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Present capabilities, experience and project fit within a verified network.",
       },
     ],
-    ctaLabel: "Send a developer enquiry",
+    ctaLabel: "Register as a developer",
     ctaHref: "/join/developer",
   },
   "/professionals": {
@@ -3403,8 +2997,8 @@ const publicPageMap: Record<string, PublicPageData> = {
     highlights: [
       {
         title: "Redevelopment Guide",
-        href: "/knowledge-centre/redevelopment-guide",
         detail: "A stage-by-stage orientation from first intent to possession.",
+        href: "/knowledge-centre/redevelopment-guide",
       },
       {
         title: "DCPR",
@@ -3426,8 +3020,8 @@ const publicPageMap: Record<string, PublicPageData> = {
       },
       {
         title: "FAQs",
-        href: "/knowledge-centre/faqs",
         detail: "Practical answers to common redevelopment questions.",
+        href: "/knowledge-centre/faqs",
       },
     ],
     ctaLabel: "Open DCPR guidance",
@@ -3487,7 +3081,7 @@ const publicPageMap: Record<string, PublicPageData> = {
         detail: "Review agreements, guarantees, timelines and reporting.",
       },
     ],
-    ctaLabel: "Prepare society details",
+    ctaLabel: "Register your society",
     ctaHref: "/assessment",
   },
   "/knowledge-centre/developer-selection": {
@@ -3578,7 +3172,10 @@ const publicPageMap: Record<string, PublicPageData> = {
     intro:
       "RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.",
     highlights: [
-      { title: "Founder", detail: "Aziz Parihar — Founder, RENOVA" },
+      {
+        title: "Aziz Parihar — Founder",
+        detail: "RENOVA",
+      },
       {
         title: "Our purpose",
         detail:
@@ -3587,7 +3184,7 @@ const publicPageMap: Record<string, PublicPageData> = {
       {
         title: "Our role",
         detail:
-          "Create structured requirements, verified discovery and clearer connections.",
+          "Create structured requirements, source-backed discovery and clearer connections.",
       },
       {
         title: "Our principle",
@@ -3625,29 +3222,7 @@ const publicPageMap: Record<string, PublicPageData> = {
 };
 
 function PublicWorkingHeader() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  return (
-    <header className="stitch-header public-page-header">
-      <div className="stitch-header-inner">
-        <button
-          className="stitch-menu"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-expanded={menuOpen}
-          aria-label="Toggle navigation"
-        >
-          {menuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-        <Logo />
-        <PublicNavigation
-          menuOpen={menuOpen}
-          onNavigate={() => setMenuOpen(false)}
-        />
-        <Link href="/assessment" className="public-header-cta">
-          Post requirement <ArrowUpRight size={14} />
-        </Link>
-      </div>
-    </header>
-  );
+  return <ExperienceHeader />;
 }
 
 const projectTabs = [
@@ -3682,9 +3257,9 @@ function ProjectsDirectory() {
     : [];
 
   return (
-    <div className="marketing-site public-content-page working-page">
+    <div className="marketing-site public-content-page renova-public-experience working-page">
       <PublicWorkingHeader />
-      <main>
+      <main id="main-content">
         <section className="working-hero">
           <div>
             <p>RENOVA project directory</p>
@@ -3930,9 +3505,9 @@ function EcosystemDirectory() {
     status !== "All";
 
   return (
-    <div className="marketing-site public-content-page working-page ecosystem-page">
+    <div className="marketing-site public-content-page renova-public-experience working-page ecosystem-page">
       <PublicWorkingHeader />
-      <main>
+      <main id="main-content">
         <section className="ecosystem-hero">
           <div className="ecosystem-hero-grid" aria-hidden="true" />
           <div className="ecosystem-hero-copy">
@@ -4131,8 +3706,7 @@ function EcosystemDirectory() {
             <p>For developers, PMCs and specialists</p>
             <h2>List your organization on RENOVA.</h2>
             <span>
-              Create a structured profile and begin the RENOVA verification
-              process.
+              Send your organization details to the RENOVA team for review.
             </span>
           </div>
           <Link href="/contact" className="stitch-primary-button">
@@ -4174,9 +3748,9 @@ function OrganizationProfilePage() {
   const organization = getOrganization(slug);
   if (!organization) return <NotFound />;
   return (
-    <div className="marketing-site public-content-page working-page organization-profile-page">
+    <div className="marketing-site public-content-page renova-public-experience working-page organization-profile-page">
       <PublicWorkingHeader />
-      <main>
+      <main id="main-content">
         <section className="organization-profile-hero">
           <Link href="/ecosystem" className="public-page-back">
             <ArrowLeft size={14} /> Ecosystem directory
@@ -4398,7 +3972,7 @@ function NetworkRegistrationPage({
 
   if (submitted)
     return (
-      <div className="marketing-site public-content-page working-page">
+      <div className="marketing-site public-content-page renova-public-experience working-page">
         <PublicWorkingHeader />
         <main className="working-success">
           <span>
@@ -4418,7 +3992,7 @@ function NetworkRegistrationPage({
     );
 
   return (
-    <div className="marketing-site public-content-page working-page">
+    <div className="marketing-site public-content-page renova-public-experience working-page">
       <PublicWorkingHeader />
       <main className="working-form-page">
         <section className="working-form-intro">
@@ -4575,7 +4149,7 @@ const frequentlyAskedQuestions = [
   ],
   [
     "How does RENOVA verify developers and professionals?",
-    "RENOVA reviews organisation details, registrations, relevant experience and supporting project information before presenting a profile as verified.",
+    "Public profiles are sourced from public information. A listing is not a RENOVA verification or endorsement. Only profiles with an actual RENOVA verification status may be presented as verified.",
   ],
   [
     "Does RENOVA replace a PMC, architect or legal advisor?",
@@ -4587,7 +4161,7 @@ const frequentlyAskedQuestions = [
   ],
   [
     "Can developers search opportunities by location and stage?",
-    "Yes. The project directory is structured around location, status and redevelopment stage, with more filters added as verified listings grow.",
+    "Developer and PMC accounts can search published society opportunities by keyword and location in the authenticated marketplace. Public registration is currently closed.",
   ],
 ];
 
@@ -4598,9 +4172,9 @@ function FaqPage() {
     (question + " " + answer).toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <div className="marketing-site public-content-page working-page">
+    <div className="marketing-site public-content-page renova-public-experience working-page">
       <PublicWorkingHeader />
-      <main>
+      <main id="main-content">
         <section className="working-hero faq-hero">
           <div>
             <p>Knowledge centre · FAQs</p>
@@ -4618,6 +4192,7 @@ function FaqPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search questions"
+              aria-label="Search questions"
             />
           </label>
           <div className="working-faq-list">
@@ -4653,73 +4228,31 @@ function FaqPage() {
 }
 
 function PublicPage({ page }: { page: PublicPageData }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <div className="marketing-site public-content-page">
-      <header className="stitch-header public-page-header">
-        <div className="stitch-header-inner">
-          <button
-            className="stitch-menu"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-label="Toggle navigation"
-          >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          <Logo />
-          <PublicNavigation
-            menuOpen={menuOpen}
-            onNavigate={() => setMenuOpen(false)}
-          />
-          <Link href="/assessment" className="public-header-cta">
-            Post requirement <ArrowUpRight size={14} />
-          </Link>
-        </div>
-      </header>
-      <main>
-        <section className="public-page-hero">
-          <div className="public-page-grid" aria-hidden="true" />
-          <div className="public-page-hero-inner">
-            <Link href="/" className="public-page-back">
-              <ArrowLeft size={14} /> RENOVA home
-            </Link>
-            <p>{page.eyebrow}</p>
-            <h1>{page.title}</h1>
-            <span>{page.intro}</span>
-          </div>
-        </section>
-        <section className="public-page-highlights">
-          {page.highlights.map((item, index) => (
+    <div className="renova-experience">
+      <ExperienceHeader />
+      <main
+        id="main-content"
+        className="experience-container experience-info-page"
+      >
+        <span className="experience-eyebrow">{page.eyebrow}</span>
+        <h1>{page.title}</h1>
+        <p>{page.intro}</p>
+        <div className="experience-benefits">
+          {page.highlights.map((item) => (
             <article key={item.title}>
-              <small>{String(index + 1).padStart(2, "0")}</small>
-              <h2>{item.href ? <Link href={item.href}>{item.title} <ArrowUpRight size={16} /></Link> : item.title}</h2>
+              <h3>{item.title}</h3>
               <p>{item.detail}</p>
+              {item.href && <Link href={item.href}>Read {item.title} →</Link>}
             </article>
           ))}
-        </section>
-        <section className="public-page-cta">
-          <div>
-            <p>Move forward with clarity.</p>
-            <h2>Bring your next redevelopment step to RENOVA.</h2>
-          </div>
-          <Link href={page.ctaHref} className="stitch-primary-button">
-            {page.ctaLabel} <ArrowUpRight size={15} />
-          </Link>
-        </section>
+        </div>
+        <Link className="experience-button" href={page.ctaHref}>
+          {page.ctaLabel}
+          <ArrowRight size={16} />
+        </Link>
       </main>
-      <footer className="stitch-footer">
-        <div>
-          <Logo />
-          <p>Renew. Connect. Redevelop.</p>
-        </div>
-        <div>
-          <Link href="/projects">Projects</Link>
-          <Link href="/knowledge-centre">Knowledge centre</Link>
-          <Link href="/about">About RENOVA</Link>
-          <Link href="/contact">Contact</Link>
-        </div>
-        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
-      </footer>
+      <ExperienceFooter />
     </div>
   );
 }
@@ -4738,12 +4271,34 @@ function WorkspaceRouter() {
 }
 
 function Router() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const pathname = location.split("?")[0];
+  const legacyApplication =
+    pathname === "/platform" ||
+    (pathname.startsWith("/platform/") && pathname !== "/platform/live") ||
+    pathname.startsWith("/dashboard/") ||
+    pathname === "/workspace" ||
+    pathname.startsWith("/project/") ||
+    pathname === "/assessment" ||
+    pathname === "/join" ||
+    pathname.startsWith("/join/") ||
+    pathname === "/get-started" ||
+    pathname.startsWith("/projects");
+  useEffect(() => {
+    if (!legacyApplication) return;
+    const view =
+      pathname.startsWith("/projects") || pathname.includes("opportunities")
+        ? "?view=opportunities"
+        : pathname === "/assessment" || pathname.includes("feasibility")
+          ? "?view=feasibility"
+          : pathname === "/get-started" || pathname.startsWith("/join")
+            ? "?mode=start"
+            : "";
+    navigate(`/platform/live${view}`, { replace: true });
+  }, [legacyApplication, pathname, navigate]);
+  if (legacyApplication)
+    return <LoadingPage label="Opening your RENOVA workspace" />;
   if (pathname === "/") return <MarketingHome />;
-  // Legacy dashboard URLs enter the one server-authorized workspace.
-  // Never trust a URL role or reuse demonstration dashboard data for accounts.
-  if (pathname.startsWith("/dashboard/")) return <Redirect to="/platform/live" />;
   if (pathname === "/platform/live")
     return (
       <Suspense
@@ -4752,36 +4307,43 @@ function Router() {
         <LiveWorkspace />
       </Suspense>
     );
-  if (
-    pathname === "/platform" ||
-    pathname.startsWith("/platform/") ||
-    pathname.startsWith("/dashboard/")
-  )
+  if (pathname === "/professionals") return <EcosystemDirectory />;
+  if (pathname.startsWith("/ecosystem/"))
     return (
-      <Suspense
-        fallback={<LoadingPage label="Preparing the RENOVA platform" />}
-      >
-        <PlatformRouter />
-      </Suspense>
+      <Route path="/ecosystem/:slug" component={OrganizationProfilePage} />
     );
-  if (pathname === "/assessment") return <Assessment />;
-  if (pathname.startsWith("/projects")) return <ProjectsDirectory />;
-  if (pathname.startsWith("/ecosystem/")) return <OrganizationProfilePage />;
   if (pathname === "/ecosystem") return <EcosystemDirectory />;
-  if (pathname === "/join/developer")
-    return <NetworkRegistrationPage role="Developer" />;
-  if (pathname === "/join/pmc") return <NetworkRegistrationPage role="PMC" />;
-  if (pathname === "/join/architect")
-    return <NetworkRegistrationPage role="Architect" />;
-  if (pathname === "/contact")
-    return <NetworkRegistrationPage role="Contact" />;
+  if (pathname === "/contact") return <ContactPage />;
   if (pathname === "/knowledge-centre/faqs") return <FaqPage />;
+  if (pathname === "/regulations")
+    return (
+      <div className="renova-experience">
+        <ExperienceHeader />
+        <main
+          id="main-content"
+          className="experience-container experience-contact-page"
+        >
+          <Regulations />
+        </main>
+        <ExperienceFooter />
+      </div>
+    );
   const publicPage = publicPageMap[pathname];
   if (publicPage) return <PublicPage page={publicPage} />;
   return (
-    <AppShell>
-      <WorkspaceRouter />
-    </AppShell>
+    <div className="renova-experience">
+      <ExperienceHeader />
+      <main
+        id="main-content"
+        className="experience-container experience-contact-page"
+      >
+        <h1>We couldn’t find this page.</h1>
+        <p>Continue from the RENOVA homepage or your workspace.</p>
+        <Link className="experience-button" href="/">
+          Go to homepage
+        </Link>
+      </main>
+    </div>
   );
 }
 

@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { and, eq, isNull } from "drizzle-orm";
-import { authTokens, db, users } from "./database";
+import { authTokens, authRateLimits, db, users } from "./database";
+import {
+  REGISTRATION_PARTICIPANTS,
+  registrationIdentity,
+} from "../src/lib/role-policy";
 import { hashPassword } from "../src/lib/session";
-import { issueAuthToken } from "../src/lib/auth-tokens";
+import { issueAuthToken, issueEmailOtp } from "../src/lib/auth-tokens";
 
 // Isolated route/database acceptance only. Intercept the external email provider,
 // never authentication or database responses, and never send test emails out.
@@ -50,14 +54,19 @@ export async function testAuthDelivery(origin: string): Promise<number> {
       body: JSON.stringify(body),
     });
   function deliveredToken(email: string, purpose: "verify" | "reset"): string {
-    const message = sent.find(
-      (row) => row.to.includes(email) && row.text.includes(`#${purpose}=`),
-    );
-    assert.ok(
-      message,
-      "the isolated provider must receive the intended template",
-    );
+    const message = [...sent]
+      .reverse()
+      .find(
+        (row) =>
+          row.to.includes(email) &&
+          (purpose === "verify"
+            ? /verification code is \d{6}/.test(row.text)
+            : row.text.includes("#reset=")),
+      );
+    assert.ok(message, "isolated provider must receive the intended template");
     checks++;
+    if (purpose === "verify")
+      return message.text.match(/verification code is (\d{6})/)![1];
     const link = message.text.match(/https:\/\/\S+/)?.[0];
     assert.ok(link);
     checks++;
@@ -89,7 +98,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
             email: invalidBrandEmail,
             password: "test-password-valid",
             displayName: "TEST ONLY invalid brand",
-            role: "PMC",
+            participantType: "PMC",
             organizationName: "TEST ONLY invalid brand",
           },
           true,
@@ -108,12 +117,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     checks++;
     process.env.RENOVA_APP_URL = "https://qa.example.invalid";
 
-    for (const role of [
-      "SOCIETY",
-      "DEVELOPER",
-      "PMC",
-      "PROFESSIONAL",
-    ] as const) {
+    for (const role of REGISTRATION_PARTICIPANTS) {
       const email = `controlled-${role.toLowerCase()}@example.invalid`;
       const registration = await request(
         "/auth/register",
@@ -121,9 +125,8 @@ export async function testAuthDelivery(origin: string): Promise<number> {
           email,
           password: "test-password-valid",
           displayName: `TEST ONLY ${role}`,
-          role,
+          participantType: role,
           organizationName: `TEST ONLY ${role}`,
-          ...(role === "PROFESSIONAL" ? { specialization: "ARCHITECT" } : {}),
         },
         true,
       );
@@ -143,13 +146,30 @@ export async function testAuthDelivery(origin: string): Promise<number> {
       checks++;
       const token = deliveredToken(email, "verify");
       assert.equal(
-        (await request("/auth/verify-email", { token })).status,
+        (await request("/auth/verify-email", { email, otp: token })).status,
         200,
       );
       checks++;
       assert.equal(
-        (await request("/auth/verify-email", { token })).status,
+        (await request("/auth/verify-email", { email, otp: token })).status,
         400,
+      );
+      checks++;
+      assert.equal(
+        (
+          await request(
+            "/auth/register",
+            {
+              email,
+              password: "test-password-valid",
+              displayName: "TEST ONLY duplicate",
+              participantType: role,
+              organizationName: "TEST ONLY duplicate",
+            },
+            true,
+          )
+        ).status,
+        409,
       );
       checks++;
       const login = await request("/auth/login", {
@@ -158,7 +178,10 @@ export async function testAuthDelivery(origin: string): Promise<number> {
       });
       assert.equal(login.status, 200);
       checks++;
-      assert.equal(((await login.json()) as any).user.role, role);
+      assert.equal(
+        ((await login.json()) as any).user.role,
+        registrationIdentity(role).role,
+      );
       checks++;
     }
 
@@ -172,16 +195,45 @@ export async function testAuthDelivery(origin: string): Promise<number> {
         isActive: false,
       })
       .returning();
+    const protectedSecret = process.env.RENOVA_AUTH_TOKEN_SECRET;
+    delete process.env.RENOVA_AUTH_TOKEN_SECRET;
+    try {
+      const known = await request("/auth/resend-verification", {
+        email: pending.email,
+      });
+      const unknown = await request("/auth/resend-verification", {
+        email: "secret-preflight-unknown@example.invalid",
+      });
+      assert.equal(known.status, 503);
+      checks++;
+      assert.equal(unknown.status, 503);
+      checks++;
+      assert.deepEqual(await known.json(), await unknown.json());
+      checks++;
+      assert.equal(
+        (
+          await db
+            .select()
+            .from(authTokens)
+            .where(eq(authTokens.userId, pending.id))
+        ).length,
+        0,
+      );
+      checks++;
+    } finally {
+      process.env.RENOVA_AUTH_TOKEN_SECRET = protectedSecret;
+    }
     sent.length = 0;
     const resends = await Promise.all(
       Array.from({ length: 6 }, () =>
         request("/auth/resend-verification", { email: pending.email }),
       ),
     );
-    for (const response of resends) {
-      assert.equal(response.status, 202);
-      checks++;
-    }
+    assert.equal(resends.filter((row) => row.status === 202).length, 3);
+    checks++;
+    assert.equal(resends.filter((row) => row.status === 429).length, 3);
+    checks++;
+    await db.delete(authRateLimits); // Isolated DB: test the persisted cooldown separately.
     assert.equal(
       sent.length,
       1,
@@ -227,15 +279,33 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     );
     checks++;
     assert.equal(
-      (await request("/auth/verify-email", { token: firstVerification }))
-        .status,
-      400,
+      (
+        await db
+          .select()
+          .from(authTokens)
+          .where(eq(authTokens.id, pendingTokens[0].id))
+      ).length,
+      0,
     );
     checks++;
+    const replacementCode = deliveredToken(pending.email, "verify");
+    if (firstVerification !== replacementCode) {
+      assert.equal(
+        (
+          await request("/auth/verify-email", {
+            email: pending.email,
+            otp: firstVerification,
+          })
+        ).status,
+        400,
+      );
+      checks++;
+    }
     assert.equal(
       (
         await request("/auth/verify-email", {
-          token: deliveredToken(pending.email, "verify"),
+          email: pending.email,
+          otp: deliveredToken(pending.email, "verify"),
         })
       ).status,
       200,
@@ -249,10 +319,10 @@ export async function testAuthDelivery(origin: string): Promise<number> {
         request("/auth/forgot-password", { email: resetEmail }),
       ),
     );
-    for (const response of resets) {
-      assert.equal(response.status, 202);
-      checks++;
-    }
+    assert.equal(resets.filter((row) => row.status === 202).length, 5);
+    checks++;
+    assert.equal(resets.filter((row) => row.status === 429).length, 1);
+    checks++;
     assert.equal(
       sent.length,
       1,
@@ -368,6 +438,104 @@ export async function testAuthDelivery(origin: string): Promise<number> {
       assert.deepEqual(await known.json(), await unknown.json());
       checks++;
     }
+
+    const [attemptUser] = await db
+      .insert(users)
+      .values({
+        email: "attempts@example.invalid",
+        displayName: "TEST ONLY attempts",
+        role: "SOCIETY",
+        passwordHash: hashPassword("test-password-valid"),
+        isActive: false,
+      })
+      .returning();
+    const issued = issueEmailOtp(attemptUser.id);
+    await db.insert(authTokens).values({
+      userId: attemptUser.id,
+      purpose: "EMAIL_VERIFICATION",
+      tokenHash: issued.tokenHash,
+      expiresAt: issued.expiresAt,
+    });
+    const wrong = issued.otp === "000000" ? "000001" : "000000";
+    const attempts = await Promise.all(
+      Array.from({ length: 6 }, () =>
+        request("/auth/verify-email", { email: attemptUser.email, otp: wrong }),
+      ),
+    );
+    assert.deepEqual(
+      attempts.map((row) => row.status),
+      [400, 400, 400, 400, 400, 400],
+    );
+    checks++;
+    assert.equal(
+      (
+        await db
+          .select()
+          .from(authTokens)
+          .where(eq(authTokens.userId, attemptUser.id))
+      )[0].failedAttempts,
+      5,
+    );
+    checks++;
+    assert.equal(
+      (
+        await request("/auth/verify-email", {
+          email: attemptUser.email,
+          otp: issued.otp,
+        })
+      ).status,
+      400,
+    );
+    checks++;
+    await db.delete(authTokens).where(eq(authTokens.userId, attemptUser.id));
+    const expired = issueEmailOtp(
+      attemptUser.id,
+      new Date(Date.now() - 11 * 60_000),
+    );
+    await db.insert(authTokens).values({
+      userId: attemptUser.id,
+      purpose: "EMAIL_VERIFICATION",
+      tokenHash: expired.tokenHash,
+      expiresAt: expired.expiresAt,
+    });
+    assert.equal(
+      (
+        await request("/auth/verify-email", {
+          email: attemptUser.email,
+          otp: expired.otp,
+        })
+      ).status,
+      400,
+    );
+    checks++;
+    assert.equal(
+      (
+        await request("/auth/verify-email", {
+          email: "unknown-otp@example.invalid",
+          otp: "123456",
+        })
+      ).status,
+      400,
+    );
+    checks++;
+    assert.equal(
+      (
+        await request(
+          "/auth/register",
+          {
+            email: "admin-signup@example.invalid",
+            password: "test-password-valid",
+            displayName: "TEST ONLY admin",
+            participantType: "ADMIN",
+            organizationName: "TEST ONLY",
+          },
+          true,
+        )
+      ).status,
+      400,
+    );
+    checks++;
+
     return checks;
   } finally {
     globalThis.fetch = nativeFetch;

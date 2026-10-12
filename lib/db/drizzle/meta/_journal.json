@@ -19,17 +19,51 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1791266400000,
-      "tag": "0002_credential_versions",
+      "when": 1791227498511,
+      "tag": "0002_glossy_veda",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1791266400001,
-      "tag": "0003_feasibility_foundation",
+      "when": 1791314129775,
+      "tag": "0003_remarkable_stephen_strange",
       "breakpoints": true
     },
-    { "idx": 4, "version": "7", "when": 1791357000000, "tag": "0004_participant_feasibility", "breakpoints": true }
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791315450991,
+      "tag": "0004_bouncy_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791657050015,
+      "tag": "0005_concerned_tattoo",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791657920739,
+      "tag": "0006_familiar_jack_murdock",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791799035715,
+      "tag": "0007_nifty_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791802730465,
+      "tag": "0008_spotty_morg",
+      "breakpoints": true
+    }
   ]
 }

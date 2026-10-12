@@ -12,6 +12,7 @@ try {
     entryPoints: ["tests/security.integration.ts"],
     outfile,
     bundle: true,
+    sourcemap: "inline",
     platform: "node",
     format: "esm",
     packages: "external",

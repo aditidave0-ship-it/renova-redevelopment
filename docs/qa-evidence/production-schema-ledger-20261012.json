@@ -1,0 +1,1678 @@
+{
+  "ledger": [
+    {
+      "id": 1,
+      "hash": "afaa171a9d353b7abf231d4dfd26ba91479b3d6316b3c7be0c4b7b56a7c23e0e",
+      "created_at": 1790664611534
+    },
+    {
+      "id": 2,
+      "hash": "98d38086373fb3ca83b51ce91670f37efc2298314e0e1926b936cdf34811bc88",
+      "created_at": 1791224612177
+    },
+    {
+      "id": 3,
+      "hash": "17fee26d154b470f9a62ae6250575eb14cc6d70c84431c4b072049cd1320ae10",
+      "created_at": 1791227498511
+    }
+  ],
+  "database": "neondb",
+  "checked_at": "2026-10-12T09:52:29.805285+00:00",
+  "constraints": [
+    {
+      "name": "audit_logs_action_not_null",
+      "table": "audit_logs",
+      "definition": "NOT NULL action"
+    },
+    {
+      "name": "audit_logs_actor_user_id_users_id_fk",
+      "table": "audit_logs",
+      "definition": "FOREIGN KEY (actor_user_id) REFERENCES users(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "audit_logs_created_at_not_null",
+      "table": "audit_logs",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "audit_logs_entity_type_not_null",
+      "table": "audit_logs",
+      "definition": "NOT NULL entity_type"
+    },
+    {
+      "name": "audit_logs_id_not_null",
+      "table": "audit_logs",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "audit_logs_pkey",
+      "table": "audit_logs",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "audit_logs_updated_at_not_null",
+      "table": "audit_logs",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "auth_sessions_created_at_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "auth_sessions_expires_at_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "name": "auth_sessions_id_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "auth_sessions_pkey",
+      "table": "auth_sessions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "auth_sessions_token_hash_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "name": "auth_sessions_token_hash_unique",
+      "table": "auth_sessions",
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "name": "auth_sessions_updated_at_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "auth_sessions_user_id_not_null",
+      "table": "auth_sessions",
+      "definition": "NOT NULL user_id"
+    },
+    {
+      "name": "auth_sessions_user_id_users_id_fk",
+      "table": "auth_sessions",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "auth_tokens_created_at_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "auth_tokens_expires_at_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "name": "auth_tokens_id_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "auth_tokens_pkey",
+      "table": "auth_tokens",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "auth_tokens_purpose_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL purpose"
+    },
+    {
+      "name": "auth_tokens_token_hash_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "name": "auth_tokens_token_hash_unique",
+      "table": "auth_tokens",
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "name": "auth_tokens_user_id_not_null",
+      "table": "auth_tokens",
+      "definition": "NOT NULL user_id"
+    },
+    {
+      "name": "auth_tokens_user_id_users_id_fk",
+      "table": "auth_tokens",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "developer_profiles_areas_served_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL areas_served"
+    },
+    {
+      "name": "developer_profiles_created_at_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "developer_profiles_credentials_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL credentials"
+    },
+    {
+      "name": "developer_profiles_id_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "developer_profiles_marketplace_visible_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL marketplace_visible"
+    },
+    {
+      "name": "developer_profiles_organization_id_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL organization_id"
+    },
+    {
+      "name": "developer_profiles_organization_id_organizations_id_fk",
+      "table": "developer_profiles",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "developer_profiles_organization_id_unique",
+      "table": "developer_profiles",
+      "definition": "UNIQUE (organization_id)"
+    },
+    {
+      "name": "developer_profiles_pkey",
+      "table": "developer_profiles",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "developer_profiles_portfolio_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL portfolio"
+    },
+    {
+      "name": "developer_profiles_specializations_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL specializations"
+    },
+    {
+      "name": "developer_profiles_updated_at_not_null",
+      "table": "developer_profiles",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "enquiries_actor_type_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL actor_type"
+    },
+    {
+      "name": "enquiries_city_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL city"
+    },
+    {
+      "name": "enquiries_created_at_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "enquiries_email_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL email"
+    },
+    {
+      "name": "enquiries_id_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "enquiries_message_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL message"
+    },
+    {
+      "name": "enquiries_name_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL name"
+    },
+    {
+      "name": "enquiries_organization_name_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL organization_name"
+    },
+    {
+      "name": "enquiries_phone_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL phone"
+    },
+    {
+      "name": "enquiries_pkey",
+      "table": "enquiries",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "enquiries_reference_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL reference"
+    },
+    {
+      "name": "enquiries_reference_unique",
+      "table": "enquiries",
+      "definition": "UNIQUE (reference)"
+    },
+    {
+      "name": "enquiries_request_fingerprint_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL request_fingerprint"
+    },
+    {
+      "name": "enquiries_source_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL source"
+    },
+    {
+      "name": "enquiries_status_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL status"
+    },
+    {
+      "name": "enquiries_updated_at_not_null",
+      "table": "enquiries",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "opportunity_interests_created_at_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "opportunity_interests_id_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "opportunity_interests_opportunity_id_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL opportunity_id"
+    },
+    {
+      "name": "opportunity_interests_opportunity_id_redevelopment_opportunitie",
+      "table": "opportunity_interests",
+      "definition": "FOREIGN KEY (opportunity_id) REFERENCES redevelopment_opportunities(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "opportunity_interests_organization_id_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL organization_id"
+    },
+    {
+      "name": "opportunity_interests_organization_id_organizations_id_fk",
+      "table": "opportunity_interests",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "opportunity_interests_pkey",
+      "table": "opportunity_interests",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "opportunity_interests_review_status_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL review_status"
+    },
+    {
+      "name": "opportunity_interests_status_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL status"
+    },
+    {
+      "name": "opportunity_interests_submitted_by_user_id_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL submitted_by_user_id"
+    },
+    {
+      "name": "opportunity_interests_submitted_by_user_id_users_id_fk",
+      "table": "opportunity_interests",
+      "definition": "FOREIGN KEY (submitted_by_user_id) REFERENCES users(id) ON DELETE RESTRICT"
+    },
+    {
+      "name": "opportunity_interests_updated_at_not_null",
+      "table": "opportunity_interests",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "organization_members_created_at_not_null",
+      "table": "organization_members",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "organization_members_id_not_null",
+      "table": "organization_members",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "organization_members_organization_id_not_null",
+      "table": "organization_members",
+      "definition": "NOT NULL organization_id"
+    },
+    {
+      "name": "organization_members_organization_id_organizations_id_fk",
+      "table": "organization_members",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "organization_members_pkey",
+      "table": "organization_members",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "organization_members_updated_at_not_null",
+      "table": "organization_members",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "organization_members_user_id_not_null",
+      "table": "organization_members",
+      "definition": "NOT NULL user_id"
+    },
+    {
+      "name": "organization_members_user_id_users_id_fk",
+      "table": "organization_members",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "organizations_created_at_not_null",
+      "table": "organizations",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "organizations_id_not_null",
+      "table": "organizations",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "organizations_kind_not_null",
+      "table": "organizations",
+      "definition": "NOT NULL kind"
+    },
+    {
+      "name": "organizations_name_not_null",
+      "table": "organizations",
+      "definition": "NOT NULL name"
+    },
+    {
+      "name": "organizations_pkey",
+      "table": "organizations",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "organizations_updated_at_not_null",
+      "table": "organizations",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "pmc_profiles_created_at_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "pmc_profiles_credentials_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL credentials"
+    },
+    {
+      "name": "pmc_profiles_id_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "pmc_profiles_locations_served_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL locations_served"
+    },
+    {
+      "name": "pmc_profiles_marketplace_visible_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL marketplace_visible"
+    },
+    {
+      "name": "pmc_profiles_organization_id_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL organization_id"
+    },
+    {
+      "name": "pmc_profiles_organization_id_organizations_id_fk",
+      "table": "pmc_profiles",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "pmc_profiles_organization_id_unique",
+      "table": "pmc_profiles",
+      "definition": "UNIQUE (organization_id)"
+    },
+    {
+      "name": "pmc_profiles_pkey",
+      "table": "pmc_profiles",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "pmc_profiles_portfolio_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL portfolio"
+    },
+    {
+      "name": "pmc_profiles_services_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL services"
+    },
+    {
+      "name": "pmc_profiles_specializations_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL specializations"
+    },
+    {
+      "name": "pmc_profiles_updated_at_not_null",
+      "table": "pmc_profiles",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "redevelopment_opportunities_created_at_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "redevelopment_opportunities_description_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL description"
+    },
+    {
+      "name": "redevelopment_opportunities_id_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "redevelopment_opportunities_location_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL location"
+    },
+    {
+      "name": "redevelopment_opportunities_pkey",
+      "table": "redevelopment_opportunities",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "redevelopment_opportunities_society_id_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL society_id"
+    },
+    {
+      "name": "redevelopment_opportunities_society_id_societies_id_fk",
+      "table": "redevelopment_opportunities",
+      "definition": "FOREIGN KEY (society_id) REFERENCES societies(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "redevelopment_opportunities_status_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL status"
+    },
+    {
+      "name": "redevelopment_opportunities_title_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL title"
+    },
+    {
+      "name": "redevelopment_opportunities_updated_at_not_null",
+      "table": "redevelopment_opportunities",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "societies_city_not_null",
+      "table": "societies",
+      "definition": "NOT NULL city"
+    },
+    {
+      "name": "societies_created_at_not_null",
+      "table": "societies",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "societies_id_not_null",
+      "table": "societies",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "societies_marketplace_visible_not_null",
+      "table": "societies",
+      "definition": "NOT NULL marketplace_visible"
+    },
+    {
+      "name": "societies_organization_id_not_null",
+      "table": "societies",
+      "definition": "NOT NULL organization_id"
+    },
+    {
+      "name": "societies_organization_id_organizations_id_fk",
+      "table": "societies",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "societies_organization_id_unique",
+      "table": "societies",
+      "definition": "UNIQUE (organization_id)"
+    },
+    {
+      "name": "societies_pkey",
+      "table": "societies",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "societies_updated_at_not_null",
+      "table": "societies",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "name": "users_created_at_not_null",
+      "table": "users",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "name": "users_display_name_not_null",
+      "table": "users",
+      "definition": "NOT NULL display_name"
+    },
+    {
+      "name": "users_email_not_null",
+      "table": "users",
+      "definition": "NOT NULL email"
+    },
+    {
+      "name": "users_email_unique",
+      "table": "users",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "name": "users_id_not_null",
+      "table": "users",
+      "definition": "NOT NULL id"
+    },
+    {
+      "name": "users_is_active_not_null",
+      "table": "users",
+      "definition": "NOT NULL is_active"
+    },
+    {
+      "name": "users_password_hash_not_null",
+      "table": "users",
+      "definition": "NOT NULL password_hash"
+    },
+    {
+      "name": "users_pkey",
+      "table": "users",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "users_role_not_null",
+      "table": "users",
+      "definition": "NOT NULL role"
+    },
+    {
+      "name": "users_updated_at_not_null",
+      "table": "users",
+      "definition": "NOT NULL updated_at"
+    }
+  ],
+  "public_columns": [
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "audit_logs",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "audit_logs",
+      "column": "actor_user_id",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "audit_logs",
+      "column": "action",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "audit_logs",
+      "column": "entity_type",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "audit_logs",
+      "column": "entity_id",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "audit_logs",
+      "column": "metadata",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "audit_logs",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "audit_logs",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "auth_sessions",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "auth_sessions",
+      "column": "user_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "auth_sessions",
+      "column": "token_hash",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_sessions",
+      "column": "expires_at",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_sessions",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_sessions",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "auth_tokens",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "auth_tokens",
+      "column": "user_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "auth_token_purpose",
+      "type": "USER-DEFINED",
+      "table": "auth_tokens",
+      "column": "purpose",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "auth_tokens",
+      "column": "token_hash",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_tokens",
+      "column": "expires_at",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_tokens",
+      "column": "used_at",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "auth_tokens",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "developer_profiles",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "developer_profiles",
+      "column": "organization_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "developer_profiles",
+      "column": "logo_url",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "developer_profiles",
+      "column": "description",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "developer_profiles",
+      "column": "website",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "developer_profiles",
+      "column": "public_email",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "developer_profiles",
+      "column": "public_phone",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "developer_profiles",
+      "column": "office_location",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "developer_profiles",
+      "column": "areas_served",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "developer_profiles",
+      "column": "specializations",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "developer_profiles",
+      "column": "team_information",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "developer_profiles",
+      "column": "portfolio",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "developer_profiles",
+      "column": "credentials",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "bool",
+      "type": "boolean",
+      "table": "developer_profiles",
+      "column": "marketplace_visible",
+      "default": "true",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "developer_profiles",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "developer_profiles",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "enquiries",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "reference",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "name",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "organization_name",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "email",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "phone",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "city",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "actor_type",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "enquiries",
+      "column": "experience_years",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "enquiries",
+      "column": "message",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "source",
+      "default": "'WEBSITE'::character varying",
+      "nullable": "NO"
+    },
+    {
+      "udt": "enquiry_status",
+      "type": "USER-DEFINED",
+      "table": "enquiries",
+      "column": "status",
+      "default": "'NEW'::enquiry_status",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "enquiries",
+      "column": "request_fingerprint",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "enquiries",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "enquiries",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "opportunity_interests",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "opportunity_interests",
+      "column": "opportunity_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "opportunity_interests",
+      "column": "organization_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "opportunity_interests",
+      "column": "submitted_by_user_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "opportunity_interests",
+      "column": "message",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "interest_status",
+      "type": "USER-DEFINED",
+      "table": "opportunity_interests",
+      "column": "status",
+      "default": "'PENDING'::interest_status",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "opportunity_interests",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "opportunity_interests",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "opportunity_interests",
+      "column": "review_status",
+      "default": "'RECEIVED'::character varying",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "organization_members",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "organization_members",
+      "column": "organization_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "organization_members",
+      "column": "user_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "organization_members",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "organization_members",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "organizations",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "organizations",
+      "column": "name",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "organization_kind",
+      "type": "USER-DEFINED",
+      "table": "organizations",
+      "column": "kind",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "organizations",
+      "column": "location",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "organizations",
+      "column": "website",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "organizations",
+      "column": "description",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "organizations",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "organizations",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "pmc_profiles",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "pmc_profiles",
+      "column": "organization_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "pmc_profiles",
+      "column": "logo_url",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "pmc_profiles",
+      "column": "description",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "pmc_profiles",
+      "column": "website",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "pmc_profiles",
+      "column": "public_email",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "pmc_profiles",
+      "column": "public_phone",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "pmc_profiles",
+      "column": "office_location",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "pmc_profiles",
+      "column": "locations_served",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "pmc_profiles",
+      "column": "services",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "pmc_profiles",
+      "column": "specializations",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "pmc_profiles",
+      "column": "team_information",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "pmc_profiles",
+      "column": "portfolio",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "jsonb",
+      "type": "jsonb",
+      "table": "pmc_profiles",
+      "column": "credentials",
+      "default": "'[]'::jsonb",
+      "nullable": "NO"
+    },
+    {
+      "udt": "bool",
+      "type": "boolean",
+      "table": "pmc_profiles",
+      "column": "marketplace_visible",
+      "default": "true",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "pmc_profiles",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "pmc_profiles",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "redevelopment_opportunities",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "redevelopment_opportunities",
+      "column": "society_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "redevelopment_opportunities",
+      "column": "title",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "redevelopment_opportunities",
+      "column": "location",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "redevelopment_opportunities",
+      "column": "description",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "redevelopment_opportunities",
+      "column": "member_count",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "redevelopment_opportunities",
+      "column": "building_age",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "redevelopment_opportunities",
+      "column": "site_area",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "opportunity_status",
+      "type": "USER-DEFINED",
+      "table": "redevelopment_opportunities",
+      "column": "status",
+      "default": "'DRAFT'::opportunity_status",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "redevelopment_opportunities",
+      "column": "published_at",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "redevelopment_opportunities",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "redevelopment_opportunities",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "societies",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "societies",
+      "column": "organization_id",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "societies",
+      "column": "address",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "city",
+      "default": "'Mumbai'::character varying",
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "societies",
+      "column": "member_count",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "societies",
+      "column": "building_age",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "redevelopment_status",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "societies",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "societies",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "contact_name",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "contact_email",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "contact_phone",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "societies",
+      "column": "number_buildings",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "societies",
+      "column": "number_wings",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "type": "integer",
+      "table": "societies",
+      "column": "unit_count",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "property_type",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "societies",
+      "column": "land_area",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "societies",
+      "column": "description",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "bool",
+      "type": "boolean",
+      "table": "societies",
+      "column": "marketplace_visible",
+      "default": "true",
+      "nullable": "NO"
+    },
+    {
+      "udt": "uuid",
+      "type": "uuid",
+      "table": "users",
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "users",
+      "column": "email",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "type": "text",
+      "table": "users",
+      "column": "password_hash",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "varchar",
+      "type": "character varying",
+      "table": "users",
+      "column": "display_name",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "account_role",
+      "type": "USER-DEFINED",
+      "table": "users",
+      "column": "role",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "bool",
+      "type": "boolean",
+      "table": "users",
+      "column": "is_active",
+      "default": "true",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "users",
+      "column": "created_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "users",
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "type": "timestamp with time zone",
+      "table": "users",
+      "column": "email_verified_at",
+      "default": null,
+      "nullable": "YES"
+    }
+  ]
+}

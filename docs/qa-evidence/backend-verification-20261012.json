@@ -1,0 +1,58 @@
+{
+  "scope": "CODE VERIFIED only; no production mutations or actual email/payment-provider delivery",
+  "checks": {
+    "frozenInstall": {
+      "status": "PASS",
+      "pnpm": "11.25.0"
+    },
+    "apiUnits": {
+      "status": "PASS",
+      "tests": 43
+    },
+    "frontendContracts": {
+      "status": "PASS",
+      "tests": 4
+    },
+    "releasePolicy": {
+      "status": "PASS",
+      "tests": 6
+    },
+    "apiDatabaseIntegration": {
+      "status": "PASS",
+      "assertions": 300,
+      "database": "isolated PostgreSQL/PGlite",
+      "externalProviders": "simulated; no actual emails or gateway transactions"
+    },
+    "migrationReplayUpgradeRollback": {
+      "status": "PASS",
+      "evidence": "migration-rehearsal-20261012.json"
+    },
+    "workspaceTypechecks": {
+      "status": "PASS"
+    },
+    "frontendBuild": {
+      "status": "PASS",
+      "warnings": [
+        "Existing tooltip source-map warning"
+      ]
+    },
+    "apiProductionLabelledBuild": {
+      "status": "PASS",
+      "DATABASE_URL": "unset",
+      "productionMigrationExecuted": false,
+      "warnings": [
+        "API bundle size"
+      ]
+    },
+    "authenticatedBrowser": {
+      "status": "BLOCKED",
+      "reason": "No verified production accounts/Admin; isolated staging DB/sender pending"
+    },
+    "realEmails": {
+      "status": "BLOCKED"
+    },
+    "realSandboxGateway": {
+      "status": "BLOCKED"
+    }
+  }
+}

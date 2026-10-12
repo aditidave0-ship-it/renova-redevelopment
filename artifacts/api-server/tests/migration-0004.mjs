@@ -4,13 +4,13 @@ import { PGlite } from "@electric-sql/pglite";
 const historical = await readFile(new URL("./fixtures/0002_glossy_veda.sql", import.meta.url), "utf8");
 const { createHash } = await import("node:crypto");
 assert.equal(createHash("sha256").update(historical).digest("hex"), "17fee26d154b470f9a62ae6250575eb14cc6d70c84431c4b072049cd1320ae10");
-const sql = await readFile("../../lib/db/drizzle/0004_participant_feasibility.sql", "utf8");
+const sql = await readFile("tests/fixtures/legacy-pr24/0004_participant_feasibility.sql", "utf8");
 assert.doesNotMatch(sql, /\b(DROP|DELETE|TRUNCATE)\b/i);
 for (const invalid of [false, true]) {
   const db = new PGlite();
   try {
     for (const name of ["0000_real_roland_deschain", "0001_bright_hedge_knight", "0002_credential_versions", "0003_feasibility_foundation"]) {
-      await db.exec(await readFile(`../../lib/db/drizzle/${name}.sql`, "utf8"));
+      await db.exec(await readFile(name.startsWith("0000") || name.startsWith("0001") ? `../../lib/db/drizzle/${name}.sql` : `tests/fixtures/legacy-pr24/${name}.sql`, "utf8"));
       if (name === "0001_bright_hedge_knight") await db.exec(historical);
     }
     const user = (await db.query("INSERT INTO users(email,password_hash,display_name,role) VALUES ('migration@example.invalid','TEST ONLY','TEST ONLY','SOCIETY') RETURNING id")).rows[0].id;
