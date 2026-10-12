@@ -10,7 +10,9 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "test": "node --import tsx --test src/**/*.test.ts",
     "test:integration": "node tests/run-integration.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:staging": "node tests/run-staging.mjs --check",
+    "staging:local": "node tests/run-staging.mjs --serve"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

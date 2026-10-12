@@ -31,6 +31,8 @@ These standing instructions reflect the owner's decisions. Follow them for all w
 - Checkout, orders, payment webhooks and receipts are authorized in SANDBOX mode only. Do not invent prices, activate live payments or trust a client callback as proof of payment.
 - Do not add chat, proposals, unrelated modules or decorative substitute functionality during this stabilization task.
 - Use clearly labelled controlled test accounts/data. Test authentication, password recovery, session persistence/invalidation, role boundaries, organization isolation, feasibility, draft/edit/publish and interests.
+- The owner explicitly authorized isolated staging fixtures on 12 October 2026. Society, Developer, PMC and Professional fixtures may register through controlled test admission and verify through the real OTP endpoint with privately captured sandbox email. A test-only Admin fixture may process staging enquiries/assessments. Never manually verify production users or ship a production verification bypass.
+- Staging-only fixture code must be excluded from production bundles, refuse production/external database configuration, keep secrets private and block real provider delivery. Clearly distinguish local embedded PostgreSQL staging, managed staging, authenticated browser acceptance and production acceptance.
 - Test approved intro behavior on desktop/mobile, production and the latest preview. Run relevant frozen-install, builds, typechecks, security and deployment checks.
 
 ## Reporting and evidence

@@ -917,6 +917,17 @@ try {
     );
     checks++;
     const verification = issueEmailOtp(unverified.id);
+    let legacyCookie = "";
+    await createSession(
+      db as never,
+      unverified.id,
+      {
+        cookie(_name: string, value: string) {
+          legacyCookie = `renova_session=${value}`;
+        },
+      } as never,
+      0,
+    );
     await db.insert(authTokens).values({
       userId: unverified.id,
       purpose: "EMAIL_VERIFICATION",
@@ -932,6 +943,8 @@ try {
       ).status,
       200,
     );
+    checks++;
+    assert.equal((await request("/auth/me", "GET", legacyCookie)).status, 401);
     checks++;
     assert.equal(
       (
@@ -1038,6 +1051,23 @@ try {
     pmc.cookie,
     adminCookie,
   );
+  assert.equal((await request("/auth/me", "GET", pmc.cookie)).status, 200);
+  checks++;
+  await db
+    .update(authSessions)
+    .set({ expiresAt: new Date(Date.now() - 1000) })
+    .where(eq(authSessions.userId, pmc.user.id));
+  assert.equal((await request("/auth/me", "GET", pmc.cookie)).status, 401);
+  checks++;
+  assert.equal((await request("/auth/me", "GET", a.cookie)).status, 200);
+  checks++;
+  assert.equal(
+    (await request("/auth/logout", "POST", a.cookie, {})).status,
+    204,
+  );
+  checks++;
+  assert.equal((await request("/auth/me", "GET", a.cookie)).status, 401);
+  checks++;
   console.log(
     `PASS: ${checks} database-backed auth/draft/authorization assertions (isolated PostgreSQL/PGlite).`,
   );

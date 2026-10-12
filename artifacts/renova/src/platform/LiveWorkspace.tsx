@@ -113,7 +113,7 @@ function Field({
 }
 
 function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
-  const [{ verificationToken, resetToken }] = useState(() => {
+  const [{ verificationToken, resetToken }, setLinkTokens] = useState(() => {
     const parameters = new URLSearchParams(window.location.hash.slice(1));
     return {
       verificationToken: parameters.get("verify"),
@@ -164,6 +164,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
       "Verification now uses a six-digit email code. Request a new code below.",
     );
     window.history.replaceState(null, "", window.location.pathname);
+    setLinkTokens((current) => ({ ...current, verificationToken: null }));
   }, [verificationToken]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -241,6 +242,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
         setNotice(result.message);
         setMode("login");
         window.history.replaceState(null, "", window.location.pathname);
+        setLinkTokens({ verificationToken: null, resetToken: null });
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to continue.");

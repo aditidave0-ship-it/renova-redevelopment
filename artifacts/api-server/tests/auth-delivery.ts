@@ -178,6 +178,14 @@ export async function testAuthDelivery(origin: string): Promise<number> {
       });
       assert.equal(login.status, 200);
       checks++;
+      const sessionHeader = login.headers.get("set-cookie") ?? "";
+      for (const attribute of ["HttpOnly", "Secure", "SameSite=Lax"]) {
+        assert.ok(
+          sessionHeader.includes(attribute),
+          "production-labelled sessions require secure cookie attributes",
+        );
+        checks++;
+      }
       assert.equal(
         ((await login.json()) as any).user.role,
         registrationIdentity(role).role,

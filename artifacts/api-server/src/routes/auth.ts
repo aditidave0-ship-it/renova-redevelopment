@@ -413,8 +413,16 @@ router.post("/auth/verify-email", async (request, response, next) => {
       if (!consumed) return null;
       await tx
         .update(users)
-        .set({ isActive: true, emailVerifiedAt: now, updatedAt: now })
+        .set({
+          isActive: true,
+          emailVerifiedAt: now,
+          updatedAt: now,
+          credentialVersion: sql`${users.credentialVersion} + 1`,
+        })
         .where(eq(users.id, user.id));
+      // Legacy pre-verification sessions must not spring back into validity
+      // when the account owner verifies. Activation requires a fresh login.
+      await tx.delete(authSessions).where(eq(authSessions.userId, user.id));
       return user;
     });
     if (!verified)
