@@ -324,7 +324,10 @@ router.patch("/societies/me/feasibility/:id", requireAuth(), requireRole("SOCIET
     const request = await db.transaction(async (tx) => {
       const [previous] = await tx.select().from(feasibilityRequests).where(and(eq(feasibilityRequests.id, id), inArray(feasibilityRequests.societyId, owned))).for("update");
       if (!previous || !["DRAFT", "MORE_INFORMATION_REQUIRED"].includes(previous.status)) return null;
-      const [updated] = await tx.update(feasibilityRequests).set({ ...details, status: submit ? "SUBMITTED" : "DRAFT", updatedAt: new Date() }).where(eq(feasibilityRequests.id, id)).returning();
+      // An in-progress response stays visible in the review queue. Only a new
+      // unsent request is a DRAFT; saving additional information must not erase
+      // the Admin's request-for-information workflow state.
+      const [updated] = await tx.update(feasibilityRequests).set({ ...details, status: submit ? "SUBMITTED" : previous.status, updatedAt: new Date() }).where(eq(feasibilityRequests.id, id)).returning();
       await tx.insert(auditLogs).values({ actorUserId: req.auth!.userId, action: "FEASIBILITY_STATUS", entityType: "feasibility_request", entityId: id, metadata: JSON.stringify({ from: previous.status, status: updated.status }) });
       return updated;
     });

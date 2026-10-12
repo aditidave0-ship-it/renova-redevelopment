@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
-import express from "express";
+import express, { type ErrorRequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import { eq } from "drizzle-orm";
 import {
@@ -26,6 +26,7 @@ import {
   verifyPassword,
 } from "../src/lib/session";
 import { issueAuthToken } from "../src/lib/auth-tokens";
+import { testAuthDelivery } from "./auth-delivery";
 
 for (const file of [
   "0000_real_roland_deschain",
@@ -39,6 +40,10 @@ for (const file of [
 const app = express();
 app.use(express.json(), cookieParser());
 app.use("/api", auth, opportunitiesRouter, workspace, enquiriesRouter);
+const testErrors: ErrorRequestHandler = (error, _request, response, _next) => {
+  response.status(error.name === "ZodError" ? 400 : error.status ?? 500).json({ error: "Test request rejected" });
+};
+app.use(testErrors);
 const server = createServer(app);
 await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
 const address = server.address();
@@ -409,12 +414,17 @@ try {
   for (const status of ["MORE_INFORMATION_REQUIRED", "ASSESSMENT_READY"]) {
     assert.equal((await request(`/admin/feasibility/${feasibility.id}`, "PATCH", adminCookie, { status, assessmentNotes: "TEST ONLY assessment; no regulatory conclusions" })).status, 200); checks++;
     if (status === "MORE_INFORMATION_REQUIRED") {
+      const responseDraft = await request(`/societies/me/feasibility/${feasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY updated property", requirement: "TEST ONLY additional information in progress", submit: false });
+      assert.equal(responseDraft.status, 200); checks++;
+      assert.equal(((await responseDraft.json()) as any).request.status, "MORE_INFORMATION_REQUIRED", "saving a response must keep the request in the Admin queue"); checks++;
+      const reviewQueue = ((await (await request("/admin/feasibility", "GET", adminCookie)).json()) as any).requests;
+      assert.ok(reviewQueue.some((row: any) => row.id === feasibility.id)); checks++;
       assert.equal((await request(`/societies/me/feasibility/${feasibility.id}`, "PATCH", a.cookie, { propertyAddress: "TEST ONLY updated property", requirement: "TEST ONLY additional information provided", submit: true })).status, 200); checks++;
     }
   }
   const history = await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", a.cookie);
   assert.equal(history.status, 200); checks++;
-  assert.deepEqual(((await history.json()) as any).history.map((entry: any) => entry.status), ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "SUBMITTED", "ASSESSMENT_READY"]); checks++;
+  assert.deepEqual(((await history.json()) as any).history.map((entry: any) => entry.status), ["SUBMITTED", "IN_REVIEW", "MORE_INFORMATION_REQUIRED", "MORE_INFORMATION_REQUIRED", "SUBMITTED", "ASSESSMENT_READY"]); checks++;
   assert.equal((await request(`/societies/me/feasibility/${feasibility.id}/history`, "GET", b.cookie)).status, 404); checks++;
   const finalResult = ((await (await request("/societies/me/feasibility", "GET", a.cookie)).json()) as any).requests.find((r: any) => r.id === feasibility.id);
   assert.equal(finalResult.status, "ASSESSMENT_READY"); checks++;
@@ -530,6 +540,22 @@ try {
     assert.equal((await request('/auth/verify-email','POST','',{token:verification.token})).status,400); checks++;
     assert.equal((await request('/auth/login','POST','',{email:unverified.email,password:'verification-password'})).status,200); checks++;
   }
+  const disabled = await account("DEVELOPER", 42);
+  await db.update(users).set({ isActive: false }).where(eq(users.id, disabled.user.id));
+  const oldVerification = issueAuthToken("EMAIL_VERIFICATION");
+  await db.insert(authTokens).values({ userId: disabled.user.id, purpose: "EMAIL_VERIFICATION", tokenHash: oldVerification.tokenHash, expiresAt: oldVerification.expiresAt });
+  assert.equal((await request("/auth/verify-email", "POST", "", { token: oldVerification.token })).status, 400, "verification must not reactivate a verified disabled account"); checks++;
+  const [stillDisabled] = await db.select().from(users).where(eq(users.id, disabled.user.id));
+  assert.equal(stillDisabled.isActive, false); checks++;
+  assert.equal((await request("/auth/me", "GET", disabled.cookie)).status, 401); checks++;
+  assert.equal((await request("/auth/login", "POST", "", { email: disabled.user.email, password: "old-password-test" })).status, 401); checks++;
+  checks += await testAuthDelivery(origin);
+  const concurrentEnquiries = await Promise.all(Array.from({ length: 8 }, () => request("/enquiries", "POST", "", {
+    name: "TEST ONLY concurrent enquiry", organizationName: "TEST ONLY society", email: "concurrent-enquiry@example.invalid", phone: "9000000000", city: "Mumbai", actorType: "Housing Society", message: "TEST ONLY rate-limit regression", consent: true,
+  })));
+  assert.equal(concurrentEnquiries.filter(row => row.status === 201).length, 5, "concurrent enquiries must not exceed five submissions per fingerprint/hour"); checks++;
+  assert.equal(concurrentEnquiries.filter(row => row.status === 429).length, 3); checks++;
+  assert.equal((await db.select().from(enquiries).where(eq(enquiries.email, "concurrent-enquiry@example.invalid"))).length, 5); checks++;
   console.log(
     `PASS: ${checks} database-backed auth/draft/authorization assertions (isolated PostgreSQL/PGlite).`,
   );

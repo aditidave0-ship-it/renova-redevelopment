@@ -46,7 +46,9 @@ const registrationSchema = z.object({
   password: passwordSchema,
   displayName: z.string().trim().min(2).max(160),
   role: roleSchema,
-  specialization: z.enum(["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"]).optional(),
+  specialization: z
+    .enum(["LEGAL", "ARCHITECT", "STRUCTURAL", "FINANCE_VALUATION", "OTHER"])
+    .optional(),
   organizationName: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160).optional(),
 });
@@ -108,20 +110,38 @@ async function replaceAuthToken(
   purpose: AuthTokenPurpose,
   cooldownMs = 0,
 ) {
-  if (cooldownMs > 0) {
-    const [latest] = await database
-      .select({ createdAt: authTokens.createdAt })
-      .from(authTokens)
-      .where(
-        and(eq(authTokens.userId, userId), eq(authTokens.purpose, purpose)),
-      )
-      .orderBy(desc(authTokens.createdAt))
-      .limit(1);
-    if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
+  return database.transaction(async (tx) => {
+    // All credential/token mutations lock the user first. This serializes the
+    // cooldown across instances and avoids user/token lock-order deadlocks.
+    const [user] = await tx
+      .select({
+        id: users.id,
+        isActive: users.isActive,
+        emailVerifiedAt: users.emailVerifiedAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .for("update");
+    if (
+      !user ||
+      (purpose === "EMAIL_VERIFICATION"
+        ? user.emailVerifiedAt !== null
+        : !user.isActive || user.emailVerifiedAt === null)
+    )
       return null;
-  }
-  const issued = issueAuthToken(purpose);
-  await database.transaction(async (tx) => {
+    if (cooldownMs > 0) {
+      const [latest] = await tx
+        .select({ createdAt: authTokens.createdAt })
+        .from(authTokens)
+        .where(
+          and(eq(authTokens.userId, userId), eq(authTokens.purpose, purpose)),
+        )
+        .orderBy(desc(authTokens.createdAt))
+        .limit(1);
+      if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
+        return null;
+    }
+    const issued = issueAuthToken(purpose);
     await tx
       .delete(authTokens)
       .where(
@@ -137,8 +157,8 @@ async function replaceAuthToken(
       tokenHash: issued.tokenHash,
       expiresAt: issued.expiresAt,
     });
+    return issued.token;
   });
-  return issued.token;
 }
 
 router.post("/auth/register", async (request, response, next) => {
@@ -149,6 +169,7 @@ router.post("/auth/register", async (request, response, next) => {
         .status(503)
         .json({ error: "Registration is not open yet" });
     ensureEmailDeliveryConfigured();
+    const brand = getEmailBrand();
     const input = registrationSchema.parse(request.body);
     const database = getDb();
     const existing = await database
@@ -182,7 +203,10 @@ router.post("/auth/register", async (request, response, next) => {
         .values({
           name: input.organizationName,
           kind: input.role,
-          specialization: input.role === "PROFESSIONAL" ? input.specialization ?? "OTHER" : null,
+          specialization:
+            input.role === "PROFESSIONAL"
+              ? (input.specialization ?? "OTHER")
+              : null,
           location: input.location ?? null,
         })
         .returning({ id: organizations.id });
@@ -199,7 +223,6 @@ router.post("/auth/register", async (request, response, next) => {
       "EMAIL_VERIFICATION",
     );
     if (!token) throw new Error("Unable to create verification token");
-    const brand = getEmailBrand();
     await getEmailProvider(brand).send({
       to: result.user.email,
       ...verificationEmail(brand, token),
@@ -233,21 +256,34 @@ router.post("/auth/verify-email", async (request, response, next) => {
         .status(400)
         .json({ error: "Verification link is invalid or expired" });
     const consumed = await database.transaction(async (tx) => {
+      const [user] = await tx
+        .select({ emailVerifiedAt: users.emailVerifiedAt })
+        .from(users)
+        .where(eq(users.id, record.userId))
+        .for("update");
+      // Verification can activate a new unverified account, never reactivate a
+      // previously verified account that has subsequently been disabled.
+      if (!user || user.emailVerifiedAt !== null) return false;
+      const consumedAt = new Date();
       const updated = await tx
         .update(authTokens)
-        .set({ usedAt: now })
+        .set({ usedAt: consumedAt })
         .where(
           and(
             eq(authTokens.id, record.id),
             isNull(authTokens.usedAt),
-            gt(authTokens.expiresAt, now),
+            gt(authTokens.expiresAt, consumedAt),
           ),
         )
         .returning({ id: authTokens.id });
       if (!updated.length) return false;
       await tx
         .update(users)
-        .set({ isActive: true, emailVerifiedAt: now, updatedAt: now })
+        .set({
+          isActive: true,
+          emailVerifiedAt: consumedAt,
+          updatedAt: consumedAt,
+        })
         .where(eq(users.id, record.userId));
       return true;
     });
@@ -264,6 +300,7 @@ router.post("/auth/verify-email", async (request, response, next) => {
 router.post("/auth/resend-verification", async (request, response, next) => {
   try {
     ensureEmailDeliveryConfigured();
+    const brand = getEmailBrand();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
     const [user] = await database
@@ -274,9 +311,9 @@ router.post("/auth/resend-verification", async (request, response, next) => {
         emailVerifiedAt: users.emailVerifiedAt,
       })
       .from(users)
-      .where(eq(users.email, input.email))
+      .where(and(eq(users.email, input.email), isNull(users.emailVerifiedAt)))
       .limit(1);
-    if (user && (!user.isActive || !user.emailVerifiedAt)) {
+    if (user) {
       const token = await replaceAuthToken(
         database,
         user.id,
@@ -284,16 +321,19 @@ router.post("/auth/resend-verification", async (request, response, next) => {
         60_000,
       );
       if (token) {
-        const brand = getEmailBrand();
-        await getEmailProvider(brand).send({
-          to: user.email,
-          ...verificationEmail(brand, token),
-        });
+        try {
+          await getEmailProvider(brand).send({
+            to: user.email,
+            ...verificationEmail(brand, token),
+          });
+        } catch {
+          // Delivery failure must not identify which addresses are unverified.
+        }
       }
     }
     return response.status(202).json({
       message:
-        "If an unverified account exists, a new verification email has been sent",
+        "If an eligible unverified account exists, you will receive a verification email",
     });
   } catch (error) {
     return next(error);
@@ -303,6 +343,7 @@ router.post("/auth/resend-verification", async (request, response, next) => {
 router.post("/auth/forgot-password", async (request, response, next) => {
   try {
     ensureEmailDeliveryConfigured();
+    const brand = getEmailBrand();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
     const [user] = await database
@@ -324,7 +365,6 @@ router.post("/auth/forgot-password", async (request, response, next) => {
         60_000,
       );
       if (token) {
-        const brand = getEmailBrand();
         try {
           await getEmailProvider(brand).send({
             to: user.email,
@@ -365,14 +405,24 @@ router.post("/auth/reset-password", async (request, response, next) => {
         .status(400)
         .json({ error: "Password reset link is invalid or expired" });
     const changed = await database.transaction(async (tx) => {
+      const [user] = await tx
+        .select({
+          isActive: users.isActive,
+          emailVerifiedAt: users.emailVerifiedAt,
+        })
+        .from(users)
+        .where(eq(users.id, record.userId))
+        .for("update");
+      if (!user || !user.isActive || !user.emailVerifiedAt) return false;
+      const changedAt = new Date();
       const updated = await tx
         .update(authTokens)
-        .set({ usedAt: now })
+        .set({ usedAt: changedAt })
         .where(
           and(
             eq(authTokens.id, record.id),
             isNull(authTokens.usedAt),
-            gt(authTokens.expiresAt, now),
+            gt(authTokens.expiresAt, changedAt),
           ),
         )
         .returning({ id: authTokens.id });
@@ -382,7 +432,7 @@ router.post("/auth/reset-password", async (request, response, next) => {
         .set({
           passwordHash: hashPassword(input.password),
           credentialVersion: sql`${users.credentialVersion} + 1`,
-          updatedAt: now,
+          updatedAt: changedAt,
         })
         .where(eq(users.id, record.userId));
       await tx
@@ -390,7 +440,7 @@ router.post("/auth/reset-password", async (request, response, next) => {
         .where(eq(authSessions.userId, record.userId));
       await tx
         .update(authTokens)
-        .set({ usedAt: now })
+        .set({ usedAt: changedAt })
         .where(
           and(
             eq(authTokens.userId, record.userId),

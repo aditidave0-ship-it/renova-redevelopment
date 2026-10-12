@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { Router, type IRouter } from "express";
 import { z } from "@workspace/api-zod";
-import { and, count, desc, eq, gte } from "drizzle-orm";
+import { and, count, desc, eq, gte, sql } from "drizzle-orm";
 import { enquiries, requireDb } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/session";
 
@@ -45,33 +45,43 @@ router.post("/enquiries", async (request, response, next) => {
     const input = enquirySchema.parse(request.body);
     const database = requireDb();
     const requestFingerprint = fingerprint(request, input.email);
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const [recent] = await database
-      .select({ value: count() })
-      .from(enquiries)
-      .where(
-        and(
-          gte(enquiries.createdAt, oneHourAgo),
-          eq(enquiries.requestFingerprint, requestFingerprint),
-        ),
+    const enquiryReference = await database.transaction(async (tx) => {
+      // Transaction-scoped lock serializes the existing fingerprint/hour quota
+      // across concurrent requests and Function instances, including an empty
+      // enquiry history. A row lock alone cannot protect the first submission.
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended(${`renova:enquiry:${requestFingerprint}`}, 0))`,
       );
-    if ((recent?.value ?? 0) >= 5)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const [recent] = await tx
+        .select({ value: count() })
+        .from(enquiries)
+        .where(
+          and(
+            gte(enquiries.createdAt, oneHourAgo),
+            eq(enquiries.requestFingerprint, requestFingerprint),
+          ),
+        );
+      if ((recent?.value ?? 0) >= 5) return null;
+      const enquiryReference = reference();
+      await tx.insert(enquiries).values({
+        reference: enquiryReference,
+        name: input.name,
+        organizationName: input.organizationName,
+        email: input.email,
+        phone: input.phone,
+        city: input.city,
+        actorType: input.actorType,
+        experienceYears: input.experienceYears ?? null,
+        message: input.message,
+        requestFingerprint,
+      });
+      return enquiryReference;
+    });
+    if (!enquiryReference)
       return response
         .status(429)
         .json({ error: "Too many requests. Please try again later." });
-    const enquiryReference = reference();
-    await database.insert(enquiries).values({
-      reference: enquiryReference,
-      name: input.name,
-      organizationName: input.organizationName,
-      email: input.email,
-      phone: input.phone,
-      city: input.city,
-      actorType: input.actorType,
-      experienceYears: input.experienceYears ?? null,
-      message: input.message,
-      requestFingerprint,
-    });
     return response.status(201).json({ reference: enquiryReference });
   } catch (error) {
     return next(error);
