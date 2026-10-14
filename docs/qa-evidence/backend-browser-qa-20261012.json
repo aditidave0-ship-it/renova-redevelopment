@@ -1,0 +1,191 @@
+{
+  "qaCommit": "426307851e1e88e604404b44bbb76c3baa0dcef3",
+  "preview": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/",
+  "scope": "Public responsive layout in desktop-browser frames, not physical devices or authenticated dashboards",
+  "roleLayouts": [
+    {
+      "frameWidth": 375,
+      "overflowControls": 0,
+      "radioCount": 8,
+      "registrationClosed": true,
+      "scrollWidth": 360,
+      "width": 360
+    },
+    {
+      "frameWidth": 390,
+      "overflowControls": 0,
+      "radioCount": 8,
+      "registrationClosed": true,
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "frameWidth": 768,
+      "overflowControls": 0,
+      "radioCount": 8,
+      "registrationClosed": true,
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "frameWidth": 1024,
+      "overflowControls": 0,
+      "radioCount": 8,
+      "registrationClosed": true,
+      "scrollWidth": 1009,
+      "width": 1009
+    },
+    {
+      "frameWidth": 1440,
+      "overflowControls": 0,
+      "radioCount": 8,
+      "registrationClosed": true,
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ],
+  "homepageLayouts": [
+    {
+      "frameWidth": 375,
+      "clientWidth": 360,
+      "heading": "Redevelopment,Reimagined.",
+      "scrollWidth": 360
+    },
+    {
+      "frameWidth": 390,
+      "clientWidth": 375,
+      "heading": "Redevelopment,Reimagined.",
+      "scrollWidth": 375
+    },
+    {
+      "frameWidth": 768,
+      "clientWidth": 753,
+      "heading": "Redevelopment,Reimagined.",
+      "scrollWidth": 753
+    },
+    {
+      "frameWidth": 1024,
+      "clientWidth": 1009,
+      "heading": "Redevelopment,Reimagined.",
+      "scrollWidth": 1009
+    },
+    {
+      "frameWidth": 1440,
+      "clientWidth": 1425,
+      "heading": "Redevelopment,Reimagined.",
+      "scrollWidth": 1425
+    }
+  ],
+  "accessGates": [
+    {
+      "role": "society",
+      "requestedPath": "/dashboard/society",
+      "frameWidth": 1024,
+      "clientWidth": 1009,
+      "heading": "Welcome back.",
+      "scrollWidth": 1009,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "developer",
+      "requestedPath": "/dashboard/developer",
+      "frameWidth": 1024,
+      "clientWidth": 1009,
+      "heading": "Welcome back.",
+      "scrollWidth": 1009,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "pmc",
+      "requestedPath": "/dashboard/pmc",
+      "frameWidth": 1024,
+      "clientWidth": 1009,
+      "heading": "Welcome back.",
+      "scrollWidth": 1009,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "professional",
+      "requestedPath": "/platform/live?view=profile",
+      "frameWidth": 1024,
+      "clientWidth": 1009,
+      "heading": "Welcome back.",
+      "scrollWidth": 1009,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "society",
+      "requestedPath": "/dashboard/society",
+      "frameWidth": 390,
+      "clientWidth": 375,
+      "heading": "Welcome back.",
+      "scrollWidth": 375,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "developer",
+      "requestedPath": "/dashboard/developer",
+      "frameWidth": 390,
+      "clientWidth": 375,
+      "heading": "Welcome back.",
+      "scrollWidth": 375,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "pmc",
+      "requestedPath": "/dashboard/pmc",
+      "frameWidth": 390,
+      "clientWidth": 375,
+      "heading": "Welcome back.",
+      "scrollWidth": 375,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    },
+    {
+      "role": "professional",
+      "requestedPath": "/platform/live?view=profile",
+      "frameWidth": 390,
+      "clientWidth": 375,
+      "heading": "Welcome back.",
+      "scrollWidth": 375,
+      "url": "https://renova-kee6afsnu-aditi-dave-s-projects.vercel.app/platform/live",
+      "status": "BLOCKED",
+      "reason": "Login gate only; no verified controlled session"
+    }
+  ],
+  "publicActions": {
+    "getStarted": "PASS",
+    "eightParticipantsNoAdmin": "PASS",
+    "developerFieldsAndDisabledRegistration": "PASS",
+    "otpEntryScreen": "PASS",
+    "mobileNavigation": "PASS"
+  },
+  "intro": {
+    "asset": "/renova-intro.mp4",
+    "duration": 104.563,
+    "mutedAutoplay": true,
+    "playsInline": true,
+    "controls": false,
+    "skipOpensHomepage": true,
+    "componentExitMs": 820,
+    "naturalCompletionObserved": true
+  },
+  "blocked": [
+    "Actual inbox OTP/reset/welcome/enquiry delivery",
+    "Authenticated Society/Developer/PMC/Professional/Admin dashboards",
+    "Physical phone playback/touch acceptance"
+  ]
+}

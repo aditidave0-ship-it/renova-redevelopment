@@ -9,9 +9,13 @@
     "bundle": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "test": "node --import tsx --test src/**/*.test.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "test:integration": "node tests/run-integration.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:staging": "node tests/run-staging.mjs --check",
+    "staging:local": "node tests/run-staging.mjs --serve"
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "cookie-parser": "^1.4.7",
@@ -22,6 +26,7 @@
     "pino-http": "^10.5.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

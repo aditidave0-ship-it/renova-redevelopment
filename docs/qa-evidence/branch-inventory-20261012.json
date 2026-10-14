@@ -1,0 +1,231 @@
+{
+  "main": "fc5f45438f0d9cfb418054352b88792cb1d06f96",
+  "pr24LatestInstructionCommit": "17a3ad37f3cc41d69b82be4f4a8fab158fe48ab1",
+  "branches": [
+    {
+      "branch": "chore/renova-production-acceptance-20261004",
+      "sha": "947e517b4329a4bf01f434740d9c0cce5a23b677",
+      "mergeBaseWithMain": "d7717847cce9272214de29cabe913caef692ff7e",
+      "mainOnlyCommits": 8,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "codex/backend-integration",
+      "sha": "706a86002d47972f065f4bbab72b118da136555f",
+      "mergeBaseWithMain": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mainOnlyCommits": 2,
+      "branchOnlyCommits": 9
+    },
+    {
+      "branch": "codex/enquiry-workflow",
+      "sha": "06a0c20f9bea20b53cfd7a72bfe481e105a50857",
+      "mergeBaseWithMain": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mainOnlyCommits": 2,
+      "branchOnlyCommits": 10
+    },
+    {
+      "branch": "codex/opportunity-lifecycle",
+      "sha": "e6925e9fdd0d077e5b0d6989df8e13b87bb4b7b0",
+      "mergeBaseWithMain": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mainOnlyCommits": 2,
+      "branchOnlyCommits": 11
+    },
+    {
+      "branch": "codex/profiles-interest-workflow",
+      "sha": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mergeBaseWithMain": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mainOnlyCommits": 2,
+      "branchOnlyCommits": 0
+    },
+    {
+      "branch": "codex/society-feasibility",
+      "sha": "55e8a3e5eb40a93dd25ac8c1baf6f9ee45bf4ca1",
+      "mergeBaseWithMain": "06718dedd8558058b1b5a83ccdfa6017ebe58fe9",
+      "mainOnlyCommits": 2,
+      "branchOnlyCommits": 7
+    },
+    {
+      "branch": "feat/ecosystem-directory",
+      "sha": "f3c84a14c3cf711372c91aeb3641e317c5eaa2e2",
+      "mergeBaseWithMain": "8873f27489660e8b569a9a16b22bf66796b3949b",
+      "mainOnlyCommits": 24,
+      "branchOnlyCommits": 3
+    },
+    {
+      "branch": "feat/ecosystem-directory-v2",
+      "sha": "65c5381069e2b8034236e9f25b202acae1be2e2e",
+      "mergeBaseWithMain": "d618748677f481a1402ca1c16174b608feafede0",
+      "mainOnlyCommits": 23,
+      "branchOnlyCommits": 3
+    },
+    {
+      "branch": "feat/hero-42-storey",
+      "sha": "a9a8b271c405e7e8cbdffc0c6baa7eb999c2a722",
+      "mergeBaseWithMain": "d2a0fbd4b5400b8dc4696cc838dc23198d03a8fe",
+      "mainOnlyCommits": 22,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "feat/multi-stakeholder-workspace",
+      "sha": "77e5fca108a62917060bdbc9bc8ea78e33f77043",
+      "mergeBaseWithMain": "9b7380473963651ce9819f85cdee3ce3d41ee04e",
+      "mainOnlyCommits": 21,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "feat/renova-backend-foundation-20260928",
+      "sha": "24f23710f0cee2b1f431575e9e3e8561434a9b07",
+      "mergeBaseWithMain": "d8b7dcfd14bd77640d366a64a803ccbb5a175efe",
+      "mainOnlyCommits": 15,
+      "branchOnlyCommits": 9
+    },
+    {
+      "branch": "feat/renova-backend-readiness-20260929",
+      "sha": "36175fcd824642e740cb5713dd15aab1181850aa",
+      "mergeBaseWithMain": "5b0424f3b159b3d05e01059f53eabd9841fc282f",
+      "mainOnlyCommits": 13,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "feat/renova-dashboard-readability-20260930",
+      "sha": "320ab0aa4666bbfa2ab298170fee144e740fcd0d",
+      "mergeBaseWithMain": "b973f5394dd30a7ea832c22a8468ebe664a08638",
+      "mainOnlyCommits": 10,
+      "branchOnlyCommits": 11
+    },
+    {
+      "branch": "feat/renova-opportunity-ui-20260929",
+      "sha": "05881ca49d57f3578b520a93bf492412535590a2",
+      "mergeBaseWithMain": "0d61467a6f5ebef7b50bec991a051bbdf01e90a1",
+      "mainOnlyCommits": 14,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "feat/renova-same-origin-api-20260929",
+      "sha": "6c4d9cda956bad1283dc84c1df2f78c08d57e359",
+      "mergeBaseWithMain": "674aafceaf78a51c3b2b612daba147cbd2319bfb",
+      "mainOnlyCommits": 12,
+      "branchOnlyCommits": 7
+    },
+    {
+      "branch": "feat/renova-sitemap",
+      "sha": "b8989556774a0eda1cc27a9f0fdc2e56f5ac8611",
+      "mergeBaseWithMain": "747fe7cb3ed0dcafcc09f391c77d47c24f615521",
+      "mainOnlyCommits": 25,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "feat/renova-ux-consolidation",
+      "sha": "09fc0dfdd6cb7a83fdbefb3f1a1856f380db924a",
+      "mergeBaseWithMain": "fc5f45438f0d9cfb418054352b88792cb1d06f96",
+      "mainOnlyCommits": 0,
+      "branchOnlyCommits": 11
+    },
+    {
+      "branch": "feat/renova-video-intro-20260923",
+      "sha": "b9d5af2cfe9e35ce842fa4cac97f32810e2bf851",
+      "mergeBaseWithMain": "ccb325c2bac7cbd52d551cad93aba757a52b401f",
+      "mainOnlyCommits": 29,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "feat/society-opportunity-builder",
+      "sha": "a684e7460f3e39160f0190823a4cc5950e494af3",
+      "mergeBaseWithMain": "c82ed2f44f82ad8a3829935ef92b7bc2c6453c63",
+      "mainOnlyCommits": 20,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "feat/unified-renova-film-theme",
+      "sha": "f52fc23873f1ec974b8ec25987910d6872502088",
+      "mergeBaseWithMain": "a9c2354807a145e0e3b8c3c9a89548c92509e37f",
+      "mainOnlyCommits": 27,
+      "branchOnlyCommits": 3
+    },
+    {
+      "branch": "fix/approved-local-intro",
+      "sha": "eed45825932b47714bfe7c7e7e36a62a6f08e2bb",
+      "mergeBaseWithMain": "bdd8ff549878450e92e9eda85a814b1860dfefc7",
+      "mainOnlyCommits": 1,
+      "branchOnlyCommits": 3
+    },
+    {
+      "branch": "fix/controlled-beta-foundations",
+      "sha": "17a3ad37f3cc41d69b82be4f4a8fab158fe48ab1",
+      "mergeBaseWithMain": "26a9d6b2aad140fd56d513ae8c87161bd62f7d5e",
+      "mainOnlyCommits": 3,
+      "branchOnlyCommits": 52
+    },
+    {
+      "branch": "fix/intro-every-entry",
+      "sha": "d016c301f81604ec006f8928b60a3a50069351c2",
+      "mergeBaseWithMain": "64bd90d69c2d227930ac97bf77676a90e5a9a0c1",
+      "mainOnlyCommits": 26,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "fix/mobile-fast-entry-20260928",
+      "sha": "72c11b118b626c4a2aa04cc7ee20e6db12c4c252",
+      "mergeBaseWithMain": "9ccb46bd232555d9179309d40d7528d0275a03d7",
+      "mainOnlyCommits": 16,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "fix/mobile-intro-auto-entry-20260928",
+      "sha": "5fba5ed7da6d23df6581aeb6b75cdee9e97931d0",
+      "mergeBaseWithMain": "4c91a747844c1d58f1c84942e71a0197f05c1db2",
+      "mainOnlyCommits": 17,
+      "branchOnlyCommits": 1
+    },
+    {
+      "branch": "fix/mobile-intro-fallback-20260928",
+      "sha": "a78ba0b9796b8d44d7c6c08e5721d61488879bfd",
+      "mergeBaseWithMain": "6a42c0b1d21b30af0264af587acc3e11bdf6834b",
+      "mainOnlyCommits": 19,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "fix/mobile-video-autoplay-20260928",
+      "sha": "1b6d04119a175120acc474069dada9539b85eb6a",
+      "mergeBaseWithMain": "2cfc8899b7ffefe4fe0247a29573ee18ca5e86b6",
+      "mainOnlyCommits": 18,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "fix/remove-old-renova-intro",
+      "sha": "e83d64b7b55e3f670d718b65a22ac0da3a552b02",
+      "mergeBaseWithMain": "72d9c2283af395a900412f4269a02b11d0938ed6",
+      "mainOnlyCommits": 28,
+      "branchOnlyCommits": 2
+    },
+    {
+      "branch": "fix/renova-registration-release-control",
+      "sha": "77de19b8adc5148be9da26af932028045e3e08b6",
+      "mergeBaseWithMain": "d7717847cce9272214de29cabe913caef692ff7e",
+      "mainOnlyCommits": 8,
+      "branchOnlyCommits": 4
+    },
+    {
+      "branch": "main",
+      "sha": "fc5f45438f0d9cfb418054352b88792cb1d06f96",
+      "mergeBaseWithMain": "fc5f45438f0d9cfb418054352b88792cb1d06f96",
+      "mainOnlyCommits": 0,
+      "branchOnlyCommits": 0
+    },
+    {
+      "branch": "regulatory/maharera-order-66-2026",
+      "sha": "1367d109b59f3fa1f3deefa9445f64a2f82885d3",
+      "mergeBaseWithMain": "b973f5394dd30a7ea832c22a8468ebe664a08638",
+      "mainOnlyCommits": 10,
+      "branchOnlyCommits": 7
+    },
+    {
+      "branch": "regulatory/mpcb-cfs-ecy-guidelines-2026",
+      "sha": "80d4e01d68c7c92b7676feb0a04268f845408ef7",
+      "mergeBaseWithMain": "b973f5394dd30a7ea832c22a8468ebe664a08638",
+      "mainOnlyCommits": 10,
+      "branchOnlyCommits": 8
+    }
+  ],
+  "source": "Remote heads inspected and cross-checked against GitHub open PR metadata on 12 October; local default/pr24 aliases excluded"
+}

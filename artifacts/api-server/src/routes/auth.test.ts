@@ -6,7 +6,9 @@ import app from "../renova-app";
 
 test("the complete verification and password recovery API surface is registered", () => {
   const paths = new Set(
-    (authRouter as unknown as { stack: Array<{ route?: { path: string } }> }).stack
+    (
+      authRouter as unknown as { stack: Array<{ route?: { path: string } }> }
+    ).stack
       .map((layer) => layer.route?.path)
       .filter((path): path is string => Boolean(path)),
   );
@@ -19,7 +21,8 @@ test("the complete verification and password recovery API surface is registered"
     "/auth/login",
     "/auth/logout",
     "/auth/me",
-  ]) assert.equal(paths.has(path), true, `${path} should be registered`);
+  ])
+    assert.equal(paths.has(path), true, `${path} should be registered`);
 });
 
 test("public registration stays closed without both release flags", async () => {
@@ -34,24 +37,41 @@ test("public registration stays closed without both release flags", async () => 
   try {
     const address = server.address();
     assert.ok(address && typeof address !== "string");
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/auth/register`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${address.port}/api/auth/register`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      },
+    );
     assert.equal(response.status, 503);
-    assert.deepEqual(await response.json(), { error: "Registration is not open yet" });
-    const forgotResponse = await fetch(`http://127.0.0.1:${address.port}/api/auth/forgot-password`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "release-check@example.invalid" }),
+    assert.deepEqual(await response.json(), {
+      error: "Registration is not open yet",
     });
+    const forgotResponse = await fetch(
+      `http://127.0.0.1:${address.port}/api/auth/forgot-password`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "release-check@example.invalid" }),
+      },
+    );
     assert.equal(forgotResponse.status, 503);
-    assert.deepEqual(await forgotResponse.json(), { error: "Email delivery is not configured yet" });
+    assert.deepEqual(await forgotResponse.json(), {
+      error: "Account email verification is not configured yet",
+    });
   } finally {
-    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
-    if (previousOpen === undefined) delete process.env.RENOVA_REGISTRATION_OPEN; else process.env.RENOVA_REGISTRATION_OPEN = previousOpen;
-    if (previousApproved === undefined) delete process.env.RENOVA_BETA_RELEASE_APPROVED; else process.env.RENOVA_BETA_RELEASE_APPROVED = previousApproved;
-    if (previousProvider === undefined) delete process.env.RENOVA_EMAIL_PROVIDER; else process.env.RENOVA_EMAIL_PROVIDER = previousProvider;
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+    if (previousOpen === undefined) delete process.env.RENOVA_REGISTRATION_OPEN;
+    else process.env.RENOVA_REGISTRATION_OPEN = previousOpen;
+    if (previousApproved === undefined)
+      delete process.env.RENOVA_BETA_RELEASE_APPROVED;
+    else process.env.RENOVA_BETA_RELEASE_APPROVED = previousApproved;
+    if (previousProvider === undefined)
+      delete process.env.RENOVA_EMAIL_PROVIDER;
+    else process.env.RENOVA_EMAIL_PROVIDER = previousProvider;
   }
 });
