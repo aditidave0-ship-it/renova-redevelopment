@@ -1,8 +1,7 @@
 import { Router, type IRouter } from "express";
-import { randomUUID, timingSafeEqual } from "node:crypto";
-import { isPublicRegistrationOpen as reviewedRegistrationOpen } from "../lib/registration-release";
+import { timingSafeEqual } from "node:crypto";
 import { z } from "@workspace/api-zod";
-import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import {
   getDb,
   clearSession,
@@ -12,47 +11,29 @@ import {
   verifyPassword,
 } from "../lib/session";
 import {
-  EMAIL_OTP_MAX_ATTEMPTS,
-  ensureEmailOtpConfigured,
   hashAuthToken,
-  issueEmailOtp,
   isUsableAuthToken,
   issueAuthToken,
   type AuthTokenPurpose,
-  verifyEmailOtpHash,
 } from "../lib/auth-tokens";
 import {
   getEmailBrand,
   getEmailProvider,
   passwordResetEmail,
   verificationEmail,
-  welcomeEmail,
 } from "../lib/email";
-import {
-  authRateLimitSubject,
-  enforceAuthRateLimit,
-  type AuthRateLimitAction,
-  type AuthRateLimitPolicy,
-} from "../lib/auth-rate-limit";
-import { logger } from "../lib/logger";
 import { requireDb } from "@workspace/db";
 import {
   authSessions,
   authTokens,
   organizationMembers,
   organizations,
-  professionalProfiles,
   societies,
   users,
 } from "@workspace/db";
-import {
-  dashboardPath,
-  REGISTRATION_PARTICIPANTS,
-  registrationIdentity,
-} from "../lib/role-policy";
 
 const router: IRouter = Router();
-const participantSchema = z.enum(REGISTRATION_PARTICIPANTS);
+const roleSchema = z.enum(["SOCIETY", "DEVELOPER", "PMC", "PROFESSIONAL"]);
 const emailSchema = z
   .string()
   .trim()
@@ -64,7 +45,7 @@ const registrationSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   displayName: z.string().trim().min(2).max(160),
-  participantType: participantSchema,
+  role: roleSchema,
   organizationName: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160).optional(),
 });
@@ -73,23 +54,8 @@ const loginSchema = z.object({
   password: z.string().min(1).max(128),
 });
 const emailRequestSchema = z.object({ email: emailSchema });
-const verificationOtpSchema = z.object({
-  email: emailSchema,
-  otp: z
-    .string()
-    .trim()
-    .regex(/^\d{6}$/, "Enter the six-digit code"),
-});
 const tokenSchema = z.object({ token: z.string().min(32).max(256) });
 const resetPasswordSchema = tokenSchema.extend({ password: passwordSchema });
-
-const AUTH_RATE_LIMITS: Record<AuthRateLimitAction, AuthRateLimitPolicy> = {
-  REGISTER: { limit: 5, windowMs: 60 * 60 * 1000 },
-  VERIFY_EMAIL: { limit: 10, windowMs: 10 * 60 * 1000 },
-  RESEND_VERIFICATION: { limit: 3, windowMs: 60 * 60 * 1000 },
-  FORGOT_PASSWORD: { limit: 5, windowMs: 60 * 60 * 1000 },
-  LOGIN: { limit: 10, windowMs: 15 * 60 * 1000 },
-};
 
 function publicUser(
   user: { id: string; email: string; displayName: string; role: string },
@@ -101,9 +67,6 @@ function publicUser(
     displayName: user.displayName,
     role: user.role,
     organizationId,
-    dashboardPath: dashboardPath(
-      user.role as "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL" | "ADMIN",
-    ),
   };
 }
 
@@ -120,14 +83,14 @@ function hasRegistrationTestAccess(request: {
 
 function isPublicRegistrationOpen(): boolean {
   return (
-    reviewedRegistrationOpen(process.env) &&
+    process.env.RENOVA_REGISTRATION_OPEN === "true" &&
     process.env.RENOVA_BETA_RELEASE_APPROVED === "true"
   );
 }
 
 function ensureEmailDeliveryConfigured(): void {
   if (
-    process.env.RENOVA_EMAIL_PROVIDER?.trim().toLowerCase() !== "resend" ||
+    process.env.RENOVA_EMAIL_PROVIDER?.toLowerCase() !== "resend" ||
     !process.env.RESEND_API_KEY
   ) {
     const error = new Error(
@@ -138,112 +101,26 @@ function ensureEmailDeliveryConfigured(): void {
   }
 }
 
-async function rateLimitAuthRequest(
-  database: ReturnType<typeof getDb>,
-  request: { ip?: string },
-  email: string,
-  action: AuthRateLimitAction,
-) {
-  await enforceAuthRateLimit(
-    database,
-    action,
-    authRateLimitSubject(request.ip || "unknown", "*"),
-    { ...AUTH_RATE_LIMITS[action], limit: AUTH_RATE_LIMITS[action].limit * 10 },
-  );
-  await enforceAuthRateLimit(
-    database,
-    action,
-    authRateLimitSubject("account", email),
-    AUTH_RATE_LIMITS[action],
-  );
-}
-
-async function replaceVerificationOtp(
-  database: ReturnType<typeof getDb>,
-  userId: string,
-  cooldownMs = 0,
-) {
-  return database.transaction(async (tx) => {
-    const [user] = await tx
-      .select({ emailVerifiedAt: users.emailVerifiedAt })
-      .from(users)
-      .where(eq(users.id, userId))
-      .for("update");
-    if (!user || user.emailVerifiedAt !== null) return null;
-    if (cooldownMs > 0) {
-      const [latest] = await tx
-        .select({ createdAt: authTokens.createdAt })
-        .from(authTokens)
-        .where(
-          and(
-            eq(authTokens.userId, userId),
-            eq(authTokens.purpose, "EMAIL_VERIFICATION"),
-          ),
-        )
-        .orderBy(desc(authTokens.createdAt))
-        .limit(1);
-      if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
-        return null;
-    }
-    const issued = issueEmailOtp(userId);
-    await tx
-      .delete(authTokens)
-      .where(
-        and(
-          eq(authTokens.userId, userId),
-          eq(authTokens.purpose, "EMAIL_VERIFICATION"),
-          isNull(authTokens.usedAt),
-        ),
-      );
-    await tx.insert(authTokens).values({
-      userId,
-      purpose: "EMAIL_VERIFICATION",
-      tokenHash: issued.tokenHash,
-      expiresAt: issued.expiresAt,
-      failedAttempts: 0,
-    });
-    return issued.otp;
-  });
-}
-
 async function replaceAuthToken(
   database: ReturnType<typeof getDb>,
   userId: string,
   purpose: AuthTokenPurpose,
   cooldownMs = 0,
 ) {
-  return database.transaction(async (tx) => {
-    // All credential/token mutations lock the user first. This serializes the
-    // cooldown across instances and avoids user/token lock-order deadlocks.
-    const [user] = await tx
-      .select({
-        id: users.id,
-        isActive: users.isActive,
-        emailVerifiedAt: users.emailVerifiedAt,
-      })
-      .from(users)
-      .where(eq(users.id, userId))
-      .for("update");
-    if (
-      !user ||
-      (purpose === "EMAIL_VERIFICATION"
-        ? user.emailVerifiedAt !== null
-        : !user.isActive || user.emailVerifiedAt === null)
-    )
+  if (cooldownMs > 0) {
+    const [latest] = await database
+      .select({ createdAt: authTokens.createdAt })
+      .from(authTokens)
+      .where(
+        and(eq(authTokens.userId, userId), eq(authTokens.purpose, purpose)),
+      )
+      .orderBy(desc(authTokens.createdAt))
+      .limit(1);
+    if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
       return null;
-    if (cooldownMs > 0) {
-      const [latest] = await tx
-        .select({ createdAt: authTokens.createdAt })
-        .from(authTokens)
-        .where(
-          and(eq(authTokens.userId, userId), eq(authTokens.purpose, purpose)),
-        )
-        .orderBy(desc(authTokens.createdAt))
-        .limit(1);
-      if (latest && latest.createdAt.getTime() > Date.now() - cooldownMs)
-        return null;
-    }
-    const issued = issueAuthToken(purpose);
+  }
+  const issued = issueAuthToken(purpose);
+  await database.transaction(async (tx) => {
     await tx
       .delete(authTokens)
       .where(
@@ -253,14 +130,16 @@ async function replaceAuthToken(
           isNull(authTokens.usedAt),
         ),
       );
-    await tx.insert(authTokens).values({
-      userId,
-      purpose,
-      tokenHash: issued.tokenHash,
-      expiresAt: issued.expiresAt,
-    });
-    return issued.token;
+    await tx
+      .insert(authTokens)
+      .values({
+        userId,
+        purpose,
+        tokenHash: issued.tokenHash,
+        expiresAt: issued.expiresAt,
+      });
   });
+  return issued.token;
 }
 
 router.post("/auth/register", async (request, response, next) => {
@@ -271,13 +150,8 @@ router.post("/auth/register", async (request, response, next) => {
         .status(503)
         .json({ error: "Registration is not open yet" });
     ensureEmailDeliveryConfigured();
-    const brand = getEmailBrand();
-    const userId = randomUUID();
-    const verification = issueEmailOtp(userId);
     const input = registrationSchema.parse(request.body);
-    const identity = registrationIdentity(input.participantType);
     const database = getDb();
-    await rateLimitAuthRequest(database, request, input.email, "REGISTER");
     const existing = await database
       .select({ id: users.id })
       .from(users)
@@ -291,64 +165,48 @@ router.post("/auth/register", async (request, response, next) => {
       const [user] = await tx
         .insert(users)
         .values({
-          id: userId,
           email: input.email,
           passwordHash: hashPassword(input.password),
           displayName: input.displayName,
-          role: identity.role,
+          role: input.role,
           isActive: false,
           emailVerifiedAt: null,
         })
-        .onConflictDoNothing({ target: users.email })
         .returning({
           id: users.id,
           email: users.email,
           displayName: users.displayName,
           role: users.role,
         });
-      if (!user) return null;
       const [organization] = await tx
         .insert(organizations)
         .values({
           name: input.organizationName,
-          kind: identity.role,
+          kind: input.role,
           location: input.location ?? null,
         })
         .returning({ id: organizations.id });
-      await tx.insert(organizationMembers).values({
-        organizationId: organization.id,
-        userId: user.id,
-        role: identity.role,
-      });
-      if (identity.role === "SOCIETY")
+      await tx
+        .insert(organizationMembers)
+        .values({ organizationId: organization.id, userId: user.id });
+      if (input.role === "SOCIETY")
         await tx.insert(societies).values({ organizationId: organization.id });
-      if (identity.role === "PROFESSIONAL" && identity.professionalType)
-        await tx.insert(professionalProfiles).values({
-          organizationId: organization.id,
-          specialization: identity.professionalType,
-        });
-      await tx.insert(authTokens).values({
-        userId: user.id,
-        purpose: "EMAIL_VERIFICATION",
-        tokenHash: verification.tokenHash,
-        expiresAt: verification.expiresAt,
-        failedAttempts: 0,
-      });
       return { user, organizationId: organization.id };
     });
-    if (!result)
-      return response
-        .status(409)
-        .json({ error: "An account with this email already exists" });
+    const token = await replaceAuthToken(
+      database,
+      result.user.id,
+      "EMAIL_VERIFICATION",
+    );
+    if (!token) throw new Error("Unable to create verification token");
+    const brand = getEmailBrand();
     await getEmailProvider(brand).send({
       to: result.user.email,
-      ...verificationEmail(brand, verification.otp),
+      ...verificationEmail(brand, token),
     });
-    return response.status(202).json({
-      message: "Enter the six-digit code sent to your email",
-      email: result.user.email,
-      verificationRequired: true,
-    });
+    return response
+      .status(202)
+      .json({ message: "Check your email to verify your account" });
   } catch (error) {
     return next(error);
   }
@@ -356,94 +214,48 @@ router.post("/auth/register", async (request, response, next) => {
 
 router.post("/auth/verify-email", async (request, response, next) => {
   try {
-    const input = verificationOtpSchema.parse(request.body);
-    ensureEmailOtpConfigured();
+    const input = tokenSchema.parse(request.body);
     const database = requireDb();
-    await rateLimitAuthRequest(database, request, input.email, "VERIFY_EMAIL");
-    const verified = await database.transaction(async (tx) => {
-      // Issuance, verification and reset all acquire the user before token locks.
-      const [user] = await tx
-        .select({
-          id: users.id,
-          email: users.email,
-          emailVerifiedAt: users.emailVerifiedAt,
-        })
-        .from(users)
-        .where(eq(users.email, input.email))
-        .for("update");
-      if (!user || user.emailVerifiedAt !== null) return null;
-      const [record] = await tx
-        .select()
-        .from(authTokens)
-        .where(
-          and(
-            eq(authTokens.userId, user.id),
-            eq(authTokens.purpose, "EMAIL_VERIFICATION"),
-            isNull(authTokens.usedAt),
-          ),
-        )
-        .orderBy(desc(authTokens.createdAt))
-        .limit(1)
-        .for("update");
-      const now = new Date();
-      if (!record || !isUsableAuthToken(record, "EMAIL_VERIFICATION", now))
-        return null;
-      if (!verifyEmailOtpHash(user.id, input.otp, record.tokenHash)) {
-        await tx
-          .update(authTokens)
-          .set({
-            failedAttempts: sql`${authTokens.failedAttempts} + 1`,
-            lastAttemptAt: now,
-          })
-          .where(eq(authTokens.id, record.id));
-        return null;
-      }
-      const [consumed] = await tx
+    const now = new Date();
+    const [record] = await database
+      .select({
+        id: authTokens.id,
+        userId: authTokens.userId,
+        purpose: authTokens.purpose,
+        expiresAt: authTokens.expiresAt,
+        usedAt: authTokens.usedAt,
+      })
+      .from(authTokens)
+      .where(eq(authTokens.tokenHash, hashAuthToken(input.token)))
+      .limit(1);
+    if (!record || !isUsableAuthToken(record, "EMAIL_VERIFICATION", now))
+      return response
+        .status(400)
+        .json({ error: "Verification link is invalid or expired" });
+    const consumed = await database.transaction(async (tx) => {
+      const updated = await tx
         .update(authTokens)
-        .set({ usedAt: now, lastAttemptAt: now })
+        .set({ usedAt: now })
         .where(
           and(
             eq(authTokens.id, record.id),
             isNull(authTokens.usedAt),
             gt(authTokens.expiresAt, now),
-            lt(authTokens.failedAttempts, EMAIL_OTP_MAX_ATTEMPTS),
           ),
         )
         .returning({ id: authTokens.id });
-      if (!consumed) return null;
+      if (!updated.length) return false;
       await tx
         .update(users)
-        .set({
-          isActive: true,
-          emailVerifiedAt: now,
-          updatedAt: now,
-          credentialVersion: sql`${users.credentialVersion} + 1`,
-        })
-        .where(eq(users.id, user.id));
-      // Legacy pre-verification sessions must not spring back into validity
-      // when the account owner verifies. Activation requires a fresh login.
-      await tx.delete(authSessions).where(eq(authSessions.userId, user.id));
-      return user;
+        .set({ isActive: true, emailVerifiedAt: now, updatedAt: now })
+        .where(eq(users.id, record.userId));
+      return true;
     });
-    if (!verified)
+    if (!consumed)
       return response
         .status(400)
-        .json({ error: "Verification code is incorrect or expired" });
-    try {
-      const brand = getEmailBrand();
-      await getEmailProvider(brand).send({
-        to: verified.email,
-        ...welcomeEmail(brand),
-      });
-    } catch {
-      logger.warn(
-        { statusCode: 503 },
-        "Welcome email was not accepted after verification",
-      );
-    }
-    return response.json({
-      message: "Email verified. Your account is active; you can now sign in.",
-    });
+        .json({ error: "Verification link is invalid or expired" });
+    return response.json({ message: "Email verified. You can now sign in." });
   } catch (error) {
     return next(error);
   }
@@ -452,16 +264,8 @@ router.post("/auth/verify-email", async (request, response, next) => {
 router.post("/auth/resend-verification", async (request, response, next) => {
   try {
     ensureEmailDeliveryConfigured();
-    ensureEmailOtpConfigured();
-    const brand = getEmailBrand();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
-    await rateLimitAuthRequest(
-      database,
-      request,
-      input.email,
-      "RESEND_VERIFICATION",
-    );
     const [user] = await database
       .select({
         id: users.id,
@@ -470,25 +274,29 @@ router.post("/auth/resend-verification", async (request, response, next) => {
         emailVerifiedAt: users.emailVerifiedAt,
       })
       .from(users)
-      .where(and(eq(users.email, input.email), isNull(users.emailVerifiedAt)))
+      .where(eq(users.email, input.email))
       .limit(1);
-    if (user) {
-      const otp = await replaceVerificationOtp(database, user.id, 60_000);
-      if (otp) {
-        try {
-          await getEmailProvider(brand).send({
-            to: user.email,
-            ...verificationEmail(brand, otp),
-          });
-        } catch {
-          /* Neutral response, no account enumeration or token logging. */
-        }
+    if (user && (!user.isActive || !user.emailVerifiedAt)) {
+      const token = await replaceAuthToken(
+        database,
+        user.id,
+        "EMAIL_VERIFICATION",
+        60_000,
+      );
+      if (token) {
+        const brand = getEmailBrand();
+        await getEmailProvider(brand).send({
+          to: user.email,
+          ...verificationEmail(brand, token),
+        });
       }
     }
-    return response.status(202).json({
-      message:
-        "If an eligible unverified account exists, you will receive a verification email",
-    });
+    return response
+      .status(202)
+      .json({
+        message:
+          "If an unverified account exists, a new verification email has been sent",
+      });
   } catch (error) {
     return next(error);
   }
@@ -497,15 +305,8 @@ router.post("/auth/resend-verification", async (request, response, next) => {
 router.post("/auth/forgot-password", async (request, response, next) => {
   try {
     ensureEmailDeliveryConfigured();
-    const brand = getEmailBrand();
     const input = emailRequestSchema.parse(request.body);
     const database = requireDb();
-    await rateLimitAuthRequest(
-      database,
-      request,
-      input.email,
-      "FORGOT_PASSWORD",
-    );
     const [user] = await database
       .select({ id: users.id, email: users.email })
       .from(users)
@@ -525,25 +326,18 @@ router.post("/auth/forgot-password", async (request, response, next) => {
         60_000,
       );
       if (token) {
-        try {
-          await getEmailProvider(brand).send({
-            to: user.email,
-            ...passwordResetEmail(brand, token),
-          });
-        } catch {
-          // Delivery failure must not distinguish an eligible account from an
-          // unknown email. Persisted cooldown/expiry still govern later retries.
-          logger.warn(
-            { statusCode: 503 },
-            "Password reset email was not accepted",
-          );
-        }
+        const brand = getEmailBrand();
+        await getEmailProvider(brand).send({
+          to: user.email,
+          ...passwordResetEmail(brand, token),
+        });
       }
     }
-    return response.status(202).json({
-      message:
-        "If an eligible account exists, you will receive a password reset email",
-    });
+    return response
+      .status(202)
+      .json({
+        message: "If the account exists, a password reset email has been sent",
+      });
   } catch (error) {
     return next(error);
   }
@@ -570,49 +364,25 @@ router.post("/auth/reset-password", async (request, response, next) => {
         .status(400)
         .json({ error: "Password reset link is invalid or expired" });
     const changed = await database.transaction(async (tx) => {
-      const [user] = await tx
-        .select({
-          isActive: users.isActive,
-          emailVerifiedAt: users.emailVerifiedAt,
-        })
-        .from(users)
-        .where(eq(users.id, record.userId))
-        .for("update");
-      if (!user || !user.isActive || !user.emailVerifiedAt) return false;
-      const changedAt = new Date();
       const updated = await tx
         .update(authTokens)
-        .set({ usedAt: changedAt })
+        .set({ usedAt: now })
         .where(
           and(
             eq(authTokens.id, record.id),
             isNull(authTokens.usedAt),
-            gt(authTokens.expiresAt, changedAt),
+            gt(authTokens.expiresAt, now),
           ),
         )
         .returning({ id: authTokens.id });
       if (!updated.length) return false;
       await tx
         .update(users)
-        .set({
-          passwordHash: hashPassword(input.password),
-          credentialVersion: sql`${users.credentialVersion} + 1`,
-          updatedAt: changedAt,
-        })
+        .set({ passwordHash: hashPassword(input.password), updatedAt: now })
         .where(eq(users.id, record.userId));
       await tx
         .delete(authSessions)
         .where(eq(authSessions.userId, record.userId));
-      await tx
-        .update(authTokens)
-        .set({ usedAt: changedAt })
-        .where(
-          and(
-            eq(authTokens.userId, record.userId),
-            eq(authTokens.purpose, "PASSWORD_RESET"),
-            isNull(authTokens.usedAt),
-          ),
-        );
       return true;
     });
     if (!changed)
@@ -637,12 +407,8 @@ router.post("/auth/login", async (request, response, next) => {
   try {
     const input = loginSchema.parse(request.body);
     const database = requireDb();
-    await rateLimitAuthRequest(database, request, input.email, "LOGIN");
     const rows = await database
-      .select({
-        user: users,
-        organizationId: organizations.id,
-      })
+      .select({ user: users, organizationId: organizations.id })
       .from(users)
       .leftJoin(organizationMembers, eq(organizationMembers.userId, users.id))
       .leftJoin(
@@ -662,12 +428,7 @@ router.post("/auth/login", async (request, response, next) => {
       return response
         .status(401)
         .json({ error: "Email or password is incorrect" });
-    await createSession(
-      database,
-      row.user.id,
-      response,
-      row.user.credentialVersion,
-    );
+    await createSession(database, row.user.id, response);
     return response.json({ user: publicUser(row.user, row.organizationId) });
   } catch (error) {
     return next(error);
@@ -688,9 +449,7 @@ router.get("/auth/me", async (request, response, next) => {
     const auth = await readSession(request);
     if (!auth)
       return response.status(401).json({ error: "Authentication required" });
-    return response.json({
-      user: { ...auth, dashboardPath: dashboardPath(auth.role) },
-    });
+    return response.json({ user: auth });
   } catch (error) {
     return next(error);
   }

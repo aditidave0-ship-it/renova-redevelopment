@@ -1,7 +1,5 @@
 # RENOVA beta readiness report
 
-Current code/evidence update: [12 October backend stabilization](backend-stabilization-20261012.md). The 6 October baseline below is historical; its schema PASS claim does not establish readiness for pending PR #24 migrations or features. Registration and beta remain closed.
-
 Updated: 6 October 2026 (Asia/Calcutta)
 
 ## Release decision

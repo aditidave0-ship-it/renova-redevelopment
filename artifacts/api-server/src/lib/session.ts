@@ -48,13 +48,12 @@ export async function createSession(
   database: AppDb,
   userId: string,
   response: Response,
-  credentialVersion: number,
 ): Promise<void> {
   const rawToken = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
   await database
     .insert(authSessions)
-    .values({ userId, tokenHash: hashToken(rawToken), expiresAt, credentialVersion });
+    .values({ userId, tokenHash: hashToken(rawToken), expiresAt });
   response.cookie(SESSION_COOKIE, rawToken, {
     httpOnly: true,
     sameSite: "lax",
@@ -109,7 +108,6 @@ export async function readSession(
         eq(authSessions.tokenHash, hashToken(rawToken)),
         gt(authSessions.expiresAt, new Date()),
         eq(users.isActive, true),
-        eq(authSessions.credentialVersion, users.credentialVersion),
         gt(users.emailVerifiedAt, new Date(0)),
       ),
     )

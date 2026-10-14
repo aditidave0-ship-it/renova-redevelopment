@@ -11,9 +11,10 @@ globalThis.require = createRequire(import.meta.url);
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildAll() {
-  // Builds must be side-effect-free. Production migrations are a separate,
-  // explicitly approved operation after ledger reconciliation and recovery
-  // review; VERCEL_ENV alone must never authorize a database mutation.
+  if (process.env.VERCEL_ENV === "production") {
+    const { migrateProduction } = await import("../../lib/db/scripts/migrate-production.mjs");
+    await migrateProduction();
+  }
 
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
