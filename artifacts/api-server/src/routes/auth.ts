@@ -445,6 +445,28 @@ router.post("/auth/verify-email", async (request, response, next) => {
       message: "Email verified. Your account is active; you can now sign in.",
     });
   } catch (error) {
+    // Missing production migrations or a disconnected database must not look
+    // like a bad OTP, and must not expose SQL/schema details to the browser.
+    // Keep unexpected application errors on the central error handler.
+    const dbError = error as { code?: unknown; cause?: { code?: unknown } };
+    const code = typeof dbError?.code === "string"
+      ? dbError.code
+      : typeof dbError?.cause?.code === "string"
+        ? dbError.cause.code
+        : "";
+    if (
+      code.startsWith("08") || // PostgreSQL connection errors
+      ["42P01", "42703", "3D000", "57P01", "57P02", "57P03"].includes(code)
+    ) {
+      logger.warn(
+        { operation: "verify-email", errorCode: code },
+        "Email verification is blocked by database readiness",
+      );
+      return response.status(503).json({
+        error: "Email verification is temporarily unavailable. Please try again later.",
+        code: "VERIFICATION_TEMPORARILY_UNAVAILABLE",
+      });
+    }
     return next(error);
   }
 });
