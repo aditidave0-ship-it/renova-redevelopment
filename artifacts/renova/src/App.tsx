@@ -2610,6 +2610,9 @@ function ComingSoonPage() {
         <p className="renova-coming-soon-note">
           Thank you for your patience while we prepare the next stage of RENOVA.
         </p>
+        <a className="renova-coming-soon-contact" href="tel:+919029931031">
+          For enquiries <span>+91 90299 31031</span>
+        </a>
       </section>
       <p className="renova-coming-soon-footer">© 2026 RENOVA</p>
     </main>

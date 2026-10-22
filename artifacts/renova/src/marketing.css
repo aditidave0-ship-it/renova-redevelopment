@@ -123,6 +123,30 @@ html { scroll-behavior: smooth; }
   line-height: 1.6;
 }
 
+.renova-coming-soon-contact {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 26px;
+  color: rgba(204, 229, 243, .66);
+  font-size: .78rem;
+  text-decoration: none;
+}
+
+.renova-coming-soon-contact span {
+  color: #f7fbff;
+  font-weight: 650;
+}
+
+.renova-coming-soon-contact:hover span,
+.renova-coming-soon-contact:focus-visible span {
+  color: #61d9ff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .renova-coming-soon-footer {
   position: absolute;
   bottom: 22px;
