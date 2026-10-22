@@ -2566,6 +2566,73 @@ function MarketingHome() {
   );
 }
 
+function ComingSoonPage() {
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "RENOVA — Coming Soon";
+    return () => {
+      document.title = previousTitle;
+    };
+  }, []);
+
+  return (
+    <main className="renova-coming-soon">
+      <div className="renova-coming-soon-glow" aria-hidden="true" />
+      <div className="renova-coming-soon-grid" aria-hidden="true" />
+      <section className="renova-coming-soon-card" aria-labelledby="coming-soon-title">
+        <div className="renova-coming-soon-brand" aria-label="RENOVA">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
+            <path
+              className="brand-r-stem"
+              d="M15 38V14h10.5c6 0 10 3.2 10 8.5S31.5 31 25.5 31H15"
+            />
+            <path className="brand-r-leg" d="m26 30 11 9" />
+            <path className="brand-building" d="M20 38V23l5-3v18" />
+          </svg>
+          <span>RENOVA</span>
+        </div>
+
+        <p className="renova-coming-soon-status">
+          <span aria-hidden="true" /> Platform preparation in progress
+        </p>
+        <h1 id="coming-soon-title">Coming Soon</h1>
+        <p className="renova-coming-soon-vision">
+          Building the digital infrastructure for redevelopment.
+        </p>
+        <p className="renova-coming-soon-copy">
+          RENOVA is preparing a secure ecosystem connecting Societies,
+          Developers, PMCs and redevelopment professionals. Public access and
+          registration will open after controlled platform testing is complete.
+        </p>
+
+        <div className="renova-coming-soon-divider" aria-hidden="true" />
+        <p className="renova-coming-soon-note">
+          Thank you for your patience while we prepare the next stage of RENOVA.
+        </p>
+        <a className="renova-coming-soon-contact" href="tel:+919029931031">
+          For enquiries <span>+91 90299 31031</span>
+        </a>
+      </section>
+      <p className="renova-coming-soon-footer">© 2026 RENOVA</p>
+    </main>
+  );
+}
+
+function ComingSoonSite() {
+  const [showIntro, setShowIntro] = useState(true);
+  return (
+    <>
+      <div inert={showIntro}>
+        <ComingSoonPage />
+      </div>
+      {showIntro && (
+        <CinematicVideoIntro onFinish={() => setShowIntro(false)} />
+      )}
+    </>
+  );
+}
+
 type PublicPageData = {
   eyebrow: string;
   title: string;
@@ -4351,7 +4418,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Router />
+        <ComingSoonSite />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
