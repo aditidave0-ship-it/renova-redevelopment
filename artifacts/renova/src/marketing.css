@@ -1,6 +1,144 @@
 /* RENOVA public site — Stitch visual direction with RENOVA ecosystem content */
 html { scroll-behavior: smooth; }
 
+.renova-coming-soon {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(28px, 6vw, 72px) 20px 64px;
+  color: #f7fbff;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(34, 152, 211, .21), transparent 34%),
+    linear-gradient(145deg, #020812 0%, #061a2d 54%, #03101d 100%);
+}
+
+.renova-coming-soon-glow {
+  position: absolute;
+  z-index: -1;
+  width: min(720px, 84vw);
+  aspect-ratio: 1;
+  border: 1px solid rgba(97, 217, 255, .14);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 80px rgba(97, 217, 255, .025),
+    0 0 0 160px rgba(97, 217, 255, .018);
+}
+
+.renova-coming-soon-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: .12;
+  background-image:
+    linear-gradient(rgba(151, 209, 239, .25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(151, 209, 239, .25) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, transparent, #000 26%, #000 70%, transparent);
+}
+
+.renova-coming-soon-card {
+  width: min(100%, 780px);
+  padding: clamp(36px, 6vw, 72px);
+  text-align: center;
+  border: 1px solid rgba(152, 215, 247, .2);
+  background: rgba(5, 20, 34, .72);
+  box-shadow: 0 32px 100px rgba(0, 0, 0, .32);
+  backdrop-filter: blur(18px);
+}
+
+.renova-coming-soon-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: clamp(38px, 7vw, 68px);
+  color: #fff;
+  font: 700 clamp(1rem, 2vw, 1.25rem)/1 var(--app-font-sans);
+  letter-spacing: .28em;
+}
+
+.renova-coming-soon-brand svg {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: #61d9ff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.renova-coming-soon-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 22px;
+  color: #9edcf8;
+  font: 600 .68rem/1.4 var(--app-font-mono);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.renova-coming-soon-status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #61d9ff;
+  box-shadow: 0 0 16px rgba(97, 217, 255, .9);
+}
+
+.renova-coming-soon h1 {
+  margin: 0;
+  color: #fff;
+  font: 600 clamp(3.6rem, 10vw, 7.6rem)/.92 var(--app-font-serif);
+  letter-spacing: -.055em;
+}
+
+.renova-coming-soon-vision {
+  margin: 28px auto 0;
+  color: #eef9ff;
+  font: 500 clamp(1.1rem, 2.5vw, 1.55rem)/1.4 var(--app-font-serif);
+}
+
+.renova-coming-soon-copy {
+  max-width: 610px;
+  margin: 22px auto 0;
+  color: rgba(226, 242, 251, .78);
+  font-size: clamp(.91rem, 1.5vw, 1.04rem);
+  line-height: 1.75;
+}
+
+.renova-coming-soon-divider {
+  width: 72px;
+  height: 1px;
+  margin: 34px auto 26px;
+  background: rgba(97, 217, 255, .52);
+}
+
+.renova-coming-soon-note {
+  margin: 0;
+  color: rgba(204, 229, 243, .58);
+  font-size: .76rem;
+  line-height: 1.6;
+}
+
+.renova-coming-soon-footer {
+  position: absolute;
+  bottom: 22px;
+  margin: 0;
+  color: rgba(185, 215, 231, .42);
+  font: 500 .62rem/1 var(--app-font-mono);
+  letter-spacing: .14em;
+}
+
+@media (max-width: 520px) {
+  .renova-coming-soon { padding-inline: 14px; }
+  .renova-coming-soon-card { padding: 38px 22px 42px; }
+  .renova-coming-soon-brand { margin-bottom: 42px; }
+  .renova-coming-soon-copy { line-height: 1.65; }
+}
+
 .renova-film-intro {
   position: fixed;
   inset: 0;
