@@ -2,8 +2,23 @@ import { Router, type IRouter } from "express";
 import { HealthCheckResponse } from "@workspace/api-zod";
 import { sql } from "drizzle-orm";
 import { requireDb } from "@workspace/db";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+function safeDatabaseFailureCode(error: unknown): string {
+  if (error instanceof Error && error.message === "DATABASE_URL is not configured")
+    return "DATABASE_URL_MISSING";
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof error.code === "string" &&
+    /^[A-Z0-9_]+$/.test(error.code)
+  )
+    return error.code;
+  return "DATABASE_CHECK_FAILED";
+}
 
 export const requiredSchemaColumns = [
   ["users", "email_verified_at"],
@@ -39,17 +54,36 @@ router.get("/healthz", (_req, res) => {
 });
 
 router.get("/readyz", async (_req, res) => {
+  let check = "database_configuration";
   try {
     const database = requireDb();
+    check = "database_connection";
+    await database.execute(sql`select 1`);
+    check = "database_schema";
     await Promise.all(
-      requiredSchemaColumns.map(([table, column]) =>
-        database.execute(
-          sql`select ${sql.identifier(column)} from ${sql.identifier(table)} limit 0`,
-        ),
-      ),
+      requiredSchemaColumns.map(async ([table, column]) => {
+        try {
+          await database.execute(
+            sql`select ${sql.identifier(column)} from ${sql.identifier(table)} limit 0`,
+          );
+        } catch (error) {
+          logger.error(
+            {
+              check: `schema.${table}.${column}`,
+              failureCode: safeDatabaseFailureCode(error),
+            },
+            "Database readiness schema probe failed",
+          );
+          throw error;
+        }
+      }),
     );
     res.json({ status: "ready" });
-  } catch {
+  } catch (error) {
+    logger.error(
+      { check, failureCode: safeDatabaseFailureCode(error) },
+      "Database readiness check failed",
+    );
     res
       .status(503)
       .json({ status: "unavailable", error: "Database is not ready" });

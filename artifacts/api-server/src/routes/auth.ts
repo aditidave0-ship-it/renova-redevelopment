@@ -612,6 +612,16 @@ router.post("/auth/reset-password", async (request, response, next) => {
         .where(
           and(
             eq(authTokens.userId, record.userId),
+            eq(authTokens.purpose, "LOGIN_OTP"),
+            isNull(authTokens.usedAt),
+          ),
+        );
+      await tx
+        .update(authTokens)
+        .set({ usedAt: changedAt })
+        .where(
+          and(
+            eq(authTokens.userId, record.userId),
             eq(authTokens.purpose, "PASSWORD_RESET"),
             isNull(authTokens.usedAt),
           ),
@@ -648,11 +658,15 @@ router.post("/auth/login", async (request, response, next) => {
     if (!row || !verifyPassword(input.password, row.user.passwordHash))
       return response.status(401).json({ error: "Email or password is incorrect" });
     const otp = await database.transaction(async (tx) => {
-      await tx.select({ id: users.id }).from(users).where(eq(users.id, row.user.id)).for("update");
-      const [latest] = await tx.select({ createdAt: authTokens.createdAt }).from(authTokens)
-        .where(and(eq(authTokens.userId, row.user.id), eq(authTokens.purpose, "LOGIN_OTP")))
+      const [lockedUser] = await tx.select({ credentialVersion: users.credentialVersion, isActive: users.isActive, emailVerifiedAt: users.emailVerifiedAt })
+        .from(users).where(eq(users.id, row.user.id)).for("update");
+      if (!lockedUser || !lockedUser.isActive || !lockedUser.emailVerifiedAt || lockedUser.credentialVersion !== row.user.credentialVersion)
+        return null;
+      const [latest] = await tx.select().from(authTokens)
+        .where(and(eq(authTokens.userId, row.user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)))
         .orderBy(desc(authTokens.createdAt)).limit(1);
-      if (latest && latest.createdAt.getTime() > Date.now() - 60_000) {
+      const now = new Date();
+      if (latest && isUsableAuthToken(latest, "LOGIN_OTP", now) && latest.createdAt.getTime() > now.getTime() - 60_000) {
         const error = new Error("A sign-in code was sent recently. Please wait before requesting another.");
         Object.assign(error, { status: 429 }); throw error;
       }
@@ -661,6 +675,7 @@ router.post("/auth/login", async (request, response, next) => {
       await tx.insert(authTokens).values({ userId: row.user.id, purpose: "LOGIN_OTP", tokenHash: issued.tokenHash, expiresAt: issued.expiresAt, failedAttempts: 0 });
       return issued.otp;
     });
+    if (!otp) return response.status(401).json({ error: "Email or password is incorrect" });
     const brand = getEmailBrand();
     await getEmailProvider(brand).send({ to: row.user.email, ...loginOtpEmail(brand, otp) });
     return response.status(202).json({ message: "A six-digit sign-in code has been sent to your email.", email: row.user.email, verificationRequired: true });
@@ -711,11 +726,14 @@ router.post("/auth/resend-login-otp", async (request, response, next) => {
       .where(and(eq(users.email, input.email), eq(users.isActive, true), gt(users.emailVerifiedAt, new Date(0)))).limit(1);
     if (user) {
       const otp = await database.transaction(async (tx) => {
-        await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for("update");
-        const [latest] = await tx.select({ createdAt: authTokens.createdAt }).from(authTokens)
-          .where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP")))
+        const [lockedUser] = await tx.select({ id: users.id, isActive: users.isActive, emailVerifiedAt: users.emailVerifiedAt })
+          .from(users).where(eq(users.id, user.id)).for("update");
+        if (!lockedUser || !lockedUser.isActive || !lockedUser.emailVerifiedAt) return null;
+        const [latest] = await tx.select().from(authTokens)
+          .where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)))
           .orderBy(desc(authTokens.createdAt)).limit(1);
-        if (latest && latest.createdAt.getTime() > Date.now() - 60_000) return null;
+        const now = new Date();
+        if (!latest || !isUsableAuthToken(latest, "LOGIN_OTP", now) || latest.createdAt.getTime() > now.getTime() - 60_000) return null;
         const issued = issueLoginOtp(user.id);
         await tx.delete(authTokens).where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)));
         await tx.insert(authTokens).values({ userId: user.id, purpose: "LOGIN_OTP", tokenHash: issued.tokenHash, expiresAt: issued.expiresAt, failedAttempts: 0 });
