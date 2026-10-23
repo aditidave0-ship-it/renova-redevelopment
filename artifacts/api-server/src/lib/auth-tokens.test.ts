@@ -15,7 +15,7 @@ import {
 test("email verification OTPs are six digits, HMAC protected, and expire after 10 minutes", () => {
   const now = new Date("2026-01-01T00:00:00Z");
   const issued = issueEmailOtp("user-123", now, "test-secret");
-  assert.match(issued.otp, /^\d{6}$/);
+  assert.match(issued.otp, /^\\d{6}$/);
   assert.notEqual(issued.otp, issued.tokenHash);
   assert.equal(
     issued.tokenHash,
