@@ -129,6 +129,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
     | "reset"
     | "verify"
     | "otp"
+    | "login-otp"
   >(
     verificationToken
       ? "otp"
@@ -175,12 +176,21 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
     setNotice("");
     try {
       if (mode === "login") {
-        const result = await api<{ user: Account }>("/auth/login", {
+        const result = await api<{ user?: Account; email?: string; message?: string; verificationRequired?: boolean }>("/auth/login", {
           method: "POST",
           body: JSON.stringify({
             email: form.get("email"),
             password: form.get("password"),
           }),
+        });
+        if (result.verificationRequired) {
+          setVerificationEmailAddress(result.email || String(form.get("email") || ""));
+          setNotice(result.message || "Enter the sign-in code sent to your email.");
+          setMode("login-otp");
+        } else if (result.user) onSignedIn(result.user);
+      } else if (mode === "login-otp") {
+        const result = await api<{ user: Account }>("/auth/verify-login", {
+          method: "POST", body: JSON.stringify({ email: form.get("email"), otp: form.get("otp") }),
         });
         onSignedIn(result.user);
       } else if (mode === "register") {
@@ -268,8 +278,8 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
                     ? "Resend verification."
                     : mode === "verify"
                       ? "Verify your email."
-                      : mode === "otp"
-                        ? "Enter your verification code."
+                      : mode === "otp" || mode === "login-otp"
+                        ? mode === "login-otp" ? "Confirm it’s you." : "Enter your verification code."
                         : "Welcome back."}
         </h2>
         <p>
@@ -389,8 +399,8 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             />
           </Field>
         )}
-        {mode === "otp" && (
-          <Field label="Six-digit verification code">
+        {(mode === "otp" || mode === "login-otp") && (
+          <Field label={mode === "login-otp" ? "Six-digit sign-in code" : "Six-digit verification code"}>
             <input
               name="otp"
               inputMode="numeric"
@@ -400,7 +410,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
               maxLength={6}
               required
             />
-            <small>Codes expire after 10 minutes and can be used once.</small>
+            <small>{mode === "login-otp" ? "Sign-in codes expire after 5 minutes and can be used once." : "Codes expire after 10 minutes and can be used once."}</small>
           </Field>
         )}
         {(mode === "register" || mode === "login" || mode === "reset") && (
@@ -459,6 +469,8 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
               "Send reset link"
             ) : mode === "otp" ? (
               "Verify email"
+            ) : mode === "login-otp" ? (
+              "Verify and sign in"
             ) : mode === "resend" ? (
               "Resend verification"
             ) : (
@@ -486,14 +498,20 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             </button>
           </div>
         )}
-        {mode === "otp" && (
+        {(mode === "otp" || mode === "login-otp") && (
           <div className="live-auth-links">
-            <button type="button" onClick={() => setMode("resend")}>
-              Resend code
-            </button>
+            <button type="button" onClick={async () => {
+              setBusy(true); setError(""); setNotice("");
+              try {
+                const endpoint = mode === "login-otp" ? "/auth/resend-login-otp" : "/auth/resend-verification";
+                const result = await api<{ message: string }>(endpoint, { method: "POST", body: JSON.stringify({ email: verificationEmailAddress }) });
+                setNotice(result.message);
+              } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to resend code."); }
+              finally { setBusy(false); }
+            }}>Resend code</button>
           </div>
         )}
-        {(mode === "forgot" || mode === "resend" || mode === "otp") && (
+        {(mode === "forgot" || mode === "resend" || mode === "otp" || mode === "login-otp") && (
           <div className="live-auth-links">
             <button type="button" onClick={() => setMode("login")}>
               Back to sign in

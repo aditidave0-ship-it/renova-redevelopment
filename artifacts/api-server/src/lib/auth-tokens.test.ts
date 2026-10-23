@@ -8,6 +8,8 @@ import {
   isUsableAuthToken,
   issueAuthToken,
   verifyEmailOtpHash,
+  issueLoginOtp,
+  verifyLoginOtpHash,
 } from "./auth-tokens";
 
 test("email verification OTPs are six digits, HMAC protected, and expire after 10 minutes", () => {
@@ -59,6 +61,17 @@ test("email verification OTPs are six digits, HMAC protected, and expire after 1
     ),
     false,
   );
+});
+
+test("login OTPs are six digits, purpose-bound, and expire after five minutes", () => {
+  const now = new Date("2026-01-01T00:00:00Z");
+  const issued = issueLoginOtp("user-456", now, "test-secret");
+  assert.match(issued.otp, /^\d{6}$/);
+  assert.equal(issued.expiresAt.toISOString(), "2026-01-01T00:05:00.000Z");
+  assert.equal(verifyLoginOtpHash("user-456", issued.otp, issued.tokenHash, "test-secret"), true);
+  assert.equal(verifyLoginOtpHash("other-user", issued.otp, issued.tokenHash, "test-secret"), false);
+  assert.equal(isUsableAuthToken({ purpose: "LOGIN_OTP", expiresAt: issued.expiresAt, usedAt: null, failedAttempts: 4 }, "LOGIN_OTP", now), true);
+  assert.equal(isUsableAuthToken({ purpose: "LOGIN_OTP", expiresAt: issued.expiresAt, usedAt: null, failedAttempts: 5 }, "LOGIN_OTP", now), false);
 });
 
 test("password reset tokens expire after one hour and cannot be reused", () => {
