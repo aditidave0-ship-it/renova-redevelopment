@@ -20,12 +20,15 @@ import {
   issueAuthToken,
   type AuthTokenPurpose,
   verifyEmailOtpHash,
+  issueLoginOtp,
+  verifyLoginOtpHash,
 } from "../lib/auth-tokens";
 import {
   getEmailBrand,
   getEmailProvider,
   passwordResetEmail,
   verificationEmail,
+  loginOtpEmail,
   welcomeEmail,
 } from "../lib/email";
 import {
@@ -636,42 +639,92 @@ router.post("/auth/reset-password", async (request, response, next) => {
 router.post("/auth/login", async (request, response, next) => {
   try {
     const input = loginSchema.parse(request.body);
+    ensureEmailDeliveryConfigured();
+    ensureEmailOtpConfigured();
     const database = requireDb();
     await rateLimitAuthRequest(database, request, input.email, "LOGIN");
-    const rows = await database
-      .select({
-        user: users,
-        organizationId: organizations.id,
-      })
-      .from(users)
-      .leftJoin(organizationMembers, eq(organizationMembers.userId, users.id))
-      .leftJoin(
-        organizations,
-        eq(organizations.id, organizationMembers.organizationId),
-      )
-      .where(
-        and(
-          eq(users.email, input.email),
-          eq(users.isActive, true),
-          gt(users.emailVerifiedAt, new Date(0)),
-        ),
-      )
-      .limit(1);
-    const row = rows[0];
+    const [row] = await database.select({ user: users }).from(users)
+      .where(and(eq(users.email, input.email), eq(users.isActive, true), gt(users.emailVerifiedAt, new Date(0)))).limit(1);
     if (!row || !verifyPassword(input.password, row.user.passwordHash))
-      return response
-        .status(401)
-        .json({ error: "Email or password is incorrect" });
-    await createSession(
-      database,
-      row.user.id,
-      response,
-      row.user.credentialVersion,
-    );
-    return response.json({ user: publicUser(row.user, row.organizationId) });
-  } catch (error) {
-    return next(error);
-  }
+      return response.status(401).json({ error: "Email or password is incorrect" });
+    const otp = await database.transaction(async (tx) => {
+      await tx.select({ id: users.id }).from(users).where(eq(users.id, row.user.id)).for("update");
+      const [latest] = await tx.select({ createdAt: authTokens.createdAt }).from(authTokens)
+        .where(and(eq(authTokens.userId, row.user.id), eq(authTokens.purpose, "LOGIN_OTP")))
+        .orderBy(desc(authTokens.createdAt)).limit(1);
+      if (latest && latest.createdAt.getTime() > Date.now() - 60_000) {
+        const error = new Error("A sign-in code was sent recently. Please wait before requesting another.");
+        Object.assign(error, { status: 429 }); throw error;
+      }
+      const issued = issueLoginOtp(row.user.id);
+      await tx.delete(authTokens).where(and(eq(authTokens.userId, row.user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)));
+      await tx.insert(authTokens).values({ userId: row.user.id, purpose: "LOGIN_OTP", tokenHash: issued.tokenHash, expiresAt: issued.expiresAt, failedAttempts: 0 });
+      return issued.otp;
+    });
+    const brand = getEmailBrand();
+    await getEmailProvider(brand).send({ to: row.user.email, ...loginOtpEmail(brand, otp) });
+    return response.status(202).json({ message: "A six-digit sign-in code has been sent to your email.", email: row.user.email, verificationRequired: true });
+  } catch (error) { return next(error); }
+});
+
+router.post("/auth/verify-login", async (request, response, next) => {
+  try {
+    const input = verificationOtpSchema.parse(request.body);
+    ensureEmailOtpConfigured();
+    const database = requireDb();
+    await rateLimitAuthRequest(database, request, input.email, "LOGIN");
+    const verified = await database.transaction(async (tx) => {
+      const [user] = await tx.select({ id: users.id, email: users.email, displayName: users.displayName, role: users.role, credentialVersion: users.credentialVersion, isActive: users.isActive, emailVerifiedAt: users.emailVerifiedAt })
+        .from(users).where(eq(users.email, input.email)).for("update");
+      if (!user || !user.isActive || !user.emailVerifiedAt) return null;
+      const [record] = await tx.select().from(authTokens)
+        .where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)))
+        .orderBy(desc(authTokens.createdAt)).limit(1).for("update");
+      const now = new Date();
+      if (!record || !isUsableAuthToken(record, "LOGIN_OTP", now)) return null;
+      if (!verifyLoginOtpHash(user.id, input.otp, record.tokenHash)) {
+        await tx.update(authTokens).set({ failedAttempts: sql`${authTokens.failedAttempts} + 1`, lastAttemptAt: now }).where(eq(authTokens.id, record.id));
+        return null;
+      }
+      const [consumed] = await tx.update(authTokens).set({ usedAt: now, lastAttemptAt: now })
+        .where(and(eq(authTokens.id, record.id), isNull(authTokens.usedAt), gt(authTokens.expiresAt, now), lt(authTokens.failedAttempts, EMAIL_OTP_MAX_ATTEMPTS)))
+        .returning({ id: authTokens.id });
+      if (!consumed) return null;
+      const [membership] = await tx.select({ organizationId: organizations.id })
+        .from(organizationMembers).leftJoin(organizations, eq(organizations.id, organizationMembers.organizationId))
+        .where(eq(organizationMembers.userId, user.id)).limit(1);
+      return { user, organizationId: membership?.organizationId ?? null };
+    });
+    if (!verified) return response.status(400).json({ error: "Sign-in code is incorrect or expired" });
+    await createSession(database, verified.user.id, response, verified.user.credentialVersion);
+    return response.json({ user: publicUser(verified.user, verified.organizationId) });
+  } catch (error) { return next(error); }
+});
+
+router.post("/auth/resend-login-otp", async (request, response, next) => {
+  try {
+    ensureEmailDeliveryConfigured(); ensureEmailOtpConfigured();
+    const input = emailRequestSchema.parse(request.body);
+    const database = requireDb();
+    await rateLimitAuthRequest(database, request, input.email, "LOGIN");
+    const [user] = await database.select({ id: users.id, email: users.email }).from(users)
+      .where(and(eq(users.email, input.email), eq(users.isActive, true), gt(users.emailVerifiedAt, new Date(0)))).limit(1);
+    if (user) {
+      const otp = await database.transaction(async (tx) => {
+        await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for("update");
+        const [latest] = await tx.select({ createdAt: authTokens.createdAt }).from(authTokens)
+          .where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP")))
+          .orderBy(desc(authTokens.createdAt)).limit(1);
+        if (latest && latest.createdAt.getTime() > Date.now() - 60_000) return null;
+        const issued = issueLoginOtp(user.id);
+        await tx.delete(authTokens).where(and(eq(authTokens.userId, user.id), eq(authTokens.purpose, "LOGIN_OTP"), isNull(authTokens.usedAt)));
+        await tx.insert(authTokens).values({ userId: user.id, purpose: "LOGIN_OTP", tokenHash: issued.tokenHash, expiresAt: issued.expiresAt, failedAttempts: 0 });
+        return issued.otp;
+      });
+      if (otp) { const brand = getEmailBrand(); await getEmailProvider(brand).send({ to: user.email, ...loginOtpEmail(brand, otp) }); }
+    }
+    return response.status(202).json({ message: "If the account is eligible, a sign-in code will be sent." });
+  } catch (error) { return next(error); }
 });
 
 router.post("/auth/logout", async (request, response, next) => {

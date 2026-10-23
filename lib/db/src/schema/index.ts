@@ -61,6 +61,7 @@ export const interestStatus = pgEnum("interest_status", [
 export const authTokenPurpose = pgEnum("auth_token_purpose", [
   "EMAIL_VERIFICATION",
   "PASSWORD_RESET",
+  "LOGIN_OTP",
 ]);
 export const enquiryStatus = pgEnum("enquiry_status", [
   "NEW",

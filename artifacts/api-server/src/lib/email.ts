@@ -87,6 +87,16 @@ export function verificationEmail(
   };
 }
 
+export function loginOtpEmail(brand: EmailBrand, otp: string): Omit<EmailMessage, "to"> {
+  const name = escapeHtml(brand.productName);
+  const safeOtp = escapeHtml(otp);
+  return {
+    subject: `Your ${brand.productName} sign-in code`,
+    text: `Your sign-in code is ${otp}. It expires in 5 minutes and can be used once. If you did not try to sign in, change your password and ignore this email.`,
+    html: `<h1>Your sign-in code</h1><p>Use this one-time code to sign in to ${name}:</p><p style="font-size:28px;font-weight:700;letter-spacing:0.22em">${safeOtp}</p><p>This code expires in 5 minutes and can be used once. If you did not try to sign in, change your password.</p>`,
+  };
+}
+
 export function welcomeEmail(brand: EmailBrand): Omit<EmailMessage, "to"> {
   const name = escapeHtml(brand.productName);
   const signInUrl = `${brand.appUrl}/platform/live`;

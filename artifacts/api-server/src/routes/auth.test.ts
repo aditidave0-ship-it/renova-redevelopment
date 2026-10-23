@@ -19,6 +19,8 @@ test("the complete verification and password recovery API surface is registered"
     "/auth/forgot-password",
     "/auth/reset-password",
     "/auth/login",
+    "/auth/verify-login",
+    "/auth/resend-login-otp",
     "/auth/logout",
     "/auth/me",
   ])
