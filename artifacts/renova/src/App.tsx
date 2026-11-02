@@ -1,6 +1,8 @@
 import { RenovaHome } from "./experience/Home";
 import { ExperienceFooter, ExperienceHeader } from "./experience/Header";
 import { ContactPage } from "./experience/ContactForm";
+import { PrivacyPage } from "./experience/PrivacyPages";
+import { sendRequirementEnquiry } from "./experience/requirement-enquiry";
 import {
   lazy,
   Suspense,
@@ -856,12 +858,11 @@ const requirementServices = [
 function Assessment() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
   const [submitted, setSubmitted] = useState<{
     reference: string;
     status: string;
     nextStep: string;
-    projectId?: string;
-    demo?: boolean;
   } | null>(null);
   const [form, setForm] = useState({
     societyName: "",
@@ -913,7 +914,7 @@ function Assessment() {
               form.email.includes("@") &&
               form.consent,
             );
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!canContinue) return;
     const data = {
@@ -933,44 +934,28 @@ function Assessment() {
       contactRole: form.contactRole,
       phone: form.phone.trim(),
       email: form.email.trim(),
-      consent: form.consent,
     };
     setIsSubmitting(true);
-    fetch("/api/requirements", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error("Live requirement intake is not connected yet.");
-        return response.json() as Promise<{
-          reference: string;
-          status: string;
-          nextStep: string;
-          projectId?: string;
-        }>;
-      })
-      .then((result) => setSubmitted(result))
-      .catch(() => {
-        const reference = `RNV-DEMO-${String(Date.now()).slice(-6)}`;
-        localStorage.setItem(
-          "renova:last-requirement",
-          JSON.stringify({
-            ...data,
-            reference,
-            savedAt: new Date().toISOString(),
-          }),
-        );
-        setSubmitted({
-          reference,
-          status: "Saved on this device",
-          nextStep:
-            "Connect the production database to route this requirement into RENOVA’s review queue.",
-          demo: true,
-        });
-      })
-      .finally(() => setIsSubmitting(false));
+    setSubmissionError("");
+    try {
+      const reference = await sendRequirementEnquiry({
+        ...data,
+        consent: form.consent,
+      });
+      setSubmitted({
+        reference,
+        status: "Received by RENOVA",
+        nextStep: "The RENOVA team will review your enquiry and respond.",
+      });
+    } catch (cause) {
+      setSubmissionError(
+        cause instanceof Error
+          ? `Your enquiry was not submitted. ${cause.message}`
+          : "Your enquiry was not submitted. Submissions are temporarily unavailable; please try again later.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted)
@@ -1010,16 +995,6 @@ function Assessment() {
             <strong>{submitted.nextStep}</strong>
           </div>
         </div>
-        {submitted.demo && (
-          <div className="demo-mode-note">
-            <CircleHelp size={17} />
-            <span>
-              This submission is saved locally for the investor-ready
-              demonstration. The live-data phase will add the production review
-              queue and notifications.
-            </span>
-          </div>
-        )}
         <div className="success-actions">
           <Link href="/" className="button button-outline">
             <ArrowLeft size={16} /> RENOVA home
@@ -1388,16 +1363,28 @@ function Assessment() {
               </div>
               <label className="consent-row">
                 <input
+                  required
                   type="checkbox"
                   checked={form.consent}
                   onChange={(event) => update("consent", event.target.checked)}
                 />
                 <span>
-                  I confirm that I am authorised to submit this requirement and
-                  agree to be contacted by RENOVA about it.
+                  I agree that RENOVA may use these details to respond to this
+                  society redevelopment enquiry. RENOVA staff handling
+                  enquiries can access them. <Link href="/privacy">Read the
+                  Privacy Notice</Link>.
                 </span>
               </label>
             </div>
+          )}
+          {submissionError && (
+            <p
+              className="form-error"
+              role="alert"
+              data-testid="requirement-submit-error"
+            >
+              {submissionError}
+            </p>
           )}
           <div className="form-actions requirement-form-actions">
             {step > 1 ? (
@@ -4314,6 +4301,9 @@ function Router() {
     );
   if (pathname === "/ecosystem") return <EcosystemDirectory />;
   if (pathname === "/contact") return <ContactPage />;
+  if (pathname === "/privacy") return <PrivacyPage page="privacy" />;
+  if (pathname === "/terms") return <PrivacyPage page="terms" />;
+  if (pathname === "/grievance") return <PrivacyPage page="grievance" />;
   if (pathname === "/knowledge-centre/faqs") return <FaqPage />;
   if (pathname === "/regulations")
     return (

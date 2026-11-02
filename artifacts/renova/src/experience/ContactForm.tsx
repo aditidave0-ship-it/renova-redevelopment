@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Link } from "wouter";
 import { ExperienceHeader, ExperienceFooter } from "./Header";
 export function ContactForm() {
   const [busy, setBusy] = useState(false),
@@ -151,8 +152,13 @@ export function ContactForm() {
         />
       </label>
       <label className="experience-consent">
-        <input name="consent" type="checkbox" required />I agree that RENOVA may
-        contact me about this enquiry.
+        <input name="consent" type="checkbox" required />
+        <span>
+          I agree that RENOVA may use these details to respond to this enquiry.
+          RENOVA staff handling enquiries can access them. <Link href="/privacy">
+            Read the Privacy Notice
+          </Link>.
+        </span>
       </label>
       {error && (
         <p role="alert" className="experience-error">

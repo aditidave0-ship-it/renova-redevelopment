@@ -156,6 +156,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [adultConfirmed, setAdultConfirmed] = useState(false);
 
   const [verificationEmailAddress, setVerificationEmailAddress] = useState("");
   useEffect(() => {
@@ -170,6 +171,10 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (mode === "register" && !adultConfirmed) {
+      setError("Confirm that you are 18 or older to continue.");
+      return;
+    }
     setBusy(true);
     setError("");
     setNotice("");
@@ -376,6 +381,16 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             <Field label="Location">
               <input name="location" maxLength={160} placeholder="Mumbai" />
             </Field>
+            <label className="live-check">
+              <input
+                type="checkbox"
+                name="adultConfirmed"
+                required
+                checked={adultConfirmed}
+                onChange={(event) => setAdultConfirmed(event.target.checked)}
+              />
+              <span>I confirm that I am 18 years of age or older.</span>
+            </label>
           </>
         )}
         {mode !== "reset" && mode !== "verify" && mode !== "roles" && (
