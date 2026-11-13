@@ -57,7 +57,6 @@ export function ExperienceFooter() {
         <Link href="/" className="experience-brand">
           {BRAND_NAME}
         </Link>
-        <p>A clearer path to redevelopment.</p>
       </div>
       <nav aria-label="Footer navigation">
         <Link href="/ecosystem">Explore the ecosystem</Link>
