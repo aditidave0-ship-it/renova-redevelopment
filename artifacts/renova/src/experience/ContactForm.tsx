@@ -47,11 +47,11 @@ export function ContactForm() {
     return (
       <div className="experience-confirmation" role="status">
         <CheckCircle2 size={32} />
-        <h3>Your enquiry is with RENOVA.</h3>
+        <h3>Your enquiry is with NIRMAQ.</h3>
         <p>
           Reference: <strong>{reference}</strong>. Keep this for your records.
         </p>
-        <p>Your request has been saved for the RENOVA team to review.</p>
+        <p>Your request has been saved for the NIRMAQ team to review.</p>
         <button className="experience-button" onClick={() => setReference("")}>
           Send another enquiry
         </button>
@@ -154,8 +154,8 @@ export function ContactForm() {
       <label className="experience-consent">
         <input name="consent" type="checkbox" required />
         <span>
-          I agree that RENOVA may use these details to respond to this enquiry.
-          RENOVA staff handling enquiries can access them. <Link href="/privacy">
+          I agree that NIRMAQ may use these details to respond to this enquiry.
+          NIRMAQ staff handling enquiries can access them. <Link href="/privacy">
             Read the Privacy Notice
           </Link>.
         </span>
@@ -182,7 +182,7 @@ export function ContactPage() {
       >
         <span className="experience-eyebrow">LET’S TALK</span>
         <h1>Start with a conversation.</h1>
-        <p>Ask about feasibility, your organization, or the RENOVA platform.</p>
+        <p>Ask about feasibility, your organization, or the NIRMAQ platform.</p>
         <ContactForm />
       </main>
       <ExperienceFooter />
