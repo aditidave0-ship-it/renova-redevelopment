@@ -77,7 +77,7 @@ const roleNavigation: Record<PlatformRole, Array<{ label: string; icon: typeof H
 };
 
 function PlatformMark() {
-  return <Link href="/" className="platform-brand" aria-label={`${BRAND_NAME} home`}><span>R</span><div><strong>{BRAND_NAME}</strong><small>Digital infrastructure for redevelopment</small></div></Link>;
+  return <Link href="/" className="platform-brand" aria-label={`${BRAND_NAME} home`}><span>N</span><div><strong>{BRAND_NAME}</strong><small>Digital infrastructure for redevelopment</small></div></Link>;
 }
 
 function DemoBadge() {

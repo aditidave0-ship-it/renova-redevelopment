@@ -163,7 +163,7 @@ export function OpportunityEditor({
             include the draft workflow. Your saved record is retained.
           </p>
           <Link href="/contact?subject=Opportunity%20draft">
-            Contact RENOVA →
+            Contact NIRMAQ →
           </Link>
         </div>
       )}

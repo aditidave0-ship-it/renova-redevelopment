@@ -418,7 +418,7 @@ export function SocietyFeasibility() {
         <h2>Get Your Society Feasibility</h2>
         <p>
           Understand the redevelopment potential of your society before taking
-          the next step. RENOVA structures the information for professional
+          the next step. NIRMAQ structures the information for professional
           review; it does not generate unverified regulatory or financial
           conclusions.
         </p>
@@ -622,7 +622,7 @@ export function SocietyFeasibility() {
                     Optional documents such as approved plans, a property card,
                     conveyance records or survey material can help an authorized
                     reviewer understand the property. They remain private to
-                    your Society and authorized RENOVA reviewers.
+                    your Society and authorized NIRMAQ reviewers.
                   </p>
                   {uploadsEnabled ? (
                     <form onSubmit={uploadDocument}>
@@ -702,7 +702,7 @@ export function SocietyFeasibility() {
                   <div className="feasibility-guardrail">
                     <strong>Professional review required</strong>
                     <p>
-                      RENOVA will not invent FSI, TDR, permissible height, rehab
+                      NIRMAQ will not invent FSI, TDR, permissible height, rehab
                       or sale area, cost, corpus, rent, entitlement, profit,
                       project value, premiums, or regulatory eligibility.
                     </p>
