@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { authTokens, authRateLimits, db, users } from "./database";
 import {
   REGISTRATION_PARTICIPANTS,
   registrationIdentity,
 } from "../src/lib/role-policy";
 import { hashPassword } from "../src/lib/session";
-import { issueAuthToken, issueEmailOtp } from "../src/lib/auth-tokens";
+import {
+  issueAuthToken,
+  issueEmailOtp,
+  issueLoginOtp,
+} from "../src/lib/auth-tokens";
 
 // Isolated route/database acceptance only. Intercept the external email provider,
 // never authentication or database responses, and never send test emails out.
@@ -42,18 +46,28 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     }
     return nativeFetch(input, init);
   };
-  const request = (path: string, body: unknown, controlled = false) =>
+  const request = (
+    path: string,
+    body: unknown,
+    controlled = false,
+    cookie = "",
+    method = "POST",
+  ) =>
     nativeFetch(origin + "/api" + path, {
-      method: "POST",
+      method,
       headers: {
         "content-type": "application/json",
+        ...(cookie ? { cookie } : {}),
         ...(controlled
           ? { "x-renova-registration-test": "TEST-ONLY-local-registration" }
           : {}),
       },
       body: JSON.stringify(body),
     });
-  function deliveredToken(email: string, purpose: "verify" | "reset"): string {
+  function deliveredToken(
+    email: string,
+    purpose: "verify" | "reset" | "login",
+  ): string {
     const message = [...sent]
       .reverse()
       .find(
@@ -61,18 +75,56 @@ export async function testAuthDelivery(origin: string): Promise<number> {
           row.to.includes(email) &&
           (purpose === "verify"
             ? /verification code is \d{6}/.test(row.text)
-            : row.text.includes("#reset=")),
+            : purpose === "login"
+              ? /sign-in code is \d{6}/.test(row.text)
+              : row.text.includes("#reset=")),
       );
     assert.ok(message, "isolated provider must receive the intended template");
     checks++;
     if (purpose === "verify")
       return message.text.match(/verification code is (\d{6})/)![1];
+    if (purpose === "login")
+      return message.text.match(/sign-in code is (\d{6})/)![1];
     const link = message.text.match(/https:\/\/\S+/)?.[0];
     assert.ok(link);
     checks++;
     assert.equal(new URL(link).origin, "https://qa.example.invalid");
     checks++;
     return decodeURIComponent(new URL(link).hash.slice(purpose.length + 2));
+  }
+  async function loginWithOtp(email: string, password: string) {
+    await db.delete(authRateLimits);
+    const initiated = await request("/auth/login", { email, password });
+    assert.equal(initiated.status, 202);
+    checks++;
+    assert.equal(
+      initiated.headers.get("set-cookie"),
+      null,
+      "password verification alone must not create a session",
+    );
+    checks++;
+    const otp = deliveredToken(email, "login");
+    const wrongOtp = otp === "000000" ? "000001" : "000000";
+    assert.equal(
+      (await request("/auth/verify-login", { email, otp: wrongOtp })).status,
+      400,
+    );
+    checks++;
+    const verified = await request("/auth/verify-login", { email, otp });
+    assert.equal(verified.status, 200);
+    checks++;
+    assert.ok(
+      verified.headers.get("set-cookie"),
+      "a session is created after OTP verification",
+    );
+    checks++;
+    assert.equal(
+      (await request("/auth/verify-login", { email, otp })).status,
+      400,
+      "a consumed OTP cannot be replayed",
+    );
+    checks++;
+    return verified;
   }
   try {
     process.env.NODE_ENV = "production";
@@ -117,7 +169,11 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     checks++;
     process.env.RENOVA_APP_URL = "https://qa.example.invalid";
 
+    let resetUserCookie = "";
     for (const role of REGISTRATION_PARTICIPANTS) {
+      // Keep the intentional IP-wide production limit from coupling separate
+      // test accounts; the isolated request still exercises account limits.
+      await db.delete(authRateLimits);
       const email = `controlled-${role.toLowerCase()}@example.invalid`;
       const registration = await request(
         "/auth/register",
@@ -172,11 +228,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
         409,
       );
       checks++;
-      const login = await request("/auth/login", {
-        email,
-        password: "test-password-valid",
-      });
-      assert.equal(login.status, 200);
+      const login = await loginWithOtp(email, "test-password-valid");
       checks++;
       const sessionHeader = login.headers.get("set-cookie") ?? "";
       for (const attribute of ["HttpOnly", "Secure", "SameSite=Lax"]) {
@@ -191,7 +243,253 @@ export async function testAuthDelivery(origin: string): Promise<number> {
         registrationIdentity(role).role,
       );
       checks++;
+      const sessionCookie = (login.headers.get("set-cookie") ?? "").split(
+        ";",
+      )[0];
+      if (role === "SOCIETY") {
+        assert.equal(
+          (await request("/auth/me", undefined, false, sessionCookie, "GET"))
+            .status,
+          200,
+        );
+        checks++;
+        assert.equal(
+          (await request("/auth/logout", undefined, false, sessionCookie))
+            .status,
+          204,
+        );
+        checks++;
+        assert.equal(
+          (await request("/auth/me", undefined, false, sessionCookie, "GET"))
+            .status,
+          401,
+        );
+        checks++;
+      }
+      if (role === "PMC") resetUserCookie = sessionCookie;
+      const deliveredCount = sent.length;
+      assert.equal(
+        (await request("/auth/resend-login-otp", { email })).status,
+        202,
+      );
+      checks++;
+      assert.equal(
+        sent.length,
+        deliveredCount,
+        "resend cooldown does not send a second code",
+      );
+      checks++;
+      const [verifiedUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
+      await db
+        .delete(authTokens)
+        .where(
+          and(
+            eq(authTokens.userId, verifiedUser.id),
+            eq(authTokens.purpose, "LOGIN_OTP"),
+          ),
+        );
     }
+
+    const [expiredUser] = await db
+      .insert(users)
+      .values({
+        email: "expired-login-otp@example.invalid",
+        displayName: "TEST ONLY expired login OTP",
+        role: "SOCIETY",
+        passwordHash: hashPassword("test-password-valid"),
+        isActive: true,
+        emailVerifiedAt: new Date(),
+      })
+      .returning();
+    const expiredLogin = issueLoginOtp(
+      expiredUser.id,
+      new Date(Date.now() - 6 * 60_000),
+    );
+    await db.insert(authTokens).values({
+      userId: expiredUser.id,
+      purpose: "LOGIN_OTP",
+      tokenHash: expiredLogin.tokenHash,
+      expiresAt: expiredLogin.expiresAt,
+      failedAttempts: 0,
+    });
+    assert.equal(
+      (
+        await request("/auth/verify-login", {
+          email: expiredUser.email,
+          otp: expiredLogin.otp,
+        })
+      ).status,
+      400,
+      "expired login OTPs are rejected",
+    );
+    checks++;
+    const attemptLogin = issueLoginOtp(expiredUser.id);
+    await db.insert(authTokens).values({
+      userId: expiredUser.id,
+      purpose: "LOGIN_OTP",
+      tokenHash: attemptLogin.tokenHash,
+      expiresAt: attemptLogin.expiresAt,
+      failedAttempts: 0,
+    });
+    const wrongOtp = attemptLogin.otp === "000000" ? "000001" : "000000";
+    for (let attempt = 0; attempt < 6; attempt++) {
+      assert.equal(
+        (
+          await request("/auth/verify-login", {
+            email: expiredUser.email,
+            otp: wrongOtp,
+          })
+        ).status,
+        400,
+      );
+      checks++;
+    }
+    const [attemptRecord] = await db
+      .select()
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.userId, expiredUser.id),
+          eq(authTokens.purpose, "LOGIN_OTP"),
+        ),
+      )
+      .orderBy(desc(authTokens.createdAt))
+      .limit(1);
+    assert.equal(
+      attemptRecord.failedAttempts,
+      5,
+      "login OTP attempts stop at the configured maximum",
+    );
+    checks++;
+    assert.equal(
+      (
+        await request("/auth/verify-login", {
+          email: expiredUser.email,
+          otp: attemptLogin.otp,
+        })
+      ).status,
+      400,
+    );
+    checks++;
+
+    await db.delete(authRateLimits);
+    const badPasswords = await Promise.all(
+      Array.from({ length: 11 }, () =>
+        request("/auth/login", {
+          email: expiredUser.email,
+          password: "incorrect-test-password",
+        }),
+      ),
+    );
+    assert.deepEqual(
+      badPasswords.map((response) => response.status),
+      [...Array(10).fill(401), 429],
+    );
+    checks++;
+
+    await db.delete(authRateLimits);
+    const [resendUser] = await db
+      .insert(users)
+      .values({
+        email: "login-resend@example.invalid",
+        displayName: "TEST ONLY login resend",
+        role: "SOCIETY",
+        passwordHash: hashPassword("test-password-valid"),
+        isActive: true,
+        emailVerifiedAt: new Date(),
+      })
+      .returning();
+    const sentBeforeUnauthorizedResend = sent.length;
+    assert.equal(
+      (await request("/auth/resend-login-otp", { email: resendUser.email }))
+        .status,
+      202,
+    );
+    checks++;
+    assert.equal(sent.length, sentBeforeUnauthorizedResend);
+    checks++;
+    assert.equal(
+      (
+        await db
+          .select()
+          .from(authTokens)
+          .where(
+            and(
+              eq(authTokens.userId, resendUser.id),
+              eq(authTokens.purpose, "LOGIN_OTP"),
+            ),
+          )
+      ).length,
+      0,
+    );
+    checks++;
+    await db.delete(authRateLimits);
+    assert.equal(
+      (
+        await request("/auth/login", {
+          email: resendUser.email,
+          password: "test-password-valid",
+        })
+      ).status,
+      202,
+    );
+    checks++;
+    const originalLoginCode = deliveredToken(resendUser.email, "login");
+    const [originalLoginToken] = await db
+      .select()
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.userId, resendUser.id),
+          eq(authTokens.purpose, "LOGIN_OTP"),
+          isNull(authTokens.usedAt),
+        ),
+      );
+    const sentBeforeCooldownResend = sent.length;
+    assert.equal(
+      (await request("/auth/resend-login-otp", { email: resendUser.email }))
+        .status,
+      202,
+    );
+    checks++;
+    assert.equal(sent.length, sentBeforeCooldownResend);
+    checks++;
+    await db
+      .update(authTokens)
+      .set({ createdAt: new Date(Date.now() - 61_000) })
+      .where(eq(authTokens.id, originalLoginToken.id));
+    assert.equal(
+      (await request("/auth/resend-login-otp", { email: resendUser.email }))
+        .status,
+      202,
+    );
+    checks++;
+    assert.equal(sent.length, sentBeforeCooldownResend + 1);
+    checks++;
+    const resentLoginCode = deliveredToken(resendUser.email, "login");
+    if (resentLoginCode !== originalLoginCode) {
+      assert.equal(
+        (
+          await request("/auth/verify-login", {
+            email: resendUser.email,
+            otp: originalLoginCode,
+          })
+        ).status,
+        400,
+      );
+      checks++;
+    }
+    const resentLogin = await request("/auth/verify-login", {
+      email: resendUser.email,
+      otp: resentLoginCode,
+    });
+    assert.equal(resentLogin.status, 200);
+    checks++;
+    assert.ok(resentLogin.headers.get("set-cookie"));
+    checks++;
 
     const [pending] = await db
       .insert(users)
@@ -359,6 +657,13 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     );
     checks++;
     assert.equal(
+      (await request("/auth/me", undefined, false, resetUserCookie, "GET"))
+        .status,
+      401,
+      "password reset invalidates existing sessions",
+    );
+    checks++;
+    assert.equal(
       (
         await request("/auth/login", {
           email: resetEmail,
@@ -369,12 +674,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
     );
     checks++;
     assert.equal(
-      (
-        await request("/auth/login", {
-          email: resetEmail,
-          password: "test-reset-password",
-        })
-      ).status,
+      (await loginWithOtp(resetEmail, "test-reset-password")).status,
       200,
     );
     checks++;

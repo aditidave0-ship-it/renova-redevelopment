@@ -6,11 +6,12 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-export type AuthTokenPurpose = "EMAIL_VERIFICATION" | "PASSWORD_RESET";
+export type AuthTokenPurpose = "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "LOGIN_OTP";
 
 const TOKEN_LIFETIME_MS: Record<AuthTokenPurpose, number> = {
   EMAIL_VERIFICATION: 10 * 60 * 1000,
   PASSWORD_RESET: 60 * 60 * 1000,
+  LOGIN_OTP: 5 * 60 * 1000,
 };
 
 export const EMAIL_OTP_MAX_ATTEMPTS = 5;
@@ -68,6 +69,21 @@ export function verifyEmailOtpHash(
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
+export function hashLoginOtp(userId: string, otp: string, secret = otpSecret()): string {
+  return createHmac("sha256", secret).update(`LOGIN_OTP:${userId}:${otp}`).digest("hex");
+}
+
+export function issueLoginOtp(userId: string, now = new Date(), secret = otpSecret()) {
+  const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
+  return { otp, tokenHash: hashLoginOtp(userId, otp, secret), expiresAt: new Date(now.getTime() + TOKEN_LIFETIME_MS.LOGIN_OTP) };
+}
+
+export function verifyLoginOtpHash(userId: string, otp: string, expectedHash: string, secret = otpSecret()): boolean {
+  const actual = Buffer.from(hashLoginOtp(userId, otp, secret), "hex");
+  const expected = Buffer.from(expectedHash, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
 export function hashAuthToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -95,7 +111,7 @@ export function isUsableAuthToken(
     token.purpose === expectedPurpose &&
     token.usedAt === null &&
     token.expiresAt.getTime() > now.getTime() &&
-    (expectedPurpose !== "EMAIL_VERIFICATION" ||
+    (!(expectedPurpose === "EMAIL_VERIFICATION" || expectedPurpose === "LOGIN_OTP") ||
       (token.failedAttempts ?? 0) < EMAIL_OTP_MAX_ATTEMPTS)
   );
 }

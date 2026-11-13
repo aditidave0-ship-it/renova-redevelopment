@@ -35,8 +35,23 @@ import emailJobsRouter from "../src/routes/email-jobs";
 import { testAuthDelivery } from "./auth-delivery";
 
 const previousOtpSecret = process.env.RENOVA_AUTH_TOKEN_SECRET;
+const previousEmailConfig = Object.fromEntries(
+  ["RENOVA_EMAIL_PROVIDER", "RESEND_API_KEY", "RENOVA_EMAIL_FROM", "RENOVA_APP_URL"].map((key) => [key, process.env[key]]),
+);
+const nativeFetch = globalThis.fetch;
+const loginCodes = new Map<string, string>();
 process.env.RENOVA_AUTH_TOKEN_SECRET =
   "TEST-ONLY-otp-secret-at-least-thirty-two-characters";
+globalThis.fetch = async (input, init) => {
+  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  if (url === "https://api.resend.com/emails") {
+    const message = JSON.parse(String(init?.body));
+    const otp = String(message.text).match(/sign-in code is (\d{6})/)?.[1];
+    if (otp && Array.isArray(message.to)) loginCodes.set(message.to[0], otp);
+    return Response.json({ id: "TEST-ONLY-captured-email" });
+  }
+  return nativeFetch(input, init);
+};
 const journal = JSON.parse(
   await readFile("../../lib/db/drizzle/meta/_journal.json", "utf8"),
 );
@@ -87,6 +102,38 @@ async function request(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
+async function loginRequest(email: string, password: string) {
+  const keys = ["RENOVA_EMAIL_PROVIDER", "RESEND_API_KEY", "RENOVA_EMAIL_FROM", "RENOVA_APP_URL"];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  Object.assign(process.env, {
+    RENOVA_EMAIL_PROVIDER: "resend",
+    RESEND_API_KEY: "TEST-ONLY-intercepted-no-delivery",
+    RENOVA_EMAIL_FROM: "TEST ONLY <sandbox@example.invalid>",
+    RENOVA_APP_URL: "https://qa.example.invalid",
+  });
+  try {
+    return await request("/auth/login", "POST", "", { email, password });
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+async function loginWithOtp(email: string, password: string) {
+  const initiated = await loginRequest(email, password);
+  assert.equal(initiated.status, 202);
+  checks++;
+  assert.equal(initiated.headers.get("set-cookie"), null);
+  checks++;
+  const otp = loginCodes.get(email);
+  assert.ok(otp, "test provider must privately capture the login OTP");
+  checks++;
+  const verified = await request("/auth/verify-login", "POST", "", { email, otp });
+  assert.equal(verified.status, 200);
+  checks++;
+  return verified;
+}
 async function account(
   role: "SOCIETY" | "DEVELOPER" | "PMC" | "PROFESSIONAL",
   n: number,
@@ -110,12 +157,7 @@ async function account(
     .values({ userId: user.id, organizationId: org.id });
   if (role === "SOCIETY")
     await db.insert(societies).values({ organizationId: org.id });
-  const response = await request("/auth/login", "POST", "", {
-    email: user.email,
-    password: "old-password-test",
-  });
-  assert.equal(response.status, 200);
-  checks++;
+  const response = await loginWithOtp(user.email, "old-password-test");
   return {
     user,
     org,
@@ -234,12 +276,7 @@ try {
   assert.equal((await request("/auth/me", "GET", a.cookie)).status, 401);
   checks++;
   assert.equal(
-    (
-      await request("/auth/login", "POST", "", {
-        email: a.user.email,
-        password: "old-password-test",
-      })
-    ).status,
+    (await loginRequest(a.user.email, "old-password-test")).status,
     401,
   );
   checks++;
@@ -267,12 +304,7 @@ try {
   );
   assert.equal((await request("/auth/me", "GET", staleCookie)).status, 401);
   checks++;
-  const currentLogin = await request("/auth/login", "POST", "", {
-    email: a.user.email,
-    password: "new-password-test",
-  });
-  assert.equal(currentLogin.status, 200);
-  checks++;
+  const currentLogin = await loginWithOtp(a.user.email, "new-password-test");
   a.cookie = currentLogin.headers.get("set-cookie")!.split(";")[0];
   const [updated] = await db
     .select()
@@ -853,10 +885,7 @@ try {
     checks++;
   }
   // Multiple existing sessions are invalidated; fresh credentials can log in afterward.
-  const second = await request("/auth/login", "POST", "", {
-    email: dev.user.email,
-    password: "old-password-test",
-  });
+  const second = await loginWithOtp(dev.user.email, "old-password-test");
   const secondCookie = second.headers.get("set-cookie")!.split(";")[0];
   const concurrentToken = issueAuthToken("PASSWORD_RESET");
   await db.insert(authTokens).values({
@@ -865,36 +894,32 @@ try {
     tokenHash: concurrentToken.tokenHash,
     expiresAt: concurrentToken.expiresAt,
   });
-  const [duringLogin, duringReset] = await Promise.all([
-    request("/auth/login", "POST", "", {
-      email: dev.user.email,
-      password: "old-password-test",
-    }),
-    request("/auth/reset-password", "POST", "", {
-      token: concurrentToken.token,
-      password: "concurrent-new-password",
-    }),
-  ]);
+  const duringLogin = await loginRequest(dev.user.email, "old-password-test");
+  const duringReset = await request("/auth/reset-password", "POST", "", {
+    token: concurrentToken.token,
+    password: "concurrent-new-password",
+  });
   assert.equal(duringReset.status, 200);
+  checks++;
+  assert.equal(duringLogin.status, 202, "password verification returns an OTP challenge, never a session");
+  checks++;
+  const racedOtp = loginCodes.get(dev.user.email);
+  assert.ok(racedOtp);
+  checks++;
+  assert.equal(
+    (await request("/auth/verify-login", "POST", "", { email: dev.user.email, otp: racedOtp })).status,
+    400,
+    "a password reset invalidates an OTP issued by a concurrent pre-reset login",
+  );
   checks++;
   for (const cookie of [
     dev.cookie,
     secondCookie,
-    duringLogin.headers.get("set-cookie")?.split(";")[0],
   ].filter(Boolean)) {
     assert.equal((await request("/auth/me", "GET", cookie!)).status, 401);
     checks++;
   }
-  assert.equal(
-    (
-      await request("/auth/login", "POST", "", {
-        email: dev.user.email,
-        password: "concurrent-new-password",
-      })
-    ).status,
-    200,
-  );
-  checks++;
+  await loginWithOtp(dev.user.email, "concurrent-new-password");
   for (const role of ["SOCIETY", "DEVELOPER", "PMC"] as const) {
     const [unverified] = await db
       .insert(users)
@@ -906,15 +931,7 @@ try {
         isActive: false,
       })
       .returning();
-    assert.equal(
-      (
-        await request("/auth/login", "POST", "", {
-          email: unverified.email,
-          password: "verification-password",
-        })
-      ).status,
-      401,
-    );
+    assert.equal((await loginRequest(unverified.email, "verification-password")).status, 401);
     checks++;
     const verification = issueEmailOtp(unverified.id);
     let legacyCookie = "";
@@ -956,16 +973,7 @@ try {
       400,
     );
     checks++;
-    assert.equal(
-      (
-        await request("/auth/login", "POST", "", {
-          email: unverified.email,
-          password: "verification-password",
-        })
-      ).status,
-      200,
-    );
-    checks++;
+    await loginWithOtp(unverified.email, "verification-password");
   }
   const disabled = await account("DEVELOPER", 42);
   await db
@@ -998,15 +1006,7 @@ try {
   checks++;
   assert.equal((await request("/auth/me", "GET", disabled.cookie)).status, 401);
   checks++;
-  assert.equal(
-    (
-      await request("/auth/login", "POST", "", {
-        email: disabled.user.email,
-        password: "old-password-test",
-      })
-    ).status,
-    401,
-  );
+  assert.equal((await loginRequest(disabled.user.email, "old-password-test")).status, 401);
   checks++;
   checks += await testAuthDelivery(origin);
   const concurrentEnquiries = await Promise.all(
@@ -1077,4 +1077,9 @@ try {
   if (previousOtpSecret === undefined)
     delete process.env.RENOVA_AUTH_TOKEN_SECRET;
   else process.env.RENOVA_AUTH_TOKEN_SECRET = previousOtpSecret;
+  globalThis.fetch = nativeFetch;
+  for (const [key, value] of Object.entries(previousEmailConfig)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 }

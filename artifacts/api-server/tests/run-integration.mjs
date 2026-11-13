@@ -40,7 +40,7 @@ try {
   await symlink(
     resolve("node_modules"),
     resolve(folder, "node_modules"),
-    "dir",
+    process.platform === "win32" ? "junction" : "dir",
   );
   await import(pathToFileURL(outfile).href);
 } finally {
