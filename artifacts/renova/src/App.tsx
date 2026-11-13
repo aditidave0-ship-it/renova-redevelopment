@@ -1,5 +1,5 @@
 import { RenovaHome } from "./experience/Home";
-import { BRAND_NAME } from "./brand";
+import { BRAND_NAME, CONTACT_EMAIL } from "./brand";
 import { ExperienceFooter, ExperienceHeader } from "./experience/Header";
 import { ContactPage } from "./experience/ContactForm";
 import { PrivacyPage } from "./experience/PrivacyPages";
@@ -3361,6 +3361,9 @@ function ProjectsDirectory() {
           <Link href="/contact">Contact</Link>
         </div>
         <small>© {new Date().getFullYear()} NIRMAQ · Mumbai</small>
+        <p>
+          Email us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+        </p>
       </footer>
     </div>
   );
@@ -3404,6 +3407,9 @@ function EcosystemFooter() {
         <Link href="/contact">Contact</Link>
       </div>
       <small>© {new Date().getFullYear()} NIRMAQ · Mumbai</small>
+      <p>
+        Email us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </p>
     </footer>
   );
 }

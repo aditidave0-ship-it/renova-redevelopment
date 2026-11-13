@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { BRAND_NAME } from "../brand";
+import { BRAND_NAME, CONTACT_EMAIL } from "../brand";
 import { ArrowRight, Menu, X } from "lucide-react";
 import "./experience.css";
 export function ExperienceHeader() {
@@ -67,6 +67,9 @@ export function ExperienceFooter() {
         <Link href="/grievance">Grievance contact</Link>
         <Link href="/platform/live?mode=login">Account login</Link>
       </nav>
+      <p>
+        Email us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </p>
       <p>
         NIRMAQ connects participants. Public profiles are not endorsements or
         verified registrations.
