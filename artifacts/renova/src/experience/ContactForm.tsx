@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
+import { CONTACT_EMAIL } from "../brand";
 import { ExperienceHeader, ExperienceFooter } from "./Header";
 export function ContactForm() {
   const [busy, setBusy] = useState(false),
@@ -169,6 +170,10 @@ export function ContactForm() {
         {busy ? "Sending enquiry…" : "Send enquiry"}
         <ArrowRight size={17} />
       </button>
+      <p>
+        Prefer email? Write to us at{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
     </form>
   );
 }
