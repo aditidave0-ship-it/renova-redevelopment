@@ -259,10 +259,10 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
   return (
     <section className="live-panel live-auth">
       <div className="live-panel-intro">
-        <span>RENOVA account</span>
+        <span>NIRMAQ account</span>
         <h2>
           {mode === "roles"
-            ? "How will you use RENOVA?"
+            ? "How will you use NIRMAQ?"
             : mode === "register"
               ? "Create your account."
               : mode === "reset"
@@ -517,7 +517,7 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
         )}
       </form>
       <p className="live-note">
-        <ShieldCheck size={16} /> Organization profiles begin unverified. RENOVA
+        <ShieldCheck size={16} /> Organization profiles begin unverified. NIRMAQ
         does not endorse or rank registrants.
       </p>
     </section>
@@ -2012,7 +2012,7 @@ function UnavailableFeature({
         className="live-primary"
         href={`/contact?subject=${encodeURIComponent(title)}`}
       >
-        Contact RENOVA <ArrowRight size={16} />
+        Contact NIRMAQ <ArrowRight size={16} />
       </Link>
     </section>
   );
@@ -2233,7 +2233,7 @@ export function LiveWorkspace() {
         : account?.role === "PMC"
           ? "Partner in Better Redevelopment."
           : account?.role === "ADMIN"
-            ? "Manage the RENOVA intake."
+            ? "Manage the NIRMAQ intake."
             : "Bring your expertise to redevelopment.";
   const workspaceBody = !account ? null : view === "settings" ? (
     <section className="live-panel">
@@ -2267,7 +2267,7 @@ export function LiveWorkspace() {
     <section className="live-panel">
       <h2>Explore Developers & PMCs</h2>
       <p>
-        Discover public organization profiles. A public listing is not a RENOVA
+        Discover public organization profiles. A public listing is not a NIRMAQ
         verification or endorsement.
       </p>
       <Link className="live-primary" href="/ecosystem">
@@ -2279,7 +2279,7 @@ export function LiveWorkspace() {
       title={items.find((item) => item.id === view)?.title ?? "Feature"}
     >
       This feature is not implemented yet. No records are being stored or
-      implied here. You can contact the RENOVA team about your requirement.
+      implied here. You can contact the NIRMAQ team about your requirement.
     </UnavailableFeature>
   ) : view === "feasibility" &&
     (account.role === "SOCIETY" || account.role === "ADMIN") ? (
@@ -2312,7 +2312,7 @@ export function LiveWorkspace() {
     <div className="live-workspace workspace-experience">
       <header className="live-header">
         <Link href="/" className="live-logo">
-          RENOVA<small>MAKE NEW AGAIN</small>
+          NIRMAQ
         </Link>
         {account ? (
           <>
@@ -2500,7 +2500,7 @@ export function LiveWorkspace() {
           </Link>
         </nav>
       )}
-      <footer>RENOVA · A clearer path from opportunity to connection.</footer>
+      <footer>NIRMAQ · A clearer path from opportunity to connection.</footer>
     </div>
   );
 }
