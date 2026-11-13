@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import { BRAND_NAME } from '@/brand';
 import {
   Activity,
   ArrowLeft,
@@ -76,7 +77,7 @@ const roleNavigation: Record<PlatformRole, Array<{ label: string; icon: typeof H
 };
 
 function PlatformMark() {
-  return <Link href="/" className="platform-brand" aria-label="RENOVA home"><span>R</span><div><strong>RENOVA</strong><small>Digital infrastructure for redevelopment</small></div></Link>;
+  return <Link href="/" className="platform-brand" aria-label={`${BRAND_NAME} home`}><span>R</span><div><strong>{BRAND_NAME}</strong><small>Digital infrastructure for redevelopment</small></div></Link>;
 }
 
 function DemoBadge() {
@@ -91,12 +92,12 @@ function PlatformGateway() {
         <section className="platform-gateway-hero">
           <div className="platform-blueprint" aria-hidden="true" />
           <DemoBadge />
-          <p>RENOVA platform</p>
+          <p>{BRAND_NAME} platform</p>
           <h1>The digital infrastructure<br />for <em>redevelopment.</em></h1>
           <span>Discover opportunities. Connect stakeholders. Compare proposals. Manage the journey.</span>
           <div className="brief-gateway-action"><Link href="/platform/opportunities" className="platform-primary-button">Prepare a society opportunity <ArrowRight size={15} /></Link><p>Save a draft on your browser and download your brief.</p></div>
           {liveWorkspaceEnabled && <p><Link href="/platform/live" className="platform-secondary-button">Open account workspace <ArrowUpRight size={15} /></Link></p>}
-          <div className="platform-flow" aria-label="RENOVA platform workflow">
+          <div className="platform-flow" aria-label="NIRMAQ platform workflow">
             {['Discover', 'Verify', 'Connect', 'Opportunity', 'Proposal', 'Compare', 'Select', 'Collaborate', 'Track'].map((item, index) => <div key={item}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item}</strong>{index < 8 ? <ArrowRight size={14} /> : null}</div>)}
           </div>
         </section>
@@ -118,11 +119,11 @@ function PlatformGateway() {
           <div><p>One project · multiple stakeholder dashboards</p><h2>A shared source of truth, with controlled access.</h2><span>Project information, proposals, documents and activity remain associated with the redevelopment record—not scattered across inboxes.</span></div>
           <div className="platform-principle-visual">
             <span className="principle-project"><Building2 size={24} /><strong>ABC CHS Redevelopment</strong><small>Central project workspace</small></span>
-            {['Society', 'Developer', 'PMC', 'RENOVA'].map((role) => <span key={role}><LockKeyhole size={15} /> {role} view</span>)}
+            {['Society', 'Developer', 'PMC', 'NIRMAQ'].map((role) => <span key={role}><LockKeyhole size={15} /> {role} view</span>)}
           </div>
         </section>
       </main>
-      <footer><span>RENOVA product preview</span><span>No real organizations, offers or credentials are represented in this demo.</span></footer>
+      <footer><span>{BRAND_NAME} product preview</span><span>No real organizations, offers or credentials are represented in this demo.</span></footer>
     </div>
   );
 }
@@ -142,7 +143,7 @@ function PlatformShell({ role, children, active = 'Overview' }: { role: Platform
           {roleNavigation[role].map(({ label, icon: Icon }) => <button type="button" onClick={label === 'Opportunity drafts' ? () => setLocation('/platform/opportunities') : undefined} className={active === label ? 'active' : ''} key={label}><Icon size={17} /><span>{label}</span>{label === 'Messages' ? <i>2</i> : null}</button>)}
         </nav>
         <div className="platform-sidebar-project"><span><Building2 size={17} /></span><div><small>Active project</small><strong>ABC CHS Redevelopment</strong></div><ChevronRight size={15} /></div>
-        <div className="platform-sidebar-bottom"><Link href="/platform"><Compass size={16} /> Switch preview</Link><Link href="/"><Home size={16} /> RENOVA website</Link></div>
+        <div className="platform-sidebar-bottom"><Link href="/platform"><Compass size={16} /> Switch preview</Link><Link href="/"><Home size={16} /> {BRAND_NAME} website</Link></div>
       </aside>
       {mobileOpen ? <button className="platform-sidebar-overlay" onClick={() => setMobileOpen(false)} aria-label="Close navigation overlay" /> : null}
       <div className="platform-main">
@@ -205,7 +206,7 @@ function PmcDashboard() {
       <section className="platform-panel platform-review-board"><div className="platform-panel-heading"><div><p>Technical review</p><h2>ABC CHS proposal comparison</h2></div><span className="platform-status"><i /> In progress</span></div><div className="platform-review-progress"><div><span>Standard fields mapped</span><strong>7 / 7</strong></div><i><span style={{ width: '100%' }} /></i><div><span>Clarifications resolved</span><strong>2 / 5</strong></div><i><span style={{ width: '40%' }} /></i><div><span>Supporting evidence reviewed</span><strong>6 / 9</strong></div><i><span style={{ width: '67%' }} /></i></div><ProjectLink role="pmc" label="Continue technical review" /></section>
       <section className="platform-panel platform-next-actions"><div className="platform-panel-heading"><div><p>Society requests</p><h2>Action queue</h2></div></div>{[['01', 'ABC CHS', 'Normalize bank guarantee terms'], ['02', 'Sea Crest Society', 'Review feasibility request'], ['03', 'Pragati Nagar', 'Prepare developer Q&A note']].map(([number, title, detail]) => <button type="button" key={number}><span>{number}</span><div><strong>{title}</strong><small>{detail}</small></div><ChevronRight size={16} /></button>)}</section>
     </div>
-    <section className="platform-panel platform-role-boundary"><div><ShieldCheck size={21} /><span><strong>PMC project access</strong><small>Technical records, society-approved proposals, assigned tasks and shared communications</small></span></div><div><LockKeyhole size={21} /><span><strong>Not included</strong><small>Unrelated organization data, private developer workspaces or RENOVA administration</small></span></div></section>
+    <section className="platform-panel platform-role-boundary"><div><ShieldCheck size={21} /><span><strong>PMC project access</strong><small>Technical records, society-approved proposals, assigned tasks and shared communications</small></span></div><div><LockKeyhole size={21} /><span><strong>Not included</strong><small>Unrelated organization data, private developer workspaces or NIRMAQ administration</small></span></div></section>
   </PlatformShell>;
 }
 
@@ -255,7 +256,7 @@ function WorkspaceActivity({ role }: { role: PlatformRole }) {
 }
 
 function ProposalComparison({ compact = false, role = 'society' }: { compact?: boolean; role?: PlatformRole }) {
-  return <section className={`platform-panel platform-comparison ${compact ? 'compact' : ''}`}><div className="platform-panel-heading"><div><p>Standardized proposal comparison</p><h2>Compare terms without ranking developers.</h2></div>{compact ? <Link href="/platform/compare?role=society">Full comparison <ArrowUpRight size={14} /></Link> : <button className="platform-secondary-button"><FileText size={15} /> Export committee copy</button>}</div><p className="platform-comparison-intro">RENOVA aligns factual fields supplied by participants. It does not declare a winner or replace technical, legal or financial advice.</p><div className="platform-comparison-table"><div><strong>Comparison field</strong><strong>Developer Alpha<small>Version 2 · clarification</small></strong><strong>Developer Beta<small>Version 1 · submitted</small></strong></div>{demoProject.proposalTerms.map((term) => <div key={term.label}><span>{term.label}</span><strong>{term.alpha}</strong><strong>{term.beta}</strong></div>)}</div><p className="platform-disclaimer"><ShieldCheck size={14} /> {proposalDisclaimer} · Viewing as {roleCopy[role].label.toLowerCase()}.</p></section>;
+  return <section className={`platform-panel platform-comparison ${compact ? 'compact' : ''}`}><div className="platform-panel-heading"><div><p>Standardized proposal comparison</p><h2>Compare terms without ranking developers.</h2></div>{compact ? <Link href="/platform/compare?role=society">Full comparison <ArrowUpRight size={14} /></Link> : <button className="platform-secondary-button"><FileText size={15} /> Export committee copy</button>}</div><p className="platform-comparison-intro">NIRMAQ aligns factual fields supplied by participants. It does not declare a winner or replace technical, legal or financial advice.</p><div className="platform-comparison-table"><div><strong>Comparison field</strong><strong>Developer Alpha<small>Version 2 · clarification</small></strong><strong>Developer Beta<small>Version 1 · submitted</small></strong></div>{demoProject.proposalTerms.map((term) => <div key={term.label}><span>{term.label}</span><strong>{term.alpha}</strong><strong>{term.beta}</strong></div>)}</div><p className="platform-disclaimer"><ShieldCheck size={14} /> {proposalDisclaimer} · Viewing as {roleCopy[role].label.toLowerCase()}.</p></section>;
 }
 
 function ComparisonPage({ role }: { role: PlatformRole }) {
