@@ -100,6 +100,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
             displayName: "TEST ONLY invalid brand",
             participantType: "PMC",
             organizationName: "TEST ONLY invalid brand",
+            ageAttestation: true,
           },
           true,
         )
@@ -127,6 +128,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
           displayName: `TEST ONLY ${role}`,
           participantType: role,
           organizationName: `TEST ONLY ${role}`,
+          ageAttestation: true,
         },
         true,
       );
@@ -165,6 +167,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
               displayName: "TEST ONLY duplicate",
               participantType: role,
               organizationName: "TEST ONLY duplicate",
+              ageAttestation: true,
             },
             true,
           )
@@ -536,6 +539,7 @@ export async function testAuthDelivery(origin: string): Promise<number> {
             displayName: "TEST ONLY admin",
             participantType: "ADMIN",
             organizationName: "TEST ONLY",
+            ageAttestation: true,
           },
           true,
         )

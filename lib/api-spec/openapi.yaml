@@ -12,6 +12,12 @@ tags:
   - name: projects
   - name: professionals
   - name: regulations
+  - name: privacy
+    description: >
+      NIRMAQ Phase B privacy requests — consent ledger, access / correction /
+      deletion requests, identity verification, Admin queue and retention
+      dry-run reporting. Fulfilment is a recorded Admin decision; no
+      automated deletion runs from these endpoints.
 paths:
   /healthz:
     get:
@@ -117,6 +123,377 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Regulation"
+  /privacy/requests:
+    post:
+      operationId: submitPrivacyRequest
+      tags: [privacy]
+      summary: Submit a privacy request (access, correction or deletion)
+      description: >
+        Public. An unauthenticated requester receives a one-hour verification
+        link by email; an authenticated requester asking about their own email
+        is verified by session. A duplicate open request for the same email
+        and type returns the existing reference instead of a second row.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyRequestSubmit"
+      responses:
+        "202":
+          description: Request accepted for verification or submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reference, status, message]
+                properties:
+                  reference: { type: string, example: "PRV-2026-AB12CD34EF" }
+                  status:
+                    type: string
+                    enum: [IDENTITY_PENDING, SUBMITTED]
+                  message: { type: string }
+        "400":
+          description: Validation failed
+        "429":
+          description: Too many requests
+        "503":
+          description: Privacy features are temporarily unavailable
+  /privacy/requests/{reference}/verify:
+    post:
+      operationId: verifyPrivacyRequest
+      tags: [privacy]
+      summary: Verify a privacy request with its emailed token
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyRequestVerify"
+      responses:
+        "200":
+          description: Verified; a status token is issued
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reference, status, statusToken, history]
+                properties:
+                  reference: { type: string }
+                  status: { type: string, enum: [SUBMITTED] }
+                  statusToken: { type: string }
+                  history:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivacyRequestEvent"
+        "400":
+          description: Token invalid, expired or too many attempts
+        "404":
+          description: Privacy request not found
+        "409":
+          description: Request already verified
+  /privacy/requests/{reference}/status:
+    get:
+      operationId: getPrivacyRequestStatus
+      tags: [privacy]
+      summary: Check a privacy request's status with its status token
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          schema: { type: string }
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Request and its subject-visible history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [request, history]
+                properties:
+                  request:
+                    $ref: "#/components/schemas/PrivacyRequest"
+                  history:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivacyRequestEvent"
+        "401":
+          description: A valid status token is required
+        "404":
+          description: Privacy request not found
+  /privacy/requests/me:
+    get:
+      operationId: listMyPrivacyRequests
+      tags: [privacy]
+      summary: List the authenticated user's own privacy requests
+      responses:
+        "200":
+          description: Own privacy requests
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests]
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivacyRequest"
+        "401":
+          description: Authentication required
+  /admin/privacy-requests:
+    get:
+      operationId: listPrivacyRequests
+      tags: [privacy]
+      summary: List the Admin privacy queue
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [IDENTITY_PENDING, SUBMITTED, IN_REVIEW, MORE_INFORMATION_REQUIRED, FULFILLED, REJECTED, CLOSED]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [ACCESS, CORRECTION, DELETION]
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Privacy queue (token hashes are never returned)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests]
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivacyRequestAdmin"
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin only
+  /admin/privacy-requests/{id}:
+    get:
+      operationId: getPrivacyRequest
+      tags: [privacy]
+      summary: Get a privacy request with its full audit history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Request and full history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [request, history]
+                properties:
+                  request:
+                    $ref: "#/components/schemas/PrivacyRequestAdmin"
+                  history:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivacyRequestEventAdmin"
+        "404":
+          description: Privacy request not found
+    patch:
+      operationId: updatePrivacyRequest
+      tags: [privacy]
+      summary: Move a privacy request through its workflow, or apply/release a hold
+      description: >
+        Only the documented transitions are allowed; an unverified request or
+        a request under a hold cannot be fulfilled. A status change, hold and
+        note are recorded as audit events in the same transaction.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyStatusUpdate"
+      responses:
+        "200":
+          description: Updated request
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [request]
+                properties:
+                  request:
+                    $ref: "#/components/schemas/PrivacyRequestAdmin"
+        "400":
+          description: Validation failed
+        "404":
+          description: Privacy request not found
+        "409":
+          description: Illegal transition, or the request is unverified / on hold
+  /admin/privacy-requests/{id}/notes:
+    post:
+      operationId: addPrivacyRequestNote
+      tags: [privacy]
+      summary: Add an Admin note to a privacy request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note: { type: string, minLength: 2, maxLength: 2000 }
+      responses:
+        "201":
+          description: Note recorded
+        "404":
+          description: Privacy request not found
+  /admin/privacy-requests/{id}/verify:
+    post:
+      operationId: verifyPrivacyRequestOutOfBand
+      tags: [privacy]
+      summary: Verify a request out of band when the verification email cannot be delivered
+      description: >
+        The Admin must record how identity was verified; the note is part of
+        the audit trail. A status token is issued for the requester.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note: { type: string, minLength: 2, maxLength: 2000 }
+      responses:
+        "200":
+          description: Verified
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reference, status, statusToken]
+                properties:
+                  reference: { type: string }
+                  status: { type: string, enum: [SUBMITTED] }
+                  statusToken: { type: string }
+        "404":
+          description: Privacy request not found
+        "409":
+          description: Request already verified
+  /admin/retention/policies:
+    get:
+      operationId: listRetentionPolicies
+      tags: [privacy]
+      summary: List retention policies
+      responses:
+        "200":
+          description: Retention policies
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [policies]
+                properties:
+                  policies:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/RetentionPolicy"
+    post:
+      operationId: createRetentionPolicy
+      tags: [privacy]
+      summary: Create a retention policy for a data category
+      description: >
+        One policy per category. retentionDays null means retain until manual
+        review. Policies are set only after the owner + legal approve the
+        retention periods.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetentionPolicyInput"
+      responses:
+        "201":
+          description: Policy created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [policy]
+                properties:
+                  policy:
+                    $ref: "#/components/schemas/RetentionPolicy"
+        "409":
+          description: A policy already exists for this category
+  /admin/retention/policies/{id}:
+    patch:
+      operationId: updateRetentionPolicy
+      tags: [privacy]
+      summary: Update a retention policy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetentionPolicyUpdate"
+      responses:
+        "200":
+          description: Updated policy
+        "404":
+          description: Retention policy not found
+  /admin/retention/dry-run:
+    get:
+      operationId: retentionDryRun
+      tags: [privacy]
+      summary: Dry-run retention report — counts only, nothing is deleted
+      description: >
+        Reports, per data category, how many rows would be eligible under the
+        active policy and how many are excluded by a hold. deletedRows is
+        always 0: deletion requires owner + legal approval of the retention
+        periods and is not performed by this endpoint.
+      responses:
+        "200":
+          description: Dry-run report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetentionDryRun"
 components:
   parameters:
     ProjectId:
@@ -208,3 +585,131 @@ components:
         authority: { type: string }
         updatedAt: { type: string }
         status: { type: string }
+    PrivacyRequestSubmit:
+      type: object
+      required: [email, type]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        type:
+          type: string
+          enum: [ACCESS, CORRECTION, DELETION]
+        details: { type: string, minLength: 2, maxLength: 2000 }
+    PrivacyRequestVerify:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, minLength: 32, maxLength: 256 }
+    PrivacyRequest:
+      type: object
+      required: [id, reference, email, type, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        reference: { type: string }
+        email: { type: string, format: email }
+        type:
+          type: string
+          enum: [ACCESS, CORRECTION, DELETION]
+        status:
+          type: string
+          enum: [IDENTITY_PENDING, SUBMITTED, IN_REVIEW, MORE_INFORMATION_REQUIRED, FULFILLED, REJECTED, CLOSED]
+        details: { type: string, nullable: true }
+        underHold: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time, nullable: true }
+        closedAt: { type: string, format: date-time, nullable: true }
+    PrivacyRequestAdmin:
+      allOf:
+        - $ref: "#/components/schemas/PrivacyRequest"
+        - type: object
+          properties:
+            requesterUserId: { type: string, format: uuid, nullable: true }
+            verificationStatus:
+              type: string
+              enum: [PENDING, VERIFIED, EXPIRED, NONE]
+            verificationAttempts: { type: integer }
+            holdReason: { type: string, nullable: true }
+            holdByUserId: { type: string, format: uuid, nullable: true }
+            resolvedByUserId: { type: string, format: uuid, nullable: true }
+    PrivacyRequestEvent:
+      type: object
+      required: [id, action, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        action: { type: string }
+        createdAt: { type: string, format: date-time }
+    PrivacyRequestEventAdmin:
+      type: object
+      required: [id, actorType, action, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        actorUserId: { type: string, format: uuid, nullable: true }
+        actorType:
+          type: string
+          enum: [SUBJECT, ADMIN, SYSTEM]
+        action: { type: string }
+        note: { type: string, nullable: true }
+        metadata: { type: object }
+        createdAt: { type: string, format: date-time }
+    PrivacyStatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [IN_REVIEW, MORE_INFORMATION_REQUIRED, FULFILLED, REJECTED, CLOSED]
+        note: { type: string, minLength: 2, maxLength: 2000 }
+        holdReason: { type: string, minLength: 2, maxLength: 500 }
+        holdReleased: { type: boolean }
+    RetentionPolicyInput:
+      type: object
+      required: [dataCategory, retentionDays]
+      properties:
+        dataCategory:
+          type: string
+          enum: [ENQUIRY, AUTH_TOKEN, AUTH_SESSION, AUDIT_LOG, FEASIBILITY_DOCUMENT, PRIVACY_REQUEST]
+        retentionDays: { type: integer, minimum: 0, maximum: 36500, nullable: true }
+        description: { type: string, minLength: 2, maxLength: 2000 }
+        legalBasis: { type: string, minLength: 2, maxLength: 2000 }
+    RetentionPolicyUpdate:
+      type: object
+      properties:
+        retentionDays: { type: integer, minimum: 0, maximum: 36500, nullable: true }
+        description: { type: string, minLength: 2, maxLength: 2000, nullable: true }
+        legalBasis: { type: string, minLength: 2, maxLength: 2000, nullable: true }
+        isActive: { type: boolean }
+    RetentionPolicy:
+      type: object
+      required: [id, dataCategory, retentionDays, isActive, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        dataCategory: { type: string }
+        retentionDays: { type: integer, nullable: true }
+        description: { type: string, nullable: true }
+        legalBasis: { type: string, nullable: true }
+        isActive: { type: boolean }
+        createdByUserId: { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    RetentionDryRun:
+      type: object
+      required: [generatedAt, categories, deletedRows, note]
+      properties:
+        generatedAt: { type: string, format: date-time }
+        categories:
+          type: array
+          items:
+            type: object
+            required: [category, policy, totalRows, eligibleRows, heldRows, note]
+            properties:
+              category: { type: string }
+              policy:
+                type: object
+                nullable: true
+                properties:
+                  retentionDays: { type: integer, nullable: true }
+              totalRows: { type: integer }
+              eligibleRows: { type: integer }
+              heldRows: { type: integer }
+              note: { type: string }
+        deletedRows: { type: integer, enum: [0] }
+        note: { type: string }

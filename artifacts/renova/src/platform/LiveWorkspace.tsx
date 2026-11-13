@@ -204,6 +204,9 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             participantType: registrationParticipant(participant.id),
             organizationName: form.get("organizationName"),
             location: form.get("location"),
+            // 18+ attestation (NIRMAQ Phase B privacy): the backend rejects
+            // registration without ageAttestation: true (400).
+            ageAttestation: form.get("ageAttestation") === "on",
           }),
         });
         setNotice(result.message);
@@ -384,12 +387,15 @@ function AccountForm({ onSignedIn }: { onSignedIn: (user: Account) => void }) {
             <label className="live-check">
               <input
                 type="checkbox"
-                name="adultConfirmed"
+                name="ageAttestation"
                 required
                 checked={adultConfirmed}
                 onChange={(event) => setAdultConfirmed(event.target.checked)}
               />
-              <span>I confirm that I am 18 years of age or older.</span>
+              <span>
+                I confirm that I am 18 years of age or older and I am
+                creating a NIRMAQ account.
+              </span>
             </label>
           </>
         )}

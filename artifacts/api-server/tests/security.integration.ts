@@ -44,6 +44,15 @@ for (const entry of journal.entries)
   await engine.exec(
     await readFile(`../../lib/db/drizzle/${entry.tag}.sql`, "utf8"),
   );
+// Phase B privacy tables (provisional 0010 — see docs/phase-b-migration-plan.md).
+// The enquiry route now records a consent event with every enquiry, so the
+// suite runs with the privacy schema applied, as deployments must.
+await engine.exec(
+  await readFile(
+    "../../lib/db/drizzle/provisional/0010_privacy_phase_b.sql",
+    "utf8",
+  ),
+);
 
 const app = express();
 app.use(

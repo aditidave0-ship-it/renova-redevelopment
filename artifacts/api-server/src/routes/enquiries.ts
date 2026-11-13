@@ -6,10 +6,13 @@ import {
   auditLogs,
   enquiries,
   enquiryEmailJobs,
+  privacyConsentEvents,
   requireDb,
   users,
 } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/session";
+import { consentEventForEnquiry } from "../lib/consent-policy";
+import { isPrivacySchemaUnavailable } from "../lib/privacy-policy";
 import { processEnquiryEmailJobs } from "../lib/enquiry-email-jobs";
 
 const router: IRouter = Router();
@@ -132,6 +135,17 @@ router.post("/enquiries", async (request, response, next) => {
             source: input.source,
           }),
         });
+      // Consent is a persistent record, not a checkbox: the consent event is
+      // written in the same transaction as the enquiry, so one cannot exist
+      // without the other.
+      await tx.insert(privacyConsentEvents).values(
+        consentEventForEnquiry({
+          id: saved.id,
+          email: input.email,
+          source: input.source,
+          reference: enquiryReference,
+        }),
+      );
       await tx.insert(enquiryEmailJobs).values([
         { enquiryId: saved.id, kind: "ACKNOWLEDGEMENT" },
         { enquiryId: saved.id, kind: "ADMIN" },
@@ -161,6 +175,15 @@ router.post("/enquiries", async (request, response, next) => {
         },
       });
   } catch (error) {
+    // The consent record is part of the enquiry contract: if the privacy
+    // tables are not migrated yet, the enquiry cannot be accepted (accepting
+    // it without a consent record would recreate the Phase A gap). The
+    // transaction has already rolled back, so nothing is half-saved.
+    if (isPrivacySchemaUnavailable(error))
+      return response.status(503).json({
+        error: "Privacy features are temporarily unavailable",
+        code: "PRIVACY_TEMPORARILY_UNAVAILABLE",
+      });
     return next(error);
   }
 });
@@ -288,6 +311,43 @@ router.patch(
       if (!updated)
         return response.status(404).json({ error: "Enquiry not found" });
       return response.json({ enquiry: updated });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.get(
+  "/admin/enquiries/:id/consent",
+  requireAuth(),
+  requireRole("ADMIN"),
+  async (request, response, next) => {
+    try {
+      const enquiryId = z.string().uuid().parse(request.params.id);
+      const database = requireDb();
+      const [enquiry] = await database
+        .select({ id: enquiries.id })
+        .from(enquiries)
+        .where(eq(enquiries.id, enquiryId))
+        .limit(1);
+      if (!enquiry)
+        return response.status(404).json({ error: "Enquiry not found" });
+      const events = await database
+        .select()
+        .from(privacyConsentEvents)
+        .where(eq(privacyConsentEvents.subjectId, enquiryId))
+        .orderBy(desc(privacyConsentEvents.createdAt));
+      return response.json({
+        enquiryId,
+        consentEvents: events.map((event) => ({
+          id: event.id,
+          action: event.action,
+          purpose: event.purpose,
+          version: event.consentVersion,
+          actor: event.actor,
+          createdAt: event.createdAt,
+        })),
+      });
     } catch (error) {
       return next(error);
     }

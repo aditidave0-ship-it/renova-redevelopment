@@ -142,6 +142,42 @@ export function passwordResetEmail(
   };
 }
 
+// NIRMAQ Phase B — privacy request emails. The verification link points at
+// the privacy page with the reference and token as query parameters; the
+// page calls the verification API (frontend handling is a Phase 2
+// follow-up). The token is also printed in the text so the request can be
+// verified without the link. Both messages are best-effort: sending never
+// blocks the request itself.
+export function privacyRequestVerificationEmail(
+  brand: EmailBrand,
+  reference: string,
+  token: string,
+): Omit<EmailMessage, "to"> {
+  const name = escapeHtml(brand.productName);
+  const safeReference = escapeHtml(reference);
+  const link = `${brand.appUrl}/privacy?reference=${encodeURIComponent(reference)}&token=${encodeURIComponent(token)}`;
+  return {
+    subject: `Verify your ${brand.productName} privacy request ${reference}`,
+    text: `We received a privacy request (${reference}) for this email address. Verify it by opening this link within 1 hour: ${link} — or quote reference ${reference} when you contact us. If you did not make this request, you can ignore this message.`,
+    html: `<h1>Verify your privacy request</h1><p>${name} received a privacy request for this email address.</p><p><strong>Reference:</strong> ${safeReference}</p><p><a href="${escapeHtml(link)}">Verify this request</a></p><p>This link expires in 1 hour. If you did not make this request, you can ignore this message.</p>`,
+  };
+}
+
+export function privacyRequestStatusEmail(
+  brand: EmailBrand,
+  reference: string,
+  status: string,
+): Omit<EmailMessage, "to"> {
+  const name = escapeHtml(brand.productName);
+  const safeReference = escapeHtml(reference);
+  const safeStatus = escapeHtml(status);
+  return {
+    subject: `Update on your ${brand.productName} privacy request ${reference}`,
+    text: `Your privacy request ${reference} is now ${status}. If you have questions, reply to this email quoting the reference.`,
+    html: `<h1>Privacy request update</h1><p>Your ${name} privacy request <strong>${safeReference}</strong> is now <strong>${safeStatus}</strong>.</p><p>If you have questions, reply to this email quoting the reference.</p>`,
+  };
+}
+
 class DisabledEmailProvider implements EmailProvider {
   async send(): Promise<EmailAcceptance> {
     const error = new Error("Transactional email delivery is not configured");
