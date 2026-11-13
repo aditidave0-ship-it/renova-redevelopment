@@ -7,11 +7,29 @@ export type AuthRateLimitAction =
   | "VERIFY_EMAIL"
   | "RESEND_VERIFICATION"
   | "FORGOT_PASSWORD"
-  | "LOGIN";
+  | "LOGIN"
+  | "PRIVACY_REQUEST"
+  | "PRIVACY_VERIFY";
 
 export type AuthRateLimitPolicy = {
   limit: number;
   windowMs: number;
+};
+
+// Single source of truth for every rate-limited action, including the
+// Phase B privacy endpoints. authRateLimits.action is a varchar, so adding
+// an action here needs no migration.
+export const AUTH_RATE_LIMIT_POLICIES: Record<
+  AuthRateLimitAction,
+  AuthRateLimitPolicy
+> = {
+  REGISTER: { limit: 5, windowMs: 60 * 60 * 1000 },
+  VERIFY_EMAIL: { limit: 10, windowMs: 10 * 60 * 1000 },
+  RESEND_VERIFICATION: { limit: 3, windowMs: 60 * 60 * 1000 },
+  FORGOT_PASSWORD: { limit: 5, windowMs: 60 * 60 * 1000 },
+  LOGIN: { limit: 10, windowMs: 15 * 60 * 1000 },
+  PRIVACY_REQUEST: { limit: 5, windowMs: 60 * 60 * 1000 },
+  PRIVACY_VERIFY: { limit: 10, windowMs: 10 * 60 * 1000 },
 };
 
 export function authRateLimitSubject(ip: string, email: string): string {

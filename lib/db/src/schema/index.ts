@@ -91,6 +91,29 @@ export const professionalSpecialization = pgEnum(
     "OTHER",
   ],
 );
+// Phase B — privacy (NIRMAQ). Request types and lifecycle for data-subject
+// requests (access / correction / deletion).
+export const privacyRequestType = pgEnum("privacy_request_type", [
+  "ACCESS",
+  "CORRECTION",
+  "DELETION",
+]);
+export const privacyRequestStatus = pgEnum("privacy_request_status", [
+  "IDENTITY_PENDING",
+  "SUBMITTED",
+  "IN_REVIEW",
+  "MORE_INFORMATION_REQUIRED",
+  "FULFILLED",
+  "REJECTED",
+  "CLOSED",
+]);
+// Consent ledger actions. The ledger is append-only: a withdrawal is a new
+// event, never an edit or delete of the original GIVEN event.
+export const consentAction = pgEnum("consent_action", ["GIVEN", "WITHDRAWN"]);
+export const consentSubjectType = pgEnum("consent_subject_type", [
+  "ENQUIRY",
+  "ACCOUNT",
+]);
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -727,4 +750,222 @@ export const enquiryEmailJobs = pgTable(
       sql`${t.status} IN ('QUEUED','ACCEPTED','NOT_CONFIGURED','RETRY','MANUAL_REVIEW')`,
     ),
   ],
+);
+
+// ===========================================================================
+// Phase B — privacy (NIRMAQ)
+// ===========================================================================
+// These tables are the persistent record for consent, data-subject privacy
+// requests, 18+ attestations and retention policy. They are created by the
+// PROVISIONAL migration lib/db/drizzle/provisional/0010_privacy_phase_b.sql
+// until the migration baseline is agreed (PR #35's 0009 is still open) — see
+// docs/phase-b-migration-plan.md. Do not add them to the canonical journal
+// (lib/db/drizzle/meta/_journal.json) until then.
+//
+// Append-only tables (privacyConsentEvents, privacyRequestEvents) have no
+// updatedAt column and no update/delete path in the API: corrections are new
+// events, never edits. Deleting a user cascades their attestations (user
+// data); privacy requests and their events survive (set null) because they
+// are the audit record of the request itself.
+
+// Versioned, append-only consent ledger. One row per consent action. A
+// checkbox is not a record — this is.
+export const privacyConsentEvents = pgTable(
+  "privacy_consent_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    subjectType: consentSubjectType("subject_type").notNull(),
+    // The enquiry or user this consent belongs to. No FK: the id refers to
+    // either enquiries.id (ENQUIRY) or users.id (ACCOUNT).
+    subjectId: uuid("subject_id"),
+    email: varchar("email", { length: 320 }).notNull(),
+    purpose: varchar("purpose", { length: 80 }).notNull(),
+    consentVersion: varchar("consent_version", { length: 24 }).notNull(),
+    action: consentAction("action").notNull(),
+    actor: varchar("actor", { length: 24 }).default("SUBJECT").notNull(),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("privacy_consent_events_email_created_idx").on(
+      table.email,
+      table.createdAt,
+    ),
+    index("privacy_consent_events_subject_idx").on(
+      table.subjectType,
+      table.subjectId,
+      table.createdAt,
+    ),
+    index("privacy_consent_events_purpose_idx").on(
+      table.purpose,
+      table.createdAt,
+    ),
+  ],
+);
+
+// Data-subject privacy requests (access / correction / deletion). A request
+// is fulfilled by an Admin decision recorded here; no automated deletion or
+// erasure runs from this table until the owner + legal approve retention
+// periods. Verification and status tokens are stored as SHA-256 hashes only.
+export const privacyRequests = pgTable(
+  "privacy_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reference: varchar("reference", { length: 40 }).notNull().unique(),
+    requesterUserId: uuid("requester_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    email: varchar("email", { length: 320 }).notNull(),
+    type: privacyRequestType("type").notNull(),
+    status: privacyRequestStatus("status")
+      .default("IDENTITY_PENDING")
+      .notNull(),
+    details: text("details"),
+    verificationTokenHash: varchar("verification_token_hash", { length: 64 }),
+    verificationExpiresAt: timestamp("verification_expires_at", {
+      withTimezone: true,
+    }),
+    verificationUsedAt: timestamp("verification_used_at", {
+      withTimezone: true,
+    }),
+    verificationAttempts: integer("verification_attempts")
+      .default(0)
+      .notNull(),
+    statusTokenHash: varchar("status_token_hash", { length: 64 }),
+    statusTokenExpiresAt: timestamp("status_token_expires_at", {
+      withTimezone: true,
+    }),
+    holdReason: varchar("hold_reason", { length: 500 }),
+    holdByUserId: uuid("hold_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    resolvedByUserId: uuid("resolved_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("privacy_requests_email_created_idx").on(
+      table.email,
+      table.createdAt,
+    ),
+    index("privacy_requests_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    index("privacy_requests_type_status_idx").on(table.type, table.status),
+  ],
+);
+
+// Append-only audit trail for a privacy request: every submission,
+// verification, status change, note, hold and fulfilment is an event.
+export const privacyRequestEvents = pgTable(
+  "privacy_request_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => privacyRequests.id, { onDelete: "cascade" }),
+    actorUserId: uuid("actor_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    actorType: varchar("actor_type", { length: 24 }).notNull(),
+    action: varchar("action", { length: 80 }).notNull(),
+    note: text("note"),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("privacy_request_events_request_idx").on(
+      table.requestId,
+      table.createdAt,
+    ),
+  ],
+);
+
+// Server-side 18+ attestations. A declaration, not an identity document:
+// no date of birth and no ID documents are collected or stored.
+export const userAttestations = pgTable(
+  "user_attestations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    attestationType: varchar("attestation_type", { length: 80 }).notNull(),
+    attestedAt: timestamp("attested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    attestationVersion: varchar("attestation_version", {
+      length: 24,
+    }).notNull(),
+    source: varchar("source", { length: 80 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("user_attestations_user_type_idx").on(
+      table.userId,
+      table.attestationType,
+    ),
+  ],
+);
+
+// Configurable retention periods per data category. RetentionDays null means
+// "retain until manual review" — there is no automated deletion. Policies
+// are set by an Admin only after the owner + legal approve the periods.
+export const privacyRetentionPolicies = pgTable(
+  "privacy_retention_policies",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dataCategory: varchar("data_category", { length: 80 }).notNull().unique(),
+    retentionDays: integer("retention_days"),
+    description: text("description"),
+    legalBasis: text("legal_basis"),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("privacy_retention_policies_category_idx").on(table.dataCategory),
+  ],
+);
+
+export const privacyRequestRelations = relations(
+  privacyRequests,
+  ({ one, many }) => ({
+    requester: one(users, {
+      fields: [privacyRequests.requesterUserId],
+      references: [users.id],
+    }),
+    events: many(privacyRequestEvents),
+  }),
+);
+export const privacyRequestEventRelations = relations(
+  privacyRequestEvents,
+  ({ one }) => ({
+    request: one(privacyRequests, {
+      fields: [privacyRequestEvents.requestId],
+      references: [privacyRequests.id],
+    }),
+    actor: one(users, {
+      fields: [privacyRequestEvents.actorUserId],
+      references: [users.id],
+    }),
+  }),
 );

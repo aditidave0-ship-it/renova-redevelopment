@@ -31,6 +31,7 @@ import {
 import {
   authRateLimitSubject,
   enforceAuthRateLimit,
+  AUTH_RATE_LIMIT_POLICIES,
   type AuthRateLimitAction,
   type AuthRateLimitPolicy,
 } from "../lib/auth-rate-limit";
@@ -43,6 +44,7 @@ import {
   organizations,
   professionalProfiles,
   societies,
+  userAttestations,
   users,
 } from "@workspace/db";
 import {
@@ -67,6 +69,12 @@ const registrationSchema = z.object({
   participantType: participantSchema,
   organizationName: z.string().trim().min(2).max(220),
   location: z.string().trim().max(160).optional(),
+  // Server-side 18+ attestation (Phase B privacy): the declaration is a
+  // required field and a row is recorded in user_attestations — no date of
+  // birth or identity documents are collected.
+  ageAttestation: z.literal(true, {
+    message: "You must confirm you are at least 18 years old",
+  }),
 });
 const loginSchema = z.object({
   email: emailSchema,
@@ -83,13 +91,8 @@ const verificationOtpSchema = z.object({
 const tokenSchema = z.object({ token: z.string().min(32).max(256) });
 const resetPasswordSchema = tokenSchema.extend({ password: passwordSchema });
 
-const AUTH_RATE_LIMITS: Record<AuthRateLimitAction, AuthRateLimitPolicy> = {
-  REGISTER: { limit: 5, windowMs: 60 * 60 * 1000 },
-  VERIFY_EMAIL: { limit: 10, windowMs: 10 * 60 * 1000 },
-  RESEND_VERIFICATION: { limit: 3, windowMs: 60 * 60 * 1000 },
-  FORGOT_PASSWORD: { limit: 5, windowMs: 60 * 60 * 1000 },
-  LOGIN: { limit: 10, windowMs: 15 * 60 * 1000 },
-};
+const AUTH_RATE_LIMITS: Record<AuthRateLimitAction, AuthRateLimitPolicy> =
+  AUTH_RATE_LIMIT_POLICIES;
 
 function publicUser(
   user: { id: string; email: string; displayName: string; role: string },
@@ -333,6 +336,12 @@ router.post("/auth/register", async (request, response, next) => {
         tokenHash: verification.tokenHash,
         expiresAt: verification.expiresAt,
         failedAttempts: 0,
+      });
+      await tx.insert(userAttestations).values({
+        userId: user.id,
+        attestationType: "AGE_18_PLUS",
+        attestationVersion: "v1",
+        source: "REGISTRATION",
       });
       return { user, organizationId: organization.id };
     });
@@ -690,6 +699,32 @@ router.get("/auth/me", async (request, response, next) => {
       return response.status(401).json({ error: "Authentication required" });
     return response.json({
       user: { ...auth, dashboardPath: dashboardPath(auth.role) },
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/auth/attestations/me", async (request, response, next) => {
+  try {
+    const auth = await readSession(request);
+    if (!auth)
+      return response.status(401).json({ error: "Authentication required" });
+    const database = requireDb();
+    const rows = await database
+      .select()
+      .from(userAttestations)
+      .where(eq(userAttestations.userId, auth.userId))
+      .orderBy(desc(userAttestations.createdAt));
+    return response.json({
+      attestations: rows.map((row) => ({
+        id: row.id,
+        type: row.attestationType,
+        version: row.attestationVersion,
+        source: row.source,
+        attestedAt: row.attestedAt,
+        createdAt: row.createdAt,
+      })),
     });
   } catch (error) {
     return next(error);

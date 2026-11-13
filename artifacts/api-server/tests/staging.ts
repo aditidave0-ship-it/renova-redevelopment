@@ -15,6 +15,15 @@ import { testSandboxAndEmail } from "./sandbox-delivery";
 
 const root = process.env.RENOVA_ISOLATED_FIXTURE_DIRECTORY!;
 await migrate(db, { migrationsFolder: resolve("../../lib/db/drizzle") });
+// Phase B privacy tables (provisional 0010 — see docs/phase-b-migration-plan.md).
+// The enquiry route now records a consent event with every enquiry, so the
+// staging suite runs with the privacy schema applied, as deployments must.
+await engine.exec(
+  await readFile(
+    resolve("../../lib/db/drizzle/provisional/0010_privacy_phase_b.sql"),
+    "utf8",
+  ),
+);
 const app = express();
 app.use("/api/billing/webhook", express.raw({ type: "application/json", limit: "256kb" }));
 app.use(express.json(), cookieParser());
@@ -64,6 +73,7 @@ async function fixture(participantType: string, label: string) {
   equal((await request("/auth/register", "POST", "", {
     email, password, participantType, displayName: `TEST ONLY ${label}`,
     organizationName: `TEST ONLY ${label}`, location: "Mumbai",
+    ageAttestation: true,
   }, true)).status, 202);
   equal((await request("/auth/login", "POST", "", { email, password })).status, 401);
   const delivered = [...captured].reverse().find(row => row.to.includes(email) && /verification code is \d{6}/.test(row.text));
