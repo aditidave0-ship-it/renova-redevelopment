@@ -1,6 +1,12 @@
-# RENOVA project instructions
+# NIRMAQ project instructions
 
 These standing instructions reflect the owner's decisions. Follow them for all work in this repository until the owner explicitly changes them.
+
+## Current public brand
+- The current public product name is NIRMAQ. Use NIRMAQ in new public-facing copy and user-facing UI.
+- No NIRMAQ tagline, logo or favicon asset has been approved or supplied. Do not invent one; retain existing visual styling pending approved assets.
+- The intended application origin is https://nirmaq.in, but domain attachment, DNS and HTTPS are unverified. Do not configure or claim it is live without explicit approval.
+- Preserve historical RENOVA repository paths, environment-variable names, internal identifiers and compatibility references unless a separately approved migration explicitly changes them.
 
 ## Continuity and integration
 - Continue the existing backend implementation and draft PR #24; the requested recovery baseline is commit 866469d. Inspect current branches and PRs before editing. Preserve completed work and coordinate through GitHub.

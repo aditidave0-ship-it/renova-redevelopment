@@ -16,11 +16,11 @@ const pageContent: Record<
     eyebrow: "TERMS · DRAFT",
     title: "Terms of use",
     intro:
-      "These terms are placeholders for owner and Indian privacy counsel review. They do not yet define the final terms for using RENOVA.",
+      "These terms are placeholders for owner and Indian privacy counsel review. They do not yet define the final terms for using NIRMAQ.",
   },
   grievance: {
     eyebrow: "GRIEVANCE CONTACT · DRAFT",
-    title: "Contact RENOVA about a concern",
+    title: "Contact NIRMAQ about a concern",
     intro:
       "The contact details below must be completed by the owner before this page is presented as an official grievance channel.",
   },
@@ -51,7 +51,7 @@ function PrivacyDraft() {
   return (
     <div className="experience-benefits">
       <article>
-        <h3>Information RENOVA may receive</h3>
+        <h3>Information NIRMAQ may receive</h3>
         <p>
           Depending on how you use the current site, this can include contact
           details and enquiry messages, account and organization details,
@@ -62,7 +62,7 @@ function PrivacyDraft() {
       <article>
         <h3>Why it is used and who may access it</h3>
         <p>
-          Enquiry details are submitted so RENOVA can respond to the enquiry.
+          Enquiry details are submitted so NIRMAQ can respond to the enquiry.
           Account, profile and property details support the platform features
           you use. Access depends on the relevant feature and account role; the
           final purposes, recipients and disclosures need owner and counsel
@@ -72,7 +72,7 @@ function PrivacyDraft() {
       <article>
         <h3>Storage and retention</h3>
         <p>
-          Enquiries and platform records are designed to use RENOVA&apos;s API
+          Enquiries and platform records are designed to use NIRMAQ&apos;s API
           and PostgreSQL database. Do not submit sensitive documents through a
           feature unless it explicitly confirms that secure upload is enabled.
         </p>

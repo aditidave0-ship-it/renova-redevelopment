@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ExperienceHeader, ExperienceFooter } from "./Header";
 import { ContactForm } from "./ContactForm";
+import { BRAND_NAME } from "../brand";
 const steps = [
   {
     title: "Choose Your Role",
@@ -79,7 +80,7 @@ export function RenovaHome() {
           aria-labelledby="home-title"
         >
           <div className="experience-hero-copy">
-            <span className="experience-eyebrow">RENOVA · MAKE NEW AGAIN</span>
+            <span className="experience-eyebrow">{BRAND_NAME}</span>
             <h1 id="home-title">
               Redevelopment,
               <br />
@@ -117,7 +118,7 @@ export function RenovaHome() {
         >
           <div className="experience-section-heading">
             <span className="experience-eyebrow">A CLEAR PATH FORWARD</span>
-            <h2>How RENOVA Works</h2>
+            <h2>How NIRMAQ Works</h2>
             <p>Four simple steps. One connected ecosystem.</p>
           </div>
           <div className="experience-steps" aria-label="Redevelopment journey">
@@ -150,7 +151,7 @@ export function RenovaHome() {
         >
           <div className="experience-section-heading">
             <span className="experience-eyebrow">YOUR ROLE. YOUR JOURNEY.</span>
-            <h2>Who Is RENOVA For?</h2>
+            <h2>Who Is NIRMAQ For?</h2>
           </div>
           <div className="experience-audiences">
             {audiences.map((item) => (
@@ -182,7 +183,7 @@ export function RenovaHome() {
             <h2>Get Your Society Feasibility</h2>
             <p>
               Start with your society and property information. Request an
-              assessment from the RENOVA team to understand the next steps.
+              assessment from the NIRMAQ team to understand the next steps.
             </p>
             <p>
               Feasibility requires professional review. No automated development
@@ -214,7 +215,7 @@ export function RenovaHome() {
             <span className="experience-eyebrow">
               LESS CONFUSION. MORE CLARITY.
             </span>
-            <h2>Why RENOVA?</h2>
+            <h2>Why NIRMAQ?</h2>
           </div>
           <div className="experience-benefits">
             {[
@@ -244,16 +245,11 @@ export function RenovaHome() {
         </section>
         <section className="experience-about experience-container" id="about">
           <div>
-            <span className="experience-eyebrow">ABOUT RENOVA</span>
-            <h2>
-              Make new again.
-              <br />
-              Move forward together.
-            </h2>
+            <h2>About NIRMAQ</h2>
           </div>
           <div>
             <p>
-              RENOVA brings housing societies, developers, PMCs and
+              NIRMAQ brings housing societies, developers, PMCs and
               redevelopment professionals into one connected platform, with a
               clearer path from discovery to the next step.
             </p>
@@ -277,7 +273,7 @@ export function RenovaHome() {
             <h2>Start with a conversation.</h2>
             <p>
               Have a society, opportunity or professional service in mind? Send
-              the RENOVA team an enquiry.
+              the NIRMAQ team an enquiry.
             </p>
           </div>
           <ContactForm />
