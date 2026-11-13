@@ -245,12 +245,7 @@ export function RenovaHome() {
         </section>
         <section className="experience-about experience-container" id="about">
           <div>
-            <span className="experience-eyebrow">ABOUT NIRMAQ</span>
-            <h2>
-              Make new again.
-              <br />
-              Move forward together.
-            </h2>
+            <h2>About NIRMAQ</h2>
           </div>
           <div>
             <p>
