@@ -1,4 +1,5 @@
 import { RenovaHome } from "./experience/Home";
+import { BRAND_NAME } from "./brand";
 import { ExperienceFooter, ExperienceHeader } from "./experience/Header";
 import { ContactPage } from "./experience/ContactForm";
 import { PrivacyPage } from "./experience/PrivacyPages";
@@ -116,7 +117,7 @@ function Logo() {
       href="/"
       className="brand-lockup"
       data-testid="link-home"
-      aria-label="RENOVA home"
+      aria-label={`${BRAND_NAME} home`}
     >
       <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
         <path className="brand-renewal-arc" d="M8.5 37.5A19 19 0 1 1 38.8 13" />
@@ -128,7 +129,7 @@ function Logo() {
         <path className="brand-building" d="M20 38V23l5-3v18" />
       </svg>
       <span className="brand-name" aria-hidden="true">
-        {"RENOVA".split("").map((letter, index) => (
+        {BRAND_NAME.split("").map((letter, index) => (
           <span
             key={`${letter}-${index}`}
             style={{ "--brand-letter": index } as React.CSSProperties}
@@ -281,7 +282,7 @@ function AppShell({ children }: { children: ReactNode }) {
       <ExperienceDrawer
         open={utilityPanel === "help"}
         onClose={() => setUtilityPanel(null)}
-        eyebrow="RENOVA support"
+        eyebrow="NIRMAQ support"
         title="How can we help your committee?"
       >
         <div className="utility-intro">
@@ -301,7 +302,7 @@ function AppShell({ children }: { children: ReactNode }) {
             <ClipboardCheck size={18} />
             <span>
               <strong>Post a society requirement</strong>
-              <small>Share your brief with RENOVA</small>
+              <small>Share your brief with NIRMAQ</small>
             </span>
             <ChevronRight size={17} />
           </Link>
@@ -944,8 +945,8 @@ function Assessment() {
       });
       setSubmitted({
         reference,
-        status: "Received by RENOVA",
-        nextStep: "The RENOVA team will review your enquiry and respond.",
+        status: "Received by NIRMAQ",
+        nextStep: "The NIRMAQ team will review your enquiry and respond.",
       });
     } catch (cause) {
       setSubmissionError(
@@ -975,7 +976,7 @@ function Assessment() {
         </h1>
         <p className="success-lead">
           Your requirement reference is <strong>{submitted.reference}</strong>.
-          Keep it handy for future conversations with RENOVA.
+          Keep it handy for future conversations with NIRMAQ.
         </p>
         <div className="submission-receipt">
           <div>
@@ -997,7 +998,7 @@ function Assessment() {
         </div>
         <div className="success-actions">
           <Link href="/" className="button button-outline">
-            <ArrowLeft size={16} /> RENOVA home
+            <ArrowLeft size={16} /> NIRMAQ home
           </Link>
           <Link href="/workspace" className="button button-dark">
             Open society workspace <ArrowUpRight size={16} />
@@ -1017,7 +1018,7 @@ function Assessment() {
       </div>
       <div className="requirement-heading">
         <Link href="/" className="back-link">
-          <ArrowLeft size={15} /> RENOVA home
+          <ArrowLeft size={15} /> NIRMAQ home
         </Link>
         <PageIntro
           kicker="Post your requirement · About 6 minutes"
@@ -1028,7 +1029,7 @@ function Assessment() {
               <em>needs into focus.</em>
             </>
           }
-          detail="Share the essentials once. RENOVA will use this brief to understand the opportunity and prepare the right next conversation."
+          detail="Share the essentials once. NIRMAQ will use this brief to understand the opportunity and prepare the right next conversation."
         />
       </div>
       <div className="requirement-shell">
@@ -1068,7 +1069,7 @@ function Assessment() {
             <ShieldCheck size={20} />
             <strong>Your details stay private.</strong>
             <p>
-              RENOVA will not share them with third parties without your
+              NIRMAQ will not share them with third parties without your
               permission.
             </p>
           </div>
@@ -1235,7 +1236,7 @@ function Assessment() {
                 <div>
                   <h2>What does your society need?</h2>
                   <p>
-                    Select every service you want RENOVA to help you explore.
+                    Select every service you want NIRMAQ to help you explore.
                   </p>
                 </div>
               </div>
@@ -1273,7 +1274,7 @@ function Assessment() {
                 </select>
               </label>
               <label className="requirement-block-label">
-                Anything RENOVA should know? <small>Optional</small>
+                Anything NIRMAQ should know? <small>Optional</small>
                 <textarea
                   maxLength={1000}
                   value={form.brief}
@@ -1291,7 +1292,7 @@ function Assessment() {
               <div className="form-heading">
                 <span className="step-number">04</span>
                 <div>
-                  <h2>Who should RENOVA contact?</h2>
+                  <h2>Who should NIRMAQ contact?</h2>
                   <p>
                     Use the details of an authorised committee representative.
                   </p>
@@ -1369,8 +1370,8 @@ function Assessment() {
                   onChange={(event) => update("consent", event.target.checked)}
                 />
                 <span>
-                  I agree that RENOVA may use these details to respond to this
-                  society redevelopment enquiry. RENOVA staff handling
+                  I agree that NIRMAQ may use these details to respond to this
+                  society redevelopment enquiry. NIRMAQ staff handling
                   enquiries can access them. <Link href="/privacy">Read the
                   Privacy Notice</Link>.
                 </span>
@@ -1880,7 +1881,7 @@ function Professionals() {
         onClose={() => setActiveProfessionalId(null)}
         eyebrow={
           drawerMode === "profile"
-            ? "Verified RENOVA network"
+            ? "Verified NIRMAQ network"
             : "Private introduction request"
         }
         title={activeProfessional?.name || "Professional"}
@@ -1934,7 +1935,7 @@ function Professionals() {
                 <div className="drawer-note">
                   <ShieldCheck size={18} />
                   <p>
-                    RENOVA reviews credentials and project relevance before
+                    NIRMAQ reviews credentials and project relevance before
                     professionals enter the network. Societies should complete
                     their own appointment due diligence.
                   </p>
@@ -1953,7 +1954,7 @@ function Professionals() {
                 </span>
                 <h3>Request saved</h3>
                 <p>
-                  RENOVA will review the fit and prepare the next conversation.
+                  NIRMAQ will review the fit and prepare the next conversation.
                   Your society’s contact details are never shared automatically.
                 </p>
                 <button
@@ -1968,7 +1969,7 @@ function Professionals() {
                 <div className="drawer-note">
                   <ShieldCheck size={18} />
                   <p>
-                    This is a private request. RENOVA reviews both sides before
+                    This is a private request. NIRMAQ reviews both sides before
                     making an introduction.
                   </p>
                 </div>
@@ -2039,7 +2040,7 @@ function Regulations() {
   );
   const downloadGuide = () => {
     const guide = [
-      "RENOVA — SOCIETY REDEVELOPMENT COMMITTEE STARTER GUIDE",
+      "NIRMAQ — SOCIETY REDEVELOPMENT COMMITTEE STARTER GUIDE",
       "",
       "1. Record the society’s redevelopment intent and committee authority.",
       "2. Collect title, conveyance, property-card and structural-audit records.",
@@ -2052,7 +2053,7 @@ function Regulations() {
     const url = URL.createObjectURL(new Blob([guide], { type: "text/plain" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = "RENOVA-committee-starter-guide.txt";
+    link.download = "NIRMAQ-committee-starter-guide.txt";
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -2079,7 +2080,7 @@ function Regulations() {
         }
       />
       <p role="note">
-        General orientation notes. RENOVA has not verified their regulatory
+        General orientation notes. NIRMAQ has not verified their regulatory
         currency or applicability. Confirm requirements with the relevant
         authority and your professional advisors.
       </p>
@@ -2260,7 +2261,7 @@ function Regulations() {
                 <strong>{activeRegulation.authority}</strong>
               </div>
               <div>
-                <span>RENOVA status</span>
+                <span>NIRMAQ status</span>
                 <strong>Orientation available</strong>
               </div>
             </div>
@@ -2282,7 +2283,7 @@ function Regulations() {
             <div className="drawer-note">
               <ShieldCheck size={18} />
               <p>
-                RENOVA presents plain-language orientation. The governing
+                NIRMAQ presents plain-language orientation. The governing
                 notification, circular or regulation and professional advice
                 remain authoritative.
               </p>
@@ -2346,7 +2347,7 @@ function PublicNavigation({
         "stitch-desktop-nav public-mega-nav",
         menuOpen && "is-open",
       )}
-      aria-label="RENOVA website navigation"
+      aria-label="NIRMAQ website navigation"
     >
       {publicNav.map((item) => (
         <PublicNavLink key={item.href} href={item.href} onClick={onNavigate}>
@@ -2367,7 +2368,7 @@ const stakeholderCards = [
   {
     title: "Explore Societies",
     detail:
-      "See how structured redevelopment opportunities can appear on RENOVA.",
+      "See how structured redevelopment opportunities can appear on NIRMAQ.",
     icon: Landmark,
     href: "#opportunities",
   },
@@ -2436,7 +2437,7 @@ const trustBenefits = [
   {
     title: "Clear Profile Status",
     detail:
-      "Public profiles and RENOVA-verified organizations are labelled distinctly, so provenance stays visible.",
+      "Public profiles and NIRMAQ-verified organizations are labelled distinctly, so provenance stays visible.",
     icon: ShieldCheck,
   },
   {
@@ -2499,7 +2500,7 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
     <section
       className={`renova-film-intro${isExiting ? " is-exiting" : ""}`}
       role="dialog"
-      aria-label="RENOVA introduction film"
+      aria-label="NIRMAQ introduction film"
       aria-modal="true"
     >
       <video
@@ -2520,7 +2521,7 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
       </video>
       {showFallback && (
         <div className="renova-film-fallback" role="status">
-          <span>RENOVA</span>
+          <span>NIRMAQ</span>
           <strong>The same property. A new possibility.</strong>
           <p>The intro film is taking longer to load on this connection.</p>
           <button
@@ -2528,7 +2529,7 @@ function CinematicVideoIntro({ onFinish }: { onFinish: () => void }) {
             className="renova-film-enter"
             onClick={finishIntro}
           >
-            Enter RENOVA <ArrowUpRight size={14} />
+            Enter NIRMAQ <ArrowUpRight size={14} />
           </button>
         </div>
       )}
@@ -2564,7 +2565,7 @@ type PublicPageData = {
 
 const publicPageMap: Record<string, PublicPageData> = {
   "/projects": {
-    eyebrow: "RENOVA project directory",
+    eyebrow: "NIRMAQ project directory",
     title: "Redevelopment opportunities, clearly organised.",
     intro:
       "Explore society opportunities and follow projects from early intent through active execution and completion.",
@@ -2609,7 +2610,7 @@ const publicPageMap: Record<string, PublicPageData> = {
     eyebrow: "Ongoing projects",
     title: "Track redevelopment beyond the first introduction.",
     intro:
-      "RENOVA brings milestones, project context and stakeholder visibility into one structured view.",
+      "NIRMAQ brings milestones, project context and stakeholder visibility into one structured view.",
     highlights: [
       {
         title: "Planning & feasibility",
@@ -2650,7 +2651,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "PMCs, architects and legal advisors can support the next step.",
       },
     ],
-    ctaLabel: "Join the RENOVA network",
+    ctaLabel: "Join the NIRMAQ network",
     ctaHref: "/join",
   },
   "/projects/completed": {
@@ -2680,7 +2681,7 @@ const publicPageMap: Record<string, PublicPageData> = {
     eyebrow: "For housing societies",
     title: "Make the first redevelopment decision with confidence.",
     intro:
-      "RENOVA helps committees understand potential, organise requirements and connect with verified developers and specialists.",
+      "NIRMAQ helps committees understand potential, organise requirements and connect with verified developers and specialists.",
     highlights: [
       {
         title: "Clear first step",
@@ -2713,7 +2714,7 @@ const publicPageMap: Record<string, PublicPageData> = {
       },
       {
         title: "02 · Review",
-        detail: "RENOVA understands your stage, needs and documentation gaps.",
+        detail: "NIRMAQ understands your stage, needs and documentation gaps.",
       },
       {
         title: "03 · Connect",
@@ -2732,7 +2733,7 @@ const publicPageMap: Record<string, PublicPageData> = {
     eyebrow: "For developers",
     title: "Find better-qualified redevelopment opportunities.",
     intro:
-      "RENOVA helps developers discover genuine society requirements with clearer project context and professional introductions.",
+      "NIRMAQ helps developers discover genuine society requirements with clearer project context and professional introductions.",
     highlights: [
       {
         title: "Relevant opportunities",
@@ -2754,7 +2755,7 @@ const publicPageMap: Record<string, PublicPageData> = {
     ctaHref: "/join/developer",
   },
   "/professionals": {
-    eyebrow: "RENOVA professional network",
+    eyebrow: "NIRMAQ professional network",
     title: "The right expertise for every redevelopment stage.",
     intro:
       "Discover PMCs, architects, legal advisors and specialist professionals who understand Mumbai society redevelopment.",
@@ -2855,7 +2856,7 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Clarify rent, corpus, area, timelines, defaults, insurance and handover obligations.",
       },
     ],
-    ctaLabel: "Contact RENOVA",
+    ctaLabel: "Contact NIRMAQ",
     ctaHref: "/contact",
   },
   "/professionals/others": {
@@ -2884,10 +2885,10 @@ const publicPageMap: Record<string, PublicPageData> = {
     ctaHref: "/contact",
   },
   "/join": {
-    eyebrow: "Join RENOVA",
+    eyebrow: "Join NIRMAQ",
     title: "Choose how you want to participate.",
     intro:
-      "Create the right RENOVA pathway for your society, development business or professional practice.",
+      "Create the right NIRMAQ pathway for your society, development business or professional practice.",
     highlights: [
       {
         title: "Housing Society",
@@ -2911,7 +2912,7 @@ const publicPageMap: Record<string, PublicPageData> = {
   },
   "/join/developer": {
     eyebrow: "Developer registration",
-    title: "Build your verified RENOVA developer profile.",
+    title: "Build your verified NIRMAQ developer profile.",
     intro:
       "Share your organisation, experience, preferred locations, project scale and redevelopment capabilities.",
     highlights: [
@@ -2929,7 +2930,7 @@ const publicPageMap: Record<string, PublicPageData> = {
         detail: "Locations, plot sizes, member counts and project values.",
       },
     ],
-    ctaLabel: "Contact the RENOVA team",
+    ctaLabel: "Contact the NIRMAQ team",
     ctaHref: "/contact",
   },
   "/join/pmc": {
@@ -2951,7 +2952,7 @@ const publicPageMap: Record<string, PublicPageData> = {
         detail: "Feasibility, tendering, evaluation, approvals and monitoring.",
       },
     ],
-    ctaLabel: "Contact the RENOVA team",
+    ctaLabel: "Contact the NIRMAQ team",
     ctaHref: "/contact",
   },
   "/join/architect": {
@@ -2973,7 +2974,7 @@ const publicPageMap: Record<string, PublicPageData> = {
         detail: "Residential, mixed-use and society redevelopment work.",
       },
     ],
-    ctaLabel: "Contact the RENOVA team",
+    ctaLabel: "Contact the NIRMAQ team",
     ctaHref: "/contact",
   },
   "/knowledge-centre": {
@@ -3123,19 +3124,19 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Through documented criteria covering capability, proposal terms, safeguards and delivery.",
       },
       {
-        title: "Does RENOVA replace professional advice?",
+        title: "Does NIRMAQ replace professional advice?",
         detail:
-          "No. RENOVA organises information and connections; qualified advice remains essential.",
+          "No. NIRMAQ organises information and connections; qualified advice remains essential.",
       },
     ],
-    ctaLabel: "Ask RENOVA",
+    ctaLabel: "Ask NIRMAQ",
     ctaHref: "/contact",
   },
   "/success-stories": {
     eyebrow: "Success stories",
     title: "Better redevelopment starts with better alignment.",
     intro:
-      "RENOVA success stories will document the challenge, the people, the process and the community outcome.",
+      "NIRMAQ success stories will document the challenge, the people, the process and the community outcome.",
     highlights: [
       {
         title: "Society perspective",
@@ -3154,14 +3155,14 @@ const publicPageMap: Record<string, PublicPageData> = {
     ctaHref: "/projects/completed",
   },
   "/about": {
-    eyebrow: "About RENOVA",
+    eyebrow: "About NIRMAQ",
     title: "Redevelopment, reimagined for Mumbai.",
     intro:
-      "RENOVA is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.",
+      "NIRMAQ is a focused platform connecting housing societies, developers, PMCs, architects, legal advisors and specialists.",
     highlights: [
       {
         title: "Aziz Parihar — Founder",
-        detail: "RENOVA",
+        detail: "NIRMAQ",
       },
       {
         title: "Our purpose",
@@ -3179,14 +3180,14 @@ const publicPageMap: Record<string, PublicPageData> = {
           "Support informed decisions without replacing independent professional advice.",
       },
     ],
-    ctaLabel: "See how RENOVA works",
+    ctaLabel: "See how NIRMAQ works",
     ctaHref: "/societies/how-it-works",
   },
   "/contact": {
-    eyebrow: "Contact RENOVA",
+    eyebrow: "Contact NIRMAQ",
     title: "Tell us where you are in the journey.",
     intro:
-      "Whether you represent a society, developer or professional practice, RENOVA can help identify the right next step.",
+      "Whether you represent a society, developer or professional practice, NIRMAQ can help identify the right next step.",
     highlights: [
       {
         title: "Housing societies",
@@ -3249,7 +3250,7 @@ function ProjectsDirectory() {
       <main id="main-content">
         <section className="working-hero">
           <div>
-            <p>RENOVA project directory</p>
+            <p>NIRMAQ project directory</p>
             <h1>Explore redevelopment opportunities.</h1>
             <span>
               Search verified society opportunities and follow projects through
@@ -3356,10 +3357,10 @@ function ProjectsDirectory() {
         <div>
           <Link href="/projects">Projects</Link>
           <Link href="/knowledge-centre">Knowledge centre</Link>
-          <Link href="/about">About RENOVA</Link>
+          <Link href="/about">About NIRMAQ</Link>
           <Link href="/contact">Contact</Link>
         </div>
-        <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
+        <small>© {new Date().getFullYear()} NIRMAQ · Mumbai</small>
       </footer>
     </div>
   );
@@ -3402,7 +3403,7 @@ function EcosystemFooter() {
         <Link href="/knowledge-centre">Knowledge centre</Link>
         <Link href="/contact">Contact</Link>
       </div>
-      <small>© {new Date().getFullYear()} RENOVA · Mumbai</small>
+      <small>© {new Date().getFullYear()} NIRMAQ · Mumbai</small>
     </footer>
   );
 }
@@ -3498,7 +3499,7 @@ function EcosystemDirectory() {
         <section className="ecosystem-hero">
           <div className="ecosystem-hero-grid" aria-hidden="true" />
           <div className="ecosystem-hero-copy">
-            <p>RENOVA ecosystem directory · Mumbai</p>
+            <p>NIRMAQ ecosystem directory · Mumbai</p>
             <h1>
               Explore the <span>Redevelopment Ecosystem.</span>
             </h1>
@@ -3582,7 +3583,7 @@ function EcosystemDirectory() {
                 >
                   <option value="All">All statuses</option>
                   <option value="public">Public profile</option>
-                  <option value="verified">RENOVA verified</option>
+                  <option value="verified">NIRMAQ verified</option>
                 </select>
               </label>
             </div>
@@ -3607,7 +3608,7 @@ function EcosystemDirectory() {
               <strong>Neutral, source-backed directory</strong>
               <span>
                 Profiles are compiled from official public sources and remain
-                PUBLIC PROFILE until independently verified by RENOVA. Database
+                PUBLIC PROFILE until independently verified by NIRMAQ. Database
                 reviewed {organizationDataVersion}.
               </span>
             </p>
@@ -3626,7 +3627,7 @@ function EcosystemDirectory() {
                     >
                       {organization.profileStatus === "verified" ? (
                         <>
-                          <BadgeCheck size={13} /> RENOVA VERIFIED
+                          <BadgeCheck size={13} /> NIRMAQ VERIFIED
                         </>
                       ) : (
                         "PUBLIC PROFILE"
@@ -3691,13 +3692,13 @@ function EcosystemDirectory() {
         <section className="ecosystem-list-cta">
           <div>
             <p>For developers, PMCs and specialists</p>
-            <h2>List your organization on RENOVA.</h2>
+            <h2>List your organization on NIRMAQ.</h2>
             <span>
-              Send your organization details to the RENOVA team for review.
+              Send your organization details to the NIRMAQ team for review.
             </span>
           </div>
           <Link href="/contact" className="stitch-primary-button">
-            List Your Organization on RENOVA <ArrowUpRight size={15} />
+            List Your Organization on NIRMAQ <ArrowUpRight size={15} />
           </Link>
         </section>
       </main>
@@ -3753,7 +3754,7 @@ function OrganizationProfilePage() {
               >
                 {organization.profileStatus === "verified" ? (
                   <>
-                    <BadgeCheck size={13} /> RENOVA VERIFIED
+                    <BadgeCheck size={13} /> NIRMAQ VERIFIED
                   </>
                 ) : (
                   "PUBLIC PROFILE"
@@ -3768,7 +3769,7 @@ function OrganizationProfilePage() {
           </div>
           <p className="organization-profile-disclaimer">
             This profile is compiled from public information and has not been
-            independently verified by RENOVA.
+            independently verified by NIRMAQ.
           </p>
         </section>
         <section className="organization-profile-layout">
@@ -3848,14 +3849,14 @@ function OrganizationProfilePage() {
               <h2>Is this your company?</h2>
               <p>
                 Claim this profile to submit accurate company information and
-                begin RENOVA verification.
+                begin NIRMAQ verification.
               </p>
               <Link href="/contact">
                 Claim this profile <ArrowUpRight size={15} />
               </Link>
             </div>
             <Link href="/contact" className="organization-list-link">
-              List Your Organization on RENOVA <ArrowUpRight size={15} />
+              List Your Organization on NIRMAQ <ArrowUpRight size={15} />
             </Link>
           </aside>
         </section>
@@ -3871,7 +3872,7 @@ const registrationCopy: Record<
 > = {
   Developer: {
     eyebrow: "Developer registration",
-    title: "Join RENOVA as a verified developer.",
+    title: "Join NIRMAQ as a verified developer.",
     detail:
       "Tell us about your organisation, redevelopment experience and preferred opportunities.",
   },
@@ -3888,10 +3889,10 @@ const registrationCopy: Record<
       "Introduce your practice, redevelopment portfolio and planning expertise.",
   },
   Contact: {
-    eyebrow: "Contact RENOVA",
+    eyebrow: "Contact NIRMAQ",
     title: "Tell us where you are in the journey.",
     detail:
-      "Share a few details and the RENOVA team will understand the right next conversation.",
+      "Share a few details and the NIRMAQ team will understand the right next conversation.",
   },
 };
 
@@ -3968,11 +3969,11 @@ function NetworkRegistrationPage({
           <p>Details received</p>
           <h1>Thank you, {form.name}.</h1>
           <div>
-            Your RENOVA reference is <strong>{submitted}</strong>. Your
+            Your NIRMAQ reference is <strong>{submitted}</strong>. Your
             information has been saved and is ready for review.
           </div>
           <Link href="/" className="stitch-primary-button">
-            Return to RENOVA home <ArrowUpRight size={15} />
+            Return to NIRMAQ home <ArrowUpRight size={15} />
           </Link>
         </main>
       </div>
@@ -3990,13 +3991,13 @@ function NetworkRegistrationPage({
             <ShieldCheck size={19} />
             <p>
               Your information remains private and is only used to review your
-              RENOVA request.
+              NIRMAQ request.
             </p>
           </div>
         </section>
         <form className="working-form" onSubmit={submit}>
           <div className="working-form-heading">
-            <span>RENOVA intake</span>
+            <span>NIRMAQ intake</span>
             <h2>
               {role === "Contact"
                 ? "Start a conversation"
@@ -4089,7 +4090,7 @@ function NetworkRegistrationPage({
               </label>
             )}
             <label className="working-field-wide">
-              How can RENOVA help? *
+              How can NIRMAQ help? *
               <textarea
                 required
                 rows={5}
@@ -4106,7 +4107,7 @@ function NetworkRegistrationPage({
                 onChange={(event) => setField("consent", event.target.checked)}
               />
               <span>
-                I confirm these details are accurate and permit RENOVA to
+                I confirm these details are accurate and permit NIRMAQ to
                 contact me about this request.
               </span>
             </label>
@@ -4117,7 +4118,7 @@ function NetworkRegistrationPage({
             className="stitch-primary-button"
             disabled={submitting}
           >
-            {submitting ? "Submitting…" : "Submit to RENOVA"} <Send size={15} />
+            {submitting ? "Submitting…" : "Submit to NIRMAQ"} <Send size={15} />
           </button>
         </form>
       </main>
@@ -4135,12 +4136,12 @@ const frequentlyAskedQuestions = [
     "Basic society details, location, member count, building age, property context, current documents and the services required are enough to begin.",
   ],
   [
-    "How does RENOVA verify developers and professionals?",
-    "Public profiles are sourced from public information. A listing is not a RENOVA verification or endorsement. Only profiles with an actual RENOVA verification status may be presented as verified.",
+    "How does NIRMAQ verify developers and professionals?",
+    "Public profiles are sourced from public information. A listing is not a NIRMAQ verification or endorsement. Only profiles with an actual NIRMAQ verification status may be presented as verified.",
   ],
   [
-    "Does RENOVA replace a PMC, architect or legal advisor?",
-    "No. RENOVA organises requirements, discovery and connections. Societies should still appoint qualified independent professionals for technical and legal advice.",
+    "Does NIRMAQ replace a PMC, architect or legal advisor?",
+    "No. NIRMAQ organises requirements, discovery and connections. Societies should still appoint qualified independent professionals for technical and legal advice.",
   ],
   [
     "How are society details protected?",
@@ -4204,8 +4205,8 @@ function FaqPage() {
             <div className="working-empty">
               <CircleHelp size={30} />
               <h2>No matching answer found.</h2>
-              <p>Try a broader term or contact the RENOVA team.</p>
-              <Link href="/contact">Ask RENOVA</Link>
+              <p>Try a broader term or contact the NIRMAQ team.</p>
+              <Link href="/contact">Ask NIRMAQ</Link>
             </div>
           )}
         </section>
@@ -4284,12 +4285,12 @@ function Router() {
     navigate(`/platform/live${view}`, { replace: true });
   }, [legacyApplication, pathname, navigate]);
   if (legacyApplication)
-    return <LoadingPage label="Opening your RENOVA workspace" />;
+    return <LoadingPage label="Opening your NIRMAQ workspace" />;
   if (pathname === "/") return <MarketingHome />;
   if (pathname === "/platform/live")
     return (
       <Suspense
-        fallback={<LoadingPage label="Opening your RENOVA workspace" />}
+        fallback={<LoadingPage label="Opening your NIRMAQ workspace" />}
       >
         <LiveWorkspace />
       </Suspense>
@@ -4328,7 +4329,7 @@ function Router() {
         className="experience-container experience-contact-page"
       >
         <h1>We couldn’t find this page.</h1>
-        <p>Continue from the RENOVA homepage or your workspace.</p>
+        <p>Continue from the NIRMAQ homepage or your workspace.</p>
         <Link className="experience-button" href="/">
           Go to homepage
         </Link>
