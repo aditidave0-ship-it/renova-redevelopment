@@ -52,5 +52,5 @@ export function removeDraft(storage: Pick<Storage, 'getItem' | 'setItem'>, id: s
   storage.setItem(DRAFT_KEY, JSON.stringify({ version: 1, drafts: readDrafts(storage).filter((item) => item.id !== id) }));
 }
 export function briefText(brief: OpportunityBrief): string {
-  return ['RENOVA — Society opportunity brief', 'Preparation draft · Not published or verified', '', ...Object.entries(fieldLabels).map(([key, label]) => `${label}: ${brief[key as keyof typeof fieldLabels].trim() || 'Information not yet provided'}`), `Professionals required: ${brief.services.join(', ') || 'Information not yet provided'}`, '', 'All details are supplied by the preparer. Areas and feasibility require professional verification.'].join('\n\n');
+  return ['NIRMAQ — Society opportunity brief', 'Preparation draft · Not published or verified', '', ...Object.entries(fieldLabels).map(([key, label]) => `${label}: ${brief[key as keyof typeof fieldLabels].trim() || 'Information not yet provided'}`), `Professionals required: ${brief.services.join(', ') || 'Information not yet provided'}`, '', 'All details are supplied by the preparer. Areas and feasibility require professional verification.'].join('\n\n');
 }

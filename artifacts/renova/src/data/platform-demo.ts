@@ -13,7 +13,7 @@ export type ProjectStage =
 export type Stakeholder = {
   id: string;
   name: string;
-  role: 'Society' | 'Developer' | 'PMC' | 'RENOVA';
+  role: 'Society' | 'Developer' | 'PMC' | 'NIRMAQ';
   access: string;
   status: 'Active' | 'Invited' | 'Interested';
 };
@@ -60,7 +60,7 @@ export const demoProject: PlatformProject = {
   stageLabel: 'Proposal comparison',
   opportunityStatus: 'Open to invited developers',
   reference: 'RNV-DEMO-2401',
-  summary: 'A shared redevelopment workspace connecting the society, invited developers, the appointed PMC and RENOVA with role-appropriate access.',
+  summary: 'A shared redevelopment workspace connecting the society, invited developers, the appointed PMC and NIRMAQ with role-appropriate access.',
   societyFacts: [
     { label: 'Member homes', value: '72' },
     { label: 'Building age', value: '41 years' },
@@ -72,7 +72,7 @@ export const demoProject: PlatformProject = {
     { id: 'developer-alpha', name: 'Developer Alpha', role: 'Developer', access: 'Opportunity and own proposal only', status: 'Interested' },
     { id: 'developer-beta', name: 'Developer Beta', role: 'Developer', access: 'Opportunity and own proposal only', status: 'Interested' },
     { id: 'pmc-demo', name: 'PMC Advisory Team', role: 'PMC', access: 'Technical review and project documents', status: 'Active' },
-    { id: 'renova-ops', name: 'RENOVA Platform Operations', role: 'RENOVA', access: 'Permissions, verification and audit', status: 'Active' },
+    { id: 'renova-ops', name: 'NIRMAQ Platform Operations', role: 'NIRMAQ', access: 'Permissions, verification and audit', status: 'Active' },
   ],
   proposalTerms: [
     { label: 'Proposal status', alpha: 'Clarification requested', beta: 'Submitted', kind: 'text' },
@@ -91,10 +91,10 @@ export const demoProject: PlatformProject = {
     { name: 'Committee internal note', type: 'Internal', owner: 'ABC CHS Committee', updated: '26 Sep 2026', visibility: ['society'] },
   ],
   activity: [
-    { title: 'Comparison fields updated', detail: 'PMC aligned the two submissions to the standard RENOVA proposal structure.', actor: 'PMC Advisory Team', time: 'Today · 6:10 PM', visibility: ['society', 'pmc'] },
+    { title: 'Comparison fields updated', detail: 'PMC aligned the two submissions to the standard NIRMAQ proposal structure.', actor: 'PMC Advisory Team', time: 'Today · 6:10 PM', visibility: ['society', 'pmc'] },
     { title: 'Clarification requested', detail: 'The society requested supporting detail for the proposed bank guarantee.', actor: 'ABC CHS Committee', time: 'Today · 2:40 PM', visibility: ['society', 'developer', 'pmc'] },
     { title: 'Proposal submitted', detail: 'A structured proposal was added to the opportunity.', actor: 'Developer Beta', time: 'Yesterday · 5:25 PM', visibility: ['society', 'developer', 'pmc'] },
-    { title: 'Opportunity access approved', detail: 'RENOVA approved access after society consent and profile review.', actor: 'RENOVA Platform Operations', time: '23 Sep 2026', visibility: ['society', 'developer', 'pmc'] },
+    { title: 'Opportunity access approved', detail: 'NIRMAQ approved access after society consent and profile review.', actor: 'NIRMAQ Platform Operations', time: '23 Sep 2026', visibility: ['society', 'developer', 'pmc'] },
   ],
 };
 

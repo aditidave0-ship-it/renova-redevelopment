@@ -12,15 +12,15 @@ function downloadBrief(brief: OpportunityBrief) {
   const url = URL.createObjectURL(new Blob([briefText(brief)], { type: 'text/plain;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = `RENOVA-${brief.name.trim().replace(/[^a-z0-9]+/gi, '-').slice(0, 60) || 'society'}-brief.txt`;
+  link.download = `NIRMAQ-${brief.name.trim().replace(/[^a-z0-9]+/gi, '-').slice(0, 60) || 'society'}-brief.txt`;
   document.body.appendChild(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function BriefHeader() {
-  return <header className="brief-header"><Link href="/platform" className="platform-brand"><span>R</span><div><strong>RENOVA</strong><small>Society opportunity preparation</small></div></Link><Link href="/platform/opportunities"><FileText size={16} /> My drafts</Link></header>;
+  return <header className="brief-header"><Link href="/platform" className="platform-brand"><span>N</span><div><strong>NIRMAQ</strong><small>Society opportunity preparation</small></div></Link><Link href="/platform/opportunities"><FileText size={16} /> My drafts</Link></header>;
 }
 function StorageNotice() {
-  return <p className="brief-storage"><strong>Private preparation on this browser.</strong> Drafts are saved only when you choose Save draft. They are not sent to RENOVA, published, or shared with developers. Anyone using this browser can access saved drafts; avoid confidential or personal information. Download a copy before clearing browser data.</p>;
+  return <p className="brief-storage"><strong>Private preparation on this browser.</strong> Drafts are saved only when you choose Save draft. They are not sent to NIRMAQ, published, or shared with developers. Anyone using this browser can access saved drafts; avoid confidential or personal information. Download a copy before clearing browser data.</p>;
 }
 export function OpportunityDrafts() {
   const [state, setState] = useState(loadDrafts);
@@ -82,7 +82,7 @@ export function OpportunityBuilder({ id }: { id?: string }) {
   };
   const textField = (key: 'name' | 'location' | 'homes' | 'plotArea' | 'age', required = false) => <div className="brief-field" key={key}><label htmlFor={`brief-${key}`}>{fieldLabels[key]} {required ? <span>*</span> : <small>Optional</small>}</label><input id={`brief-${key}`} value={brief[key]} type={key === 'name' || key === 'location' ? 'text' : 'number'} min="1" max={key === 'age' ? 300 : key === 'homes' ? 10000 : key === 'plotArea' ? 10000000 : undefined} step={key === 'plotArea' ? 'any' : '1'} maxLength={key === 'name' ? 160 : 120} required={required} aria-invalid={Boolean(errors[key])} aria-describedby={errors[key] ? `error-${key}` : undefined} onChange={(event) => update(key, event.target.value)} />{errors[key] ? <span className="brief-field-error" id={`error-${key}`}>{errors[key]}</span> : null}</div>;
   if (id && !existing) return <div className="platform-gateway brief-page"><BriefHeader /><main className="brief-main"><h1>Draft unavailable</h1><p>{initial.error || 'This draft is not saved in this browser. Draft links do not transfer data between devices.'}</p><Link href="/platform/opportunities">Return to my drafts</Link></main></div>;
-  return <div className="platform-gateway brief-page"><header className="brief-header"><span className="platform-brand"><span>R</span><strong>RENOVA</strong></span><button onClick={() => dirty ? setLeaving(true) : navigate('/platform/opportunities')}><ArrowLeft size={15} /> My drafts</button></header><main className="brief-main">
+  return <div className="platform-gateway brief-page"><header className="brief-header"><span className="platform-brand"><span>N</span><strong>NIRMAQ</strong></span><button onClick={() => dirty ? setLeaving(true) : navigate('/platform/opportunities')}><ArrowLeft size={15} /> My drafts</button></header><main className="brief-main">
     <div className="brief-title"><div><p>Society opportunity / Draft preparation</p><h1>Make your requirements clear.</h1><span>A structured starting point for your redevelopment journey.</span></div><span className="brief-local-label">NOT PUBLISHED</span></div>
     <StorageNotice />
     {initial.error ? <p role="alert" className="brief-error-banner">{initial.error}</p> : null}
