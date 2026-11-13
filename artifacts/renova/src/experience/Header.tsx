@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { BRAND_NAME } from "../brand";
 import { ArrowRight, Menu, X } from "lucide-react";
 import "./experience.css";
 export function ExperienceHeader() {
@@ -18,8 +19,8 @@ export function ExperienceHeader() {
         Skip to content
       </a>
       <div className="experience-header-inner">
-        <Link href="/" className="experience-brand" aria-label="RENOVA home">
-          RENOVA<small>MAKE NEW AGAIN</small>
+        <Link href="/" className="experience-brand" aria-label={`${BRAND_NAME} home`}>
+          {BRAND_NAME}
         </Link>
         <button
           className="experience-menu"
@@ -54,7 +55,7 @@ export function ExperienceFooter() {
     <footer className="experience-footer">
       <div>
         <Link href="/" className="experience-brand">
-          RENOVA<small>MAKE NEW AGAIN</small>
+          NIRMAQ<small>MAKE NEW AGAIN</small>
         </Link>
         <p>A clearer path to redevelopment.</p>
       </div>
@@ -68,7 +69,7 @@ export function ExperienceFooter() {
         <Link href="/platform/live?mode=login">Account login</Link>
       </nav>
       <p>
-        RENOVA connects participants. Public profiles are not endorsements or
+        NIRMAQ connects participants. Public profiles are not endorsements or
         verified registrations.
       </p>
     </footer>
