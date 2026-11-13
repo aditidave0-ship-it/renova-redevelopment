@@ -55,7 +55,7 @@ export function ExperienceFooter() {
     <footer className="experience-footer">
       <div>
         <Link href="/" className="experience-brand">
-          NIRMAQ<small>MAKE NEW AGAIN</small>
+          {BRAND_NAME}
         </Link>
         <p>A clearer path to redevelopment.</p>
       </div>
