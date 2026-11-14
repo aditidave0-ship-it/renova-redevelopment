@@ -1,5 +1,32 @@
 # Production migration reconciliation — 12 October 2026
 
+## Live incident update — 22 October 2026
+
+The production API deployment now contains schema expectations through migration
+`0008`, while `GET /api/readyz` returns HTTP 503. Do not weaken the readiness
+check or merge the broad `revert-24-fix/controlled-beta-foundations` branch: that
+revert removes reviewed backend work and re-enables implicit production
+migrations during builds.
+
+Run the new read-only preflight from an authorized environment before choosing a
+recovery path:
+
+```sh
+pnpm --filter @workspace/db preflight:production
+```
+
+The command requires `DATABASE_URL_UNPOOLED`, opens a read-only transaction,
+compares the live Drizzle ledger with canonical migration hashes and reports only
+migration tags and required schema-column names. It never prints the connection
+string or application rows. Any unexpected ledger hash reports
+`BLOCKED_SCHEMA_DRIFT`; a canonical prefix with missing migrations reports
+`BLOCKED_PENDING_MIGRATIONS`.
+
+Keep registration closed. Before applying migrations `0003`–`0008`, freshly
+verify Neon recovery availability and obtain explicit owner approval. If recovery
+cannot be verified, roll the API deployment back to the last compatible build
+instead of changing the ledger or masking readiness.
+
 **CODE VERIFIED. Production execution is not approved and has not occurred.**
 
 The apparent unmatched ledger entry is the original `0002_glossy_veda.sql`, hash `17fee26d154b470f9a62ae6250575eb14cc6d70c84431c4b072049cd1320ae10`, timestamp `1791227498511`. Restoring the canonical Codex migration lineage resolves the repository divergence. **No production ledger edits, renumbering or marking unapplied migrations as applied are needed.**
